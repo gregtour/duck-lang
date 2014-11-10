@@ -1,0 +1,18 @@
+// duck
+function main()
+	numbers = []
+	for i = 2 to 1000 do
+		numbers[i] = 1
+	loop
+	for i = 2 to 1000 do
+		if numbers[i] == 1 then
+			numbers[i] = 0
+			for j = 2 to 1000/i do
+				numbers[i*j] = 0
+			loop
+			duck.print(i)
+		end
+	loop
+end
+
+main()

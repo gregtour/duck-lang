@@ -1,0 +1,26 @@
+function fixed_point(f)
+  function curry(g, i)
+    function recurse(j)
+      return g(g, j)
+    end
+    return f(recurse, i)
+  end
+
+  function apply(k)
+    return curry(curry, k)
+  end
+
+  return apply
+end
+function fib_prime(continuation, x)
+  if x < 2 then
+    return x
+  else
+    return continuation(x-1) + continuation(x-2)
+  end
+end
+
+fibonacci = fixed_point(fib_prime)
+for i = 1 to 20 do
+  duck.print(fibonacci(i))
+loop

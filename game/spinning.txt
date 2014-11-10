@@ -1,0 +1,39 @@
+import SDL
+import GL
+
+APP_TITLE = "Color Triangle"
+SCR_WIDTH = 800
+SCR_HEIGHT = 600
+
+duck.println("Starting up 3D test...")
+SDL.MakeWindow(SCR_WIDTH, SCR_HEIGHT, APP_TITLE)
+
+frame = 12.0
+
+while SDL.running() do
+    SDL.event()
+    frame = frame + 2.0
+
+    SDL.clearScreen()
+
+    SDL.glLoadIdentity();
+    SDL.glTranslatef(SCR_WIDTH/2.0, SCR_HEIGHT/2.0, 0.0)
+    SDL.glRotatef(frame, 0.0, 0.0, 1.0)
+    SDL.glScalef(4.0, 4.0, 4.0)
+
+    SDL.glBegin(SDL.GL_TRIANGLES)
+        SDL.glColor3f(1.0, 0.0, 0.0)
+        SDL.glVertex3f(-87.0, -50.0, 0.0)
+        SDL.glColor3f(0.0, 1.0, 0.0)
+        SDL.glVertex3f(0.0, 100.0, 0.0)
+        SDL.glColor3f(0.0, 0.0, 1.0)
+        SDL.glVertex3f(87.0, -50.0, 0.0)
+    SDL.glEnd();
+
+    // duck.print(frame)
+    SDL.flip()
+loop
+
+duck.println("Done.")
+SDL.quit()
+
