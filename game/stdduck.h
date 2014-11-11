@@ -7,6 +7,7 @@
 void BindStandardLibrary();
 int DuckPrint(int argument_count);
 int DuckPrompt(int argument_count);
+void PrintObject(CONTEXT*);
 
 #endif // _STDDUCK_H
 
