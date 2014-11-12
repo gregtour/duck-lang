@@ -1,9 +1,0 @@
-for i = 1 to 10 do
-	if i/2*2 != i then
-		stars = ""
-		for j = 1 to i do
-			stars = stars + "*"
-		loop
-		duck.print(stars)
-	end
-loop

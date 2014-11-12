@@ -1,2 +1,0 @@
-#!/bin/sh
-gcc interpreter.c lexer.c parser.c grammar.c duck.c tables.c stdduck.c sdllib.c -o gduck -lGL -lGLU -lSDL -I/usr/lib64/gcc/x86_64-pc-linux-gnu/4.5.3 -B/usr/lib64 -B/usr/lib64/gcc/x86_64-pc-linux-gnu/4.5.3 -D_MEM_TRACKING
