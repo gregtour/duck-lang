@@ -1,6 +1,10 @@
 /* interpreter.c */
 
 #include "interpreter.h"
+#ifdef FLAG_GDUCK
+#include "stdduck.h"
+#include "sdllib.h"
+#endif
 
 // global data
 CONTEXT* gGlobalContext;
@@ -254,6 +258,16 @@ void  LinkFunction(VALUE namespace, const char* identifier, VALUE function)
     StoreRecord(identifier, function, namespace.reference);
 }
 
+#ifdef FLAG_GDUCK
+void  LinkConstPrimitive(VALUE namespace, const char* identifier, int value)
+{
+    VALUE constant;
+    constant.type = VAL_PRIMITIVE;
+    constant.primitive = value;
+    StoreRecord(identifier, constant, namespace.reference);
+}
+#endif
+
 VALUE CreateFunction(int (*function)(int))
 {
     VALUE record;
@@ -307,7 +321,11 @@ int Interpret(SYNTAX_TREE* tree)
     gLValueIdentifier = NULL;
     gLValueContext = NULL;
 
+    /* libraries */
     BindStandardLibrary();
+#ifdef FLAG_GDUCK
+    BindSDL();
+#endif
     gParameterListing = NULL;
 
     returning = 0;
@@ -329,7 +347,11 @@ int main(int argc, char* argv[])
     if (argc > 1)
         program = argv[1];
     else {
+#ifdef FLAG_GDUCK
+        printf("gduck program.src\n");
+#else
         printf("duck program.src\n");
+#endif
         return 1;
     }
 

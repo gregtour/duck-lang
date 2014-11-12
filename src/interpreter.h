@@ -64,6 +64,11 @@ void  AddParameter(VALUE functor,
 void  LinkFunction(VALUE namespace, 
                    const char* identifier, 
                    VALUE function);
+#ifdef ENABLE_GDUCK
+void  LinkConstPrimitive(VALUE namespace,
+                         const char* identifier,
+                         int value);
+#endif
 
 /* execution context */
 extern CONTEXT* gGlobalContext;
