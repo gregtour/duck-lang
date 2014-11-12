@@ -1,0 +1,14 @@
+
+# lrparser
+add_executable(lrparser
+  generator.c
+  grammar.c
+  lexer.c
+  main.c
+  parser.c
+  lr1.c
+  slr.c
+)
+# gcc generator.c grammar.c lexer.c main.c parser.c lr1.c slr.c -o lrparser -I/usr/lib64/gcc/x86_64-pc-linux-gnu/4.5.3 -B/usr/lib64 -B/usr/lib64/gcc/x86_64-pc-linux-gnu/4.5.3
+
+
