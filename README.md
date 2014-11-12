@@ -1,8 +1,8 @@
 # Duck Programming Language
 A simple scripting language based on the idea of duck-typing (or dynamic typing).
 
->When I see a bird that walks like a duck and swims like a duck and quacks like a duck, I call that bird a duck.
-> - James Whitcomb Riley
+>&ldquo;When I see a bird that walks like a duck and swims like a duck and quacks like a duck, I call that bird a duck.&rdquo;
+> &mdash; James Whitcomb Riley
 
 ## Language Features
 
@@ -17,7 +17,7 @@ loop
 ```
 Notice the use of the syntax \`do' and \`loop.' &nbsp;There are a number of example programs in the _examples_ directory of the source repository.
 
-The Duck programming language's grammar is represented below in Backss-Naur form. The duck language has its own parser-generator, generating SLR(1) parse tables, so it is relatively easy to change the syntax of the language. Other optional ways to configure the language include disabling case-sensitivity or changing the format of comments, which are currently implemented as `/* C-style block comments */`, `// full line comments`, `; semicolons until end of line`, and `# any macro use`.
+The programming language's grammar is represented below in Backas-Naur form. The duck language has its own parser-generator, generating SLR(1) parse tables, so it is relatively easy to change the syntax of the language. Other optional ways to configure the language include disabling case-sensitivity or changing the format of comments, which are currently implemented as `/* C-style block comments */`, `// full line comments`, `; semicolons until end of line`, and `# any macro use`.
 
 It is easy to port libraries to Duck. Function hooks are implemented as pointers, of the form `int (function_pointer)(int)` where the argument count is passed as the only parameter. Arguments are bound as string identifiers, and are accessed dynamically in the bound-function's body.
 
