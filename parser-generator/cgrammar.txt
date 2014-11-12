@@ -1,0 +1,91 @@
+<program> ::= <def list>
+<def list> ::= <def><def list>
+<def list> ::= <epsilon>
+<def> ::= typedef <type> <identifier>;
+<type> ::= int
+<type> ::= char
+<type> ::= void
+<type> ::= size_t
+<type> ::= long
+<type> ::= const <type>
+<type> ::= unsigned <type>
+<type> ::= struct {<struct>}
+<type> ::= <type>*
+<type> ::= <identifier>
+<type> ::= <type>[]
+<struct> ::= <type> <identifier>; <struct>
+<struct> ::= <epsilon>
+<def> ::= <type> <identifier>;
+<def> ::= <type> <identifier> = <expr>;
+<def> ::= <type> <identifier>(<param list>) ;
+<def> ::= <type> <identifier>(<param list>) { <function body> }
+<param list> ::= <epsilon>
+<param list> ::= <param>
+<param list> ::= <param>, <param list>
+<param> ::= <type> <identifier>
+<function body> ::= <epsilon>
+<function body> ::= <stmt> <function body>
+<stmt> ::= <type> <identifier>;
+<stmt> ::= <type> <identifier> = <expr>;
+<stmt> ::= for (<expr>; <expr>; <expr>) <loop body>
+<stmt> ::= while (<expr>) <loop body>
+<stmt> ::= if (<expr>) <stmt>
+<stmt> ::= if (<expr>) <stmt> else <stmt>
+<stmt> ::= return ;
+<stmt> ::= return <expr>;
+<stmt> ::= break ;
+<stmt> ::= continue ;
+<stmt> ::= <expr> ;
+<stmt> ::= { <block stmt> }
+<loop body> ::= <stmt>
+<loop body> ::= { <block stmt> }
+<block stmt> ::= <epsilon>
+<block stmt> ::= <stmt> <block stmt>
+<expr> ::= <identifier> = <expr>
+<expr> ::= <identifier> += <expr>
+<expr> ::= <identifier>
+<expr> ::= <integer>
+<expr> ::= <float>f
+<expr> ::= <string>
+<expr> ::= <boolean>
+<boolean> ::= true
+<boolean> ::= false
+<expr> ::= <expr>.<identifier>
+<expr> ::= <expr>-\><identifier>
+<expr> ::= (<expr>)
+<expr> ::= &<expr>
+<expr> ::= *<expr>
+<expr> ::= (<type>)<expr>
+<expr> ::= <expr>[<expr>]
+<expr> ::= <expr> + <expr>
+<expr> ::= <expr> - <expr>
+<expr> ::= <expr> * <expr>
+<expr> ::= <expr> / <expr>
+<expr> ::= <expr> % <expr>
+<expr> ::= <expr> & <expr>
+<expr> ::= <expr> | <expr>
+<expr> ::= <expr> ^ <expr>
+<expr> ::= <expr> && <expr>
+<expr> ::= <expr> || <expr>
+<expr> ::= <identifier>++
+<expr> ::= <identifer>--
+<expr> ::= <identifier> -= <expr>
+<expr> ::= <identifier> *= <expr>
+<expr> ::= <identifier> /= <expr>
+<expr> ::= <identifier> %= <expr>
+<expr> ::= <identifier> &= <expr>
+<expr> ::= <identifier> |= <expr>
+<expr> ::= <identifier> ^= <expr>
+<expr> ::= <expr>(<expr list>)
+<expr list> ::= <epsilon>
+<expr list> ::= <expr list+>
+<expr list+> ::= <expr>
+<expr list+> ::= <expr>, <expr list+>
+<expr> ::= <expr> == <expr>
+<expr> ::= <expr> != <expr>
+<expr> ::= <expr> \< <expr>
+<expr> ::= <expr> \> <expr>
+<expr> ::= <expr> \<= <expr>
+<expr> ::= <expr> >= <expr>
+<expr> ::= !<expr>
+<expr> ::= <expr> ? <expr> : <expr>
