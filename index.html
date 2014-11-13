@@ -1,0 +1,161 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Duck-lang by gregtour</title>
+
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+        <h1>Duck-lang</h1>
+        <p>Duck Programming Language</p>
+
+        <p class="view"><a href="https://github.com/gregtour/duck-lang">View the Project on GitHub <small>gregtour/duck-lang</small></a></p>
+
+
+        <ul>
+          <li><a href="https://github.com/gregtour/duck-lang/zipball/master">Download <strong>ZIP File</strong></a></li>
+          <li><a href="https://github.com/gregtour/duck-lang/tarball/master">Download <strong>TAR Ball</strong></a></li>
+          <li><a href="https://github.com/gregtour/duck-lang">View On <strong>GitHub</strong></a></li>
+        </ul>
+      </header>
+      <section>
+        <h1>
+<a id="duck-programming-language" class="anchor" href="#duck-programming-language" aria-hidden="true"><span class="octicon octicon-link"></span></a>Duck Programming Language</h1>
+
+<p>A simple scripting language based on the idea of duck-typing (or dynamic typing).</p>
+
+<blockquote>
+<p>“When I see a bird that walks like a duck and swims like a duck and quacks like a duck, I call that bird a duck.”
+— James Whitcomb Riley</p>
+</blockquote>
+
+<h2>
+<a id="language-features" class="anchor" href="#language-features" aria-hidden="true"><span class="octicon octicon-link"></span></a>Language Features</h2>
+
+<p>The duck programming language supports first-class functions, integer and floating-point arithmetic, string manipulation, dynamically-sized arrays, dictionary types, and basic object oriented programming. The syntax is strongly reminiscent of BASIC, Lua, or Python. While identation is not strictly specified, the language requires specific whitespace in required newlines at the end of certain statements. Duck is currently only implemented in the form of a slow, interpreted frontend, making it useful as a portable scripting language. This frontend has been developed entirely in C.</p>
+
+<p>The syntax of loops is somewhat different than other forms of BASIC. For example, a while loop has the following syntax:</p>
+
+<pre><code>while (condition) do
+    // loop body
+    // ...
+loop
+</code></pre>
+
+<p>Notice the use of the syntax `do' and `loop.'  There are a number of example programs in the <em>examples</em> directory of the source repository.</p>
+
+<p>The programming language's grammar is represented below in Backas-Naur form. The duck language has its own parser-generator, generating SLR(1) parse tables, so it is relatively easy to change the syntax of the language. Other optional ways to configure the language include disabling case-sensitivity or changing the format of comments, which are currently implemented as <code>/* C-style block comments */</code>, <code>// full line comments</code>, <code>; semicolons until end of line</code>, and <code># any macro use</code>.</p>
+
+<p>It is easy to port libraries to Duck. Function hooks are implemented as pointers, of the form <code>int (function_pointer)(int)</code> where the argument count is passed as the only parameter. Arguments are bound as string identifiers, and are accessed dynamically in the bound-function's body.</p>
+
+<p>Example:</p>
+
+<div class="highlight highlight-c"><pre><span class="pl-s">void</span> <span class="pl-enf">BindStandardLibrary</span>()
+{
+    VALUE duckStdLib = <span class="pl-sf">LinkNamespace</span>(<span class="pl-s1"><span class="pl-pds">"</span>duck<span class="pl-pds">"</span></span>);
+
+    VALUE print = <span class="pl-sf">CreateFunction</span>(DuckPrint);
+    <span class="pl-sf">AddParameter</span>(print, <span class="pl-s1"><span class="pl-pds">"</span>output<span class="pl-pds">"</span></span>);
+
+    <span class="pl-sf">LinkFunction</span>(duckStdLib, <span class="pl-s1"><span class="pl-pds">"</span>print<span class="pl-pds">"</span></span>, print);
+    <span class="pl-sf">LinkFunction</span>(duckStdLib, <span class="pl-s1"><span class="pl-pds">"</span>println<span class="pl-pds">"</span></span>, print);
+
+    VALUE prompt = <span class="pl-sf">CreateFunction</span>(DuckPrompt);
+    <span class="pl-sf">LinkFunction</span>(duckStdLib, <span class="pl-s1"><span class="pl-pds">"</span>prompt<span class="pl-pds">"</span></span>, prompt);
+}</pre></div>
+
+<h2>
+<a id="standard-library" class="anchor" href="#standard-library" aria-hidden="true"><span class="octicon octicon-link"></span></a>Standard Library</h2>
+
+<p>Duck has a standard library supporting both command-line input and output. See: stdduck.h.
+There are also SDL and OpenGL bindings to support making a graphical window as well as draw calls.</p>
+
+<p>Here is a list of those functions:</p>
+
+<h4>
+<a id="library" class="anchor" href="#library" aria-hidden="true"><span class="octicon octicon-link"></span></a>Library</h4>
+
+<h5>
+<a id="duck" class="anchor" href="#duck" aria-hidden="true"><span class="octicon octicon-link"></span></a>Duck</h5>
+
+<ul>
+<li>duck.print(output)</li>
+<li>duck.println(output)</li>
+<li>duck.prompt()</li>
+</ul>
+
+<h5>
+<a id="sdl" class="anchor" href="#sdl" aria-hidden="true"><span class="octicon octicon-link"></span></a>SDL</h5>
+
+<ul>
+<li>SDL.MakeWindow(width, height, title, fullscreen)</li>
+<li>SDL.flip()</li>
+<li>SDL.event()</li>
+<li>SDL.clearScreen()</li>
+<li>SDL.running()</li>
+<li>SDL.waitkey()</li>
+<li>SDL.quit()</li>
+</ul>
+
+<h5>
+<a id="gl" class="anchor" href="#gl" aria-hidden="true"><span class="octicon octicon-link"></span></a>GL</h5>
+
+<ul>
+<li>SDL.glLoadIdentity()</li>
+<li>SDL.glTranslatef(x, y, z)</li>
+<li>SDL.glRotatef(deg, x, y, z)</li>
+<li>SDL.glScalef(x, y, z)</li>
+<li>SDL.glBegin(primitive)</li>
+<li>SDL.glColor3f(r, g, b)</li>
+<li>SDL.glVertex3f(x, y, z)</li>
+<li>SDL.glNormal3f(x, y, z)</li>
+<li>SDL.glEnd()</li>
+</ul>
+
+<h2>
+<a id="building" class="anchor" href="#building" aria-hidden="true"><span class="octicon octicon-link"></span></a>Building</h2>
+
+<p>Duck uses CMake 2.8. To build simply run:</p>
+
+<pre><code>&gt; cmake .
+&gt; make
+</code></pre>
+
+<p>Building gduck with SDL support requires SDL and OpenGL libraries. There are no platform specific libraries.</p>
+
+<h2>
+<a id="credits" class="anchor" href="#credits" aria-hidden="true"><span class="octicon octicon-link"></span></a>Credits</h2>
+
+<p>Greg Tourville - Team Duck (<a href="http://team-duck.com">http://team-duck.com</a>)<br>
+Hiroyuki Sano  </p>
+
+<h2>
+<a id="future-work" class="anchor" href="#future-work" aria-hidden="true"><span class="octicon octicon-link"></span></a>Future Work</h2>
+
+<ul>
+<li>Implementing a binary compiler</li>
+<li>Memory management and garbage collection, to prevent crashes due to running out of memory</li>
+<li>Optional, strongly/statically typed form of DUCK</li>
+<li>Multithreaded parallelism — implicit or explicit through syntax analysis or library functions</li>
+<li>Benchmark and profiling performance intrinsics</li>
+<li>Expanding the standard library</li>
+</ul>
+      </section>
+      <footer>
+        <p>This project is maintained by <a href="https://github.com/gregtour">gregtour</a></p>
+        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
+      </footer>
+    </div>
+    <script src="javascripts/scale.fix.js"></script>
+    
+  </body>
+</html>
