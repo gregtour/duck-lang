@@ -1,6 +1,19 @@
+# http://docs.travis-ci.com/user/languages/c/
+
 language: c
-compiler: gcc
+
+compiler:
+  - clang
+  - gcc
+
+before_install:
+  - sudo apt-get install libsdl1.2-dev
+
+install:
+  - cmake ./
+  - make
+  - sudo make install
 
 script:
-  - cmake .
-  - make duck
+  - echo hello-duck | duck bin/examples/echo.txt
+  - echo hello-gduck | gduck bin/examples/echo.txt
