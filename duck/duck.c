@@ -1944,68 +1944,6 @@ void PrintObject(CONTEXT* context)
     printf("]");
 }
 
-/* 78. <reference> -> duck . print ( <expr> ) */
-int ReduceDuckPrint(SYNTAX_TREE* node)
-{
-    if (node->numChildren != 6) return 77;
-    SYNTAX_TREE* expr1 = node->children[4];
-
-    int error = 0;
-    error = error || InterpretNode(expr1);
-    
-    if (gLastExpression.type == VAL_PRIMITIVE)
-    {
-        printf("%i", gLastExpression.primitive);
-    }
-    else if (gLastExpression.type == VAL_STRING)
-    {
-        printf("%s", gLastExpression.string);
-    }
-    else if (gLastExpression.type == VAL_REFERENCE)
-    {
-        //printf("[OBJECT REFERENCE]");
-        PrintObject(gLastExpression.reference);
-    }
-    else if (gLastExpression.type == VAL_FUNCTION)
-    {
-        printf("f(");
-        PAIR* list = gLastExpression.function->parameters;
-        while (list)
-        {
-            printf("%s", list->identifier);
-            if (list->next)
-                printf(", ");
-            list = list->next;
-        }
-        printf(")");
-    }
-    else
-    {
-        printf("[NIL]");
-    }
-    
-    gLastExpression.type = VAL_NIL;
-    printf("\n");
-
-    return error;
-}
-
-/* 79. <reference> -> duck . prompt ( ) */
-int ReduceDuckPrompt(SYNTAX_TREE* node)
-{
-    if (node->numChildren != 5) return 79;
-
-    int error = 0;
-
-    char* buffer = (char*)ALLOCATE(sizeof(char)*128);
-    fgets(buffer, 128, stdin);
-
-    gLastExpression.type = VAL_STRING;
-    gLastExpression.string = buffer;
-
-    return error;
-}
-
 
 void PrintNode(SYNTAX_TREE* node)
 {

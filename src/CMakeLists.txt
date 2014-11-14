@@ -11,6 +11,7 @@ add_executable(duck
   ../duck/grammar.c
   ../duck/duck.c
   ../duck/tables.c
+  ../duck/memory.c
   ../duck/lib/library.c
   ../duck/lib/stdduck.c
 )
@@ -23,9 +24,10 @@ add_executable(gduck
   ../duck/grammar.c
   ../duck/duck.c
   ../duck/tables.c
+  ../duck/memory.c
   ../duck/lib/library.c
-  ../duck/lib/SDLlib.c
   ../duck/lib/stdduck.c
+  ../duck/lib/SDLlib.c
 )
 
 include_directories(../duck)
