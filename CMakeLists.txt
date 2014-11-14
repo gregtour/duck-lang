@@ -5,4 +5,7 @@ set( CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin )
 # source directory
 add_subdirectory(src)
 
-install_programs(bin/ duck gduck)
+install_programs(/bin # dest
+  bin/duck
+  bin/gduck
+)
