@@ -3,7 +3,7 @@
 #define malloc malloc
 #include <stdlib.h>
 #include "lr_parser.h"
-#include "generated_parser.h"
+//#include "generated_parser.h"
 //#include "java_parser.h"
 
 // memory tracker

@@ -17,16 +17,16 @@ int ReduceProgram(SYNTAX_TREE* node)
     return error;
 }
 
-/* 2. <stmt list> -> <stmt list> <stmt> */
+/* 2. <stmt list> -> <stmt> <stmt list> */
 int ReduceStmtListA(SYNTAX_TREE* node)
 {
     if (node->numChildren != 2) return 2;
-    SYNTAX_TREE* stmt_list1 = node->children[0];
-    SYNTAX_TREE* stmt1 = node->children[1];
+    SYNTAX_TREE* stmt1 = node->children[0];
+    SYNTAX_TREE* stmt_list1 = node->children[1];
 
     int error = 0;
-    error = error || CompileNode(stmt_list1);
     error = error || CompileNode(stmt1);
+    error = error || CompileNode(stmt_list1);
 
     return error;
 }
@@ -41,10 +41,10 @@ int ReduceStmtListB(SYNTAX_TREE* node)
     return error;
 }
 
-/* 4. <stmt> -> import <identifier> */
+/* 4. <stmt> -> import <identifier> <endl> */
 int ReduceStmtA(SYNTAX_TREE* node)
 {
-    if (node->numChildren != 2) return 4;
+    if (node->numChildren != 3) return 4;
     SYNTAX_TREE* identifier1 = node->children[1];
 
     int error = 0;
@@ -53,10 +53,10 @@ int ReduceStmtA(SYNTAX_TREE* node)
     return error;
 }
 
-/* 5. <stmt> -> call <reference> */
+/* 5. <stmt> -> call <reference> <endl> */
 int ReduceStmtB(SYNTAX_TREE* node)
 {
-    if (node->numChildren != 2) return 5;
+    if (node->numChildren != 3) return 5;
     SYNTAX_TREE* reference1 = node->children[1];
 
     int error = 0;
@@ -791,8 +791,10 @@ int ReduceFinalC(SYNTAX_TREE* node)
 int ReduceFinalD(SYNTAX_TREE* node)
 {
     if (node->numChildren != 1) return 62;
+    SYNTAX_TREE* float1 = node->children[0];
 
     int error = 0;
+    error = error || CompileNode(float1);
 
     return error;
 }

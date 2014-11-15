@@ -50,13 +50,13 @@ extern RULE GRAMMAR_RULES[80];
 /* Context Free Grammar */
 extern GRAMMAR_TABLE CONTEXT_FREE_GRAMMAR;
 
-/* LR(1) GOTO table */
-extern int GOTO_TABLE[4290];
+/* SLR GOTO table */
+extern int GOTO_TABLE[4368];
 
-/* LR(1) ACTION table */
-extern ACTION ACTION_TABLE[8250];
+/* SLR ACTION table */
+extern ACTION ACTION_TABLE[8400];
 
-/* LR(1) parse table structure */
+/* SLR parse table structure */
 extern LR_TABLE PARSE_TABLE;
 
 #endif // _DUCK_H

@@ -1,9 +1,9 @@
 ; duck programming language
 <program> ::= <stmt list>
-<stmt list> ::= <stmt list> <stmt>
+<stmt list> ::= <stmt> <stmt list>
 <stmt list> ::= <epsilon>
-<stmt> ::= import <identifier>
-<stmt> ::= call <reference>
+<stmt> ::= import <identifier> <endl>
+<stmt> ::= call <reference> <endl>
 <stmt> ::= <endl>
 <stmt> ::= <expr> <endl>
 <stmt> ::= <assignment> <endl>

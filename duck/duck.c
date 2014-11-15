@@ -10,22 +10,16 @@ float CoerceFloat(VALUE val)
     {
     case VAL_NIL:               return 0.0f;
                                 break;
-
     case VAL_PRIMITIVE:         return (float)val.primitive;
                                 break;
-
     case VAL_STRING:            return 0.0f;
                                 break;
-
     case VAL_REFERENCE:         return 0.0f;
                                 break;
-
     case VAL_FUNCTION:          return 0.0f;
                                 break;
-    
     case VAL_FLOATING_POINT:    return val.floatp;
                                 break;
-
     default:                    return 0.0f;
     }
     return 0.0f;
@@ -46,22 +40,22 @@ int ReduceProgram(SYNTAX_TREE* node)
     return error;
 }
 
-/* 2. <stmt list> -> <stmt list> <stmt> */
+/* 2. <stmt list> -> <stmt> <stmt list> */
 int ReduceStmtListA(SYNTAX_TREE* node)
 {
     if (node->numChildren != 2) return 2;
-    SYNTAX_TREE* stmt_list1 = node->children[0];
-    SYNTAX_TREE* stmt1 = node->children[1];
+    SYNTAX_TREE* stmt1 = node->children[0];
+    SYNTAX_TREE* stmt_list1 = node->children[1];
 
     int error = 0;
-    error = error || InterpretNode(stmt_list1);
-    
     if (returning == 0 &&
         breaking == 0 &&
         continuing == 0)
     {
         error = error || InterpretNode(stmt1);
     }
+    
+    error = error || InterpretNode(stmt_list1);
 
     return error;
 }
@@ -79,11 +73,12 @@ int ReduceStmtListB(SYNTAX_TREE* node)
 /* 4. <stmt> -> import <identifier> */
 int ReduceStmtA(SYNTAX_TREE* node)
 {
-    if (node->numChildren != 2) return 4;
+    if (node->numChildren != 3) return 4;
     //SYNTAX_TREE* identifier1 = node->children[1];
 
     int error = 0;
     //error = error || InterpretNode(identifier1);
+    printf("@import %s\n", node->children[1]->string);
 
     /* import library */
     // change scope of [namespace] to global
@@ -95,13 +90,35 @@ int ReduceStmtA(SYNTAX_TREE* node)
 /* 5. <stmt> -> call <reference> */
 int ReduceStmtB(SYNTAX_TREE* node)
 {
-    if (node->numChildren != 2) return 5;
+    if (node->numChildren != 3) return 5;
     SYNTAX_TREE* reference1 = node->children[1];
 
     int error = 0;
     error = error || InterpretNode(reference1);
-
-    // make a function call without parameters or return values
+	VALUE function = gLastExpression;
+    
+    if (function.type == VAL_FUNCTION)
+    {
+        // create new context
+        CONTEXT* current = gCurrentContext;
+        gCurrentContext = (CONTEXT*)ALLOCATE(sizeof(CONTEXT));
+        gCurrentContext->list = NULL;
+        gCurrentContext->parent = function.function->closure;
+        
+        if (function.function->built_in) {
+            error = error || function.function->functor(0);
+        } else {
+            error = error || InterpretNode(function.function->body);
+        }
+        
+        // return with same context
+        gCurrentContext = current;
+        returning = 0;
+    }
+    else
+    {
+        error = error || 12345;
+    }
 
     return error;
 }
