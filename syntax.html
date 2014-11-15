@@ -1,0 +1,99 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Syntax | Duck Programming Language Official Website</title>
+
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+<h1 style="text-align: center;">Duck Programming Language Context Free Grammar</h1>
+   <pre style="width: 80%; margin: auto;"><code>; duck programming language
+&lt;program&gt; ::= &lt;stmt list&gt;
+&lt;stmt list&gt; ::= &lt;stmt&gt; &lt;stmt list&gt;
+&lt;stmt list&gt; ::= &lt;epsilon&gt;
+&lt;stmt&gt; ::= import &lt;identifier&gt; &lt;endl&gt;
+&lt;stmt&gt; ::= call &lt;reference&gt; &lt;endl&gt;
+&lt;stmt&gt; ::= &lt;endl&gt;
+&lt;stmt&gt; ::= &lt;expr&gt; &lt;endl&gt;
+&lt;stmt&gt; ::= &lt;assignment&gt; &lt;endl&gt;
+&lt;stmt&gt; ::= &lt;function def&gt; &lt;endl&gt;
+&lt;stmt&gt; ::= &lt;if&gt; &lt;endl&gt;
+&lt;stmt&gt; ::= &lt;if else&gt; &lt;endl&gt;
+&lt;stmt&gt; ::= &lt;for loop&gt; &lt;endl&gt;
+&lt;stmt&gt; ::= &lt;while loop&gt; &lt;endl&gt;
+&lt;stmt&gt; ::= return &lt;expr&gt; &lt;endl&gt;
+&lt;stmt&gt; ::= break &lt;endl&gt;
+&lt;stmt&gt; ::= continue &lt;endl&gt;
+&lt;function def&gt; ::= function &lt;identifier&gt; &lt;parameters&gt; &lt;endl&gt; &lt;stmt list&gt; end
+&lt;parameters&gt; ::= &lt;epsilon&gt;
+&lt;parameters&gt; ::= ( )
+&lt;parameters&gt; ::= (&lt;param decl&gt;)
+&lt;param decl&gt; ::= &lt;identifier&gt;
+&lt;param decl&gt; ::= &lt;param decl&gt;, &lt;identifier&gt;
+&lt;if&gt; ::= if &lt;condition&gt; then &lt;endl&gt; &lt;stmt list&gt; end
+&lt;if else&gt; ::= if &lt;condition&gt; then &lt;endl&gt; &lt;stmt list&gt; else &lt;endl&gt; &lt;stmt list&gt; end
+&lt;for loop&gt; ::= for &lt;identifier&gt; = &lt;arithmetic&gt; to &lt;arithmetic&gt; do &lt;endl&gt; &lt;stmt list&gt; loop
+&lt;while loop&gt; ::= while &lt;condition&gt; do &lt;endl&gt; &lt;stmt list&gt; loop
+&lt;assignment&gt; ::= &lt;l-value&gt; = &lt;assignment&gt;
+&lt;assignment&gt; ::= &lt;l-value&gt; = &lt;condition&gt;
+&lt;l-value&gt; ::= &lt;identifier&gt;
+&lt;l-value&gt; ::= ( &lt;l-value&gt; )
+&lt;l-value&gt; ::= &lt;reference&gt; . &lt;identifier&gt;
+&lt;l-value&gt; ::= &lt;reference&gt; [ &lt;expr&gt; ]
+&lt;expr&gt; ::= &lt;condition&gt;
+&lt;condition&gt; ::= &lt;condition&gt; and &lt;logic&gt;
+&lt;condition&gt; ::= &lt;condition&gt; or &lt;logic&gt;
+&lt;condition&gt; ::= &lt;condition&gt; nor &lt;logic&gt;
+&lt;condition&gt; ::= &lt;condition&gt; xor &lt;logic&gt;
+&lt;condition&gt; ::= &lt;logic&gt;
+&lt;logic&gt; ::= not &lt;comparison&gt;
+&lt;logic&gt; ::= &lt;comparison&gt;
+&lt;comparison&gt; ::= &lt;comparison&gt; == &lt;arithmetic&gt;
+&lt;comparison&gt; ::= &lt;comparison&gt; != &lt;arithmetic&gt;
+&lt;comparison&gt; ::= &lt;comparison&gt; \&lt; &lt;arithmetic&gt;
+&lt;comparison&gt; ::= &lt;comparison&gt; &gt; &lt;arithmetic&gt;
+&lt;comparison&gt; ::= &lt;comparison&gt; \&lt;= &lt;arithmetic&gt;
+&lt;comparison&gt; ::= &lt;comparison&gt; &gt;= &lt;arithmetic&gt;
+&lt;comparison&gt; ::= &lt;arithmetic&gt;
+&lt;arithmetic&gt; ::= &lt;arithmetic&gt; + &lt;term&gt;
+&lt;arithmetic&gt; ::= &lt;arithmetic&gt; - &lt;term&gt;
+&lt;arithmetic&gt; ::= &lt;arithmetic&gt; &amp; &lt;term&gt;
+&lt;arithmetic&gt; ::= &lt;arithmetic&gt; | &lt;term&gt;
+&lt;arithmetic&gt; ::= &lt;term&gt;
+&lt;term&gt; ::= &lt;term&gt; * &lt;factor&gt;
+&lt;term&gt; ::= &lt;term&gt; / &lt;factor&gt;
+&lt;term&gt; ::= &lt;factor&gt;
+&lt;factor&gt; ::= -&lt;factor&gt;
+&lt;factor&gt; ::= !&lt;factor&gt;
+&lt;factor&gt; ::= &lt;final&gt;
+&lt;final&gt; ::= ( &lt;expr&gt; )
+&lt;final&gt; ::= &lt;boolean&gt;
+&lt;final&gt; ::= &lt;integer&gt;
+&lt;final&gt; ::= &lt;float&gt;
+&lt;final&gt; ::= &lt;string&gt;
+&lt;final&gt; ::= &lt;object&gt;
+&lt;final&gt; ::= &lt;reference&gt;
+&lt;reference&gt; ::= &lt;l-value&gt;
+&lt;reference&gt; ::= &lt;reference&gt; ( )
+&lt;reference&gt; ::= &lt;reference&gt; ( &lt;arguments&gt; )
+&lt;arguments&gt; ::= &lt;arguments&gt;, &lt;expr&gt;
+&lt;arguments&gt; ::= &lt;expr&gt;
+&lt;object&gt; ::= [ ]
+&lt;object&gt; ::= [ &lt;array init&gt; ]
+&lt;object&gt; ::= [ &lt;dictionary init&gt; ]
+&lt;array init&gt; ::= &lt;array init&gt;, &lt;expr&gt;
+&lt;array init&gt; ::= &lt;expr&gt;
+&lt;dictionary init&gt; ::= &lt;dictionary init&gt;, &lt;identifier&gt; : &lt;expr&gt;
+&lt;dictionary init&gt; ::= &lt;identifier&gt; : &lt;expr&gt;
+&lt;boolean&gt; ::= true
+&lt;boolean&gt; ::= false
+</code></pre>
+  </body>
+</html>
