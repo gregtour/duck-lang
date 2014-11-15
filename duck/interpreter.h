@@ -90,7 +90,7 @@ VALUE GetRecord(const char* identifier, CONTEXT* context);
 void  StoreRecord(const char* identifier, VALUE value, CONTEXT* context);
 
 /* type-casting */
-float CoerceFloat(VALUE val);
+float TypeFloat(VALUE value);
 
 #endif // _INTERPRETER_H
 

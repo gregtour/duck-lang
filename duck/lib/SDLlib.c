@@ -241,9 +241,9 @@ int GlTranslatef(int argument_count)
     VALUE Y = GetRecord("y", gCurrentContext);
     VALUE Z = GetRecord("z", gCurrentContext);
 
-    glTranslatef(CoerceFloat(X), 
-                 CoerceFloat(Y), 
-                 CoerceFloat(Z));
+    glTranslatef(TypeFloat(X), 
+                 TypeFloat(Y), 
+                 TypeFloat(Z));
 
     gLastExpression.type = VAL_NIL;
     return error;
@@ -258,10 +258,10 @@ int GlRotatef(int argument_count)
     VALUE Y = GetRecord("y", gCurrentContext);
     VALUE Z = GetRecord("z", gCurrentContext);
 
-    glRotatef(CoerceFloat(DEG),
-              CoerceFloat(X), 
-              CoerceFloat(Y), 
-              CoerceFloat(Z));
+    glRotatef(TypeFloat(DEG),
+              TypeFloat(X), 
+              TypeFloat(Y), 
+              TypeFloat(Z));
 
     gLastExpression.type = VAL_NIL;
     return error;
@@ -275,9 +275,9 @@ int GlScalef(int argument_count)
     VALUE Y = GetRecord("y", gCurrentContext);
     VALUE Z = GetRecord("z", gCurrentContext);
 
-    glScalef(CoerceFloat(X), 
-             CoerceFloat(Y), 
-             CoerceFloat(Z));
+    glScalef(TypeFloat(X), 
+             TypeFloat(Y), 
+             TypeFloat(Z));
 
     gLastExpression.type = VAL_NIL;
     return error;
@@ -316,9 +316,9 @@ int GlColor3f(int argument_count)
     VALUE G = GetRecord("g", gCurrentContext);
     VALUE B = GetRecord("b", gCurrentContext);
 
-    glColor3f(CoerceFloat(R), 
-              CoerceFloat(G), 
-              CoerceFloat(B));
+    glColor3f(TypeFloat(R), 
+              TypeFloat(G), 
+              TypeFloat(B));
 
     gLastExpression.type = VAL_NIL;
     return error;
@@ -332,9 +332,9 @@ int GlVertex3f(int argument_count)
     VALUE Y = GetRecord("y", gCurrentContext);
     VALUE Z = GetRecord("z", gCurrentContext);
 
-    glVertex3f(CoerceFloat(X), 
-               CoerceFloat(Y), 
-               CoerceFloat(Z));
+    glVertex3f(TypeFloat(X), 
+               TypeFloat(Y), 
+               TypeFloat(Z));
 
     gLastExpression.type = VAL_NIL;
     return error;
@@ -348,9 +348,9 @@ int GlNormal3f(int argument_count)
     VALUE Y = GetRecord("y", gCurrentContext);
     VALUE Z = GetRecord("z", gCurrentContext);
 
-    glNormal3f(CoerceFloat(X), 
-               CoerceFloat(Y), 
-               CoerceFloat(Z));
+    glNormal3f(TypeFloat(X), 
+               TypeFloat(Y), 
+               TypeFloat(Z));
 
     gLastExpression.type = VAL_NIL;
     return error;

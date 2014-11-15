@@ -4,25 +4,30 @@
 
 /* type stuff */
 
-float CoerceFloat(VALUE val)
+float TypeFloat(VALUE value)
 {
-    switch (val.type)
-    {
-    case VAL_NIL:               return 0.0f;
-                                break;
-    case VAL_PRIMITIVE:         return (float)val.primitive;
-                                break;
-    case VAL_STRING:            return 0.0f;
-                                break;
-    case VAL_REFERENCE:         return 0.0f;
-                                break;
-    case VAL_FUNCTION:          return 0.0f;
-                                break;
-    case VAL_FLOATING_POINT:    return val.floatp;
-                                break;
-    default:                    return 0.0f;
+    if (value.type == VAL_PRIMITIVE) {
+        return (float)value.primitive;
+    } else if (value.type == VAL_FLOATING_POINT) {
+        return value.floatp;
+    } else if (value.type == VAL_STRING) {
+        return atof(value.string);
+    } else {
+        return 0.0f;
     }
-    return 0.0f;
+}
+
+int TypeInt(VALUE value)
+{
+    if (value.type == VAL_PRIMITIVE) {
+        return value.primitive;
+    } else if (value.type == VAL_FLOATING_POINT) {
+        return (int)value.floatp;
+    } else if (value.type == VAL_STRING) {
+        return atoi(value.string);
+    } else {
+        return 0;
+    }
 }
 
 
@@ -982,8 +987,8 @@ int ReduceComparisonC(SYNTAX_TREE* node)
     }
     else if (comparison.type == VAL_FLOATING_POINT || arithmetic.type == VAL_FLOATING_POINT)
     {
-        float a = CoerceFloat(comparison);
-        float b = CoerceFloat(arithmetic);
+        float a = TypeFloat(comparison);
+        float b = TypeFloat(arithmetic);
         gLastExpression.type = VAL_PRIMITIVE;
         gLastExpression.primitive = a < b;
     }
@@ -1018,8 +1023,8 @@ int ReduceComparisonD(SYNTAX_TREE* node)
     }
     else if (comparison.type == VAL_FLOATING_POINT || arithmetic.type == VAL_FLOATING_POINT)
     {
-        float a = CoerceFloat(comparison);
-        float b = CoerceFloat(arithmetic);
+        float a = TypeFloat(comparison);
+        float b = TypeFloat(arithmetic);
         gLastExpression.type = VAL_PRIMITIVE;
         gLastExpression.primitive = a > b;
     }
@@ -1054,8 +1059,8 @@ int ReduceComparisonE(SYNTAX_TREE* node)
     }
     else if (comparison.type == VAL_FLOATING_POINT || arithmetic.type == VAL_FLOATING_POINT)
     {
-        float a = CoerceFloat(comparison);
-        float b = CoerceFloat(arithmetic);
+        float a = TypeFloat(comparison);
+        float b = TypeFloat(arithmetic);
         gLastExpression.type = VAL_PRIMITIVE;
         gLastExpression.primitive = a <= b;
     }
@@ -1090,8 +1095,8 @@ int ReduceComparisonF(SYNTAX_TREE* node)
     }
     else if (comparison.type == VAL_FLOATING_POINT || arithmetic.type == VAL_FLOATING_POINT)
     {
-        float a = CoerceFloat(comparison);
-        float b = CoerceFloat(arithmetic);
+        float a = TypeFloat(comparison);
+        float b = TypeFloat(arithmetic);
         gLastExpression.type = VAL_PRIMITIVE;
         gLastExpression.primitive = a >= b;
     }
@@ -1365,8 +1370,8 @@ int ReduceTermA(SYNTAX_TREE* node)
     }
     else if (term.type == VAL_FLOATING_POINT || factor.type == VAL_FLOATING_POINT)
     {
-        float a = CoerceFloat(term);
-        float b = CoerceFloat(factor);
+        float a = TypeFloat(term);
+        float b = TypeFloat(factor);
         gLastExpression.type = VAL_FLOATING_POINT;
         gLastExpression.floatp = (a * b);
     }
