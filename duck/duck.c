@@ -82,6 +82,18 @@ int ReduceStmtA(SYNTAX_TREE* node)
 
     /* import library */
     // change scope of [namespace] to global
+    VALUE library = GetRecord(node->children[1]->string, gCurrentContext);
+    if (library.type == VAL_REFERENCE)
+    {
+        CONTEXT* namespace = library.reference;
+        PAIR* iterator = namespace->list;
+        while (iterator)
+        {
+            StoreRecord(iterator->identifier, iterator->value, gGlobalContext);
+            iterator = iterator->next;
+        }
+    }
+
     gLastExpression.type = VAL_NIL;
 
     return error;
