@@ -1,0 +1,19 @@
+import math
+duck.println('Math Examples...')
+duck.println(math.cos(0.50))
+duck.println(math.sin(0.50))
+duck.println(math.tan(0.50))
+
+duck.println('Pi is:')
+duck.println(math.pi)
+duck.println(math.test)
+
+duck.println('Inverse Trig Functions...')
+duck.println(math.acos(0.50))
+duck.println(math.asin(0.50))
+duck.println(math.atan(0.50))
+
+duck.println('Power function')
+for i = 0 to 30 do
+  duck.println(math.pow(2, i))
+loop

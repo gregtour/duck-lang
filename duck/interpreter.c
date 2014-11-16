@@ -3,6 +3,7 @@
 #include "interpreter.h"
 #include "lib/library.h"
 #include "lib/stdduck.h"
+#include "lib/dmath.h"
 
 // global data
 CONTEXT* gGlobalContext;
@@ -68,8 +69,8 @@ void PrintMemoryUsage()
         printf("Total memory usage: %i.%i kb\n", kb, b);
     }
 
-    printf("%i calls to malloc() with %i calls to free()\n", 
-        gMallocCalls, 
+    printf("%i calls to malloc() with %i calls to free()\n",
+        gMallocCalls,
         gFreeCalls);
 }
 #endif // _MEM_TRACKING
@@ -99,7 +100,7 @@ void PrintContext(CONTEXT* context)
             else
                 printf("nil");
             printf(", ");
-            
+
             list = list->next;
         }
         context = context->parent;
@@ -132,6 +133,18 @@ void  LinkConstPrimitive(VALUE namespace, const char* identifier, int value)
     VALUE constant;
     constant.type = VAL_PRIMITIVE;
     constant.primitive = value;
+    StoreRecord(identifier, constant, namespace.reference);
+}
+
+void  LinkConstFloatp(VALUE namespace, const char* identifier, float value)
+{
+    //printf("%e\n", value);
+    VALUE constant;
+    //printf("%e\n", value);
+    constant.type = VAL_FLOATING_POINT;
+    //printf("%e\n", value);
+    constant.floatp = value;
+    //printf("%e\n", value);
     StoreRecord(identifier, constant, namespace.reference);
 }
 
@@ -190,6 +203,7 @@ int Interpret(SYNTAX_TREE* tree)
 
     /* libraries */
     BindStandardLibrary();
+    BindMathLibrary();
     BindAdditionalLibraries();
 
     gParameterListing = NULL;
@@ -257,10 +271,10 @@ int main(int argc, char* argv[])
         getchar();
         return 1;
     }
-    
+
     //printf("Done.\n");
     //getchar();
-    
+
     // clean up
     FreeEnvironment();
     FreeLexing(lexing, buffer);
@@ -271,4 +285,3 @@ int main(int argc, char* argv[])
 #endif // _MEM_TRACKING
     return 0;
 }
-
