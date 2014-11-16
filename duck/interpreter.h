@@ -91,6 +91,7 @@ void  StoreRecord(const char* identifier, VALUE value, CONTEXT* context);
 
 /* type-casting */
 float TypeFloat(VALUE value);
+int TypeInt(VALUE value);
 
 #endif // _INTERPRETER_H
 

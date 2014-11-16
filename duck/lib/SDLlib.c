@@ -116,8 +116,8 @@ int MakeWindow(int argument_count)
     VALUE r_title = GetRecord("name", gCurrentContext);
     VALUE r_fullscreen = GetRecord("fullscreen", gCurrentContext);
 
-    width = (r_width.type == VAL_PRIMITIVE) ? r_width.primitive : 0;
-    height = (r_height.type == VAL_PRIMITIVE) ? r_height.primitive : 0;
+    width = TypeInt(r_width);
+    height = TypeInt(r_height);
     szClassName = (r_title.type == VAL_STRING) ? r_title.string : "Untitled";
 
     SDL_Init(SDL_INIT_VIDEO | SDL_INIT_NOPARACHUTE);
@@ -127,8 +127,7 @@ int MakeWindow(int argument_count)
         SDL_HWPALETTE |
         SDL_HWSURFACE |
         SDL_HWACCEL |
-        ((r_fullscreen.type != VAL_NIL && r_fullscreen.primitive) ? SDL_FULLSCREEN :
-            0)
+        (TypeInt(r_fullscreen) ? SDL_FULLSCREEN : 0)
 /* | SDL_FULLSCREEN */
         );
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
