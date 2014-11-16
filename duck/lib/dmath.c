@@ -202,8 +202,6 @@ void BindMathLibrary()
 
     LinkConstFloatp(mathLib, "pi", 3.14159);
 
-    LinkConstPrimitive(mathLib, "test", 3);
-
     //Exponentials and logs
 
 

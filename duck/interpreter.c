@@ -138,13 +138,9 @@ void  LinkConstPrimitive(VALUE namespace, const char* identifier, int value)
 
 void  LinkConstFloatp(VALUE namespace, const char* identifier, float value)
 {
-    //printf("%e\n", value);
     VALUE constant;
-    //printf("%e\n", value);
     constant.type = VAL_FLOATING_POINT;
-    //printf("%e\n", value);
     constant.floatp = value;
-    //printf("%e\n", value);
     StoreRecord(identifier, constant, namespace.reference);
 }
 
