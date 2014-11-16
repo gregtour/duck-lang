@@ -14,14 +14,7 @@ int MathSin(int arg_count){
   float val = 0.0;
   VALUE argument = GetRecord("angle", gCurrentContext);
 
-
-  if(argument.type == VAL_FLOATING_POINT){
-    angle = argument.floatp;
-  }
-  else if(argument.type == VAL_PRIMITIVE){
-    angle = argument.primitive*1.0;
-  }
-
+  angle = TypeFloat(argument);
   val = sin(angle);
 
   gLastExpression.type = VAL_FLOATING_POINT;
@@ -36,14 +29,7 @@ int MathCos(int arg_count){
   float val = 0.0;
   VALUE argument = GetRecord("angle", gCurrentContext);
 
-
-  if(argument.type == VAL_FLOATING_POINT){
-    angle = argument.floatp;
-  }
-  else if(argument.type == VAL_PRIMITIVE){
-    angle = argument.primitive*1.0;
-  }
-
+  angle = TypeFloat(argument);
   val = cos(angle);
 
   gLastExpression.type = VAL_FLOATING_POINT;
@@ -58,14 +44,7 @@ int MathTan(int arg_count){
   float val = 0.0;
   VALUE argument = GetRecord("angle", gCurrentContext);
 
-
-  if(argument.type == VAL_FLOATING_POINT){
-    angle = argument.floatp;
-  }
-  else if(argument.type == VAL_PRIMITIVE){
-    angle = argument.primitive*1.0;
-  }
-
+  angle = TypeFloat(argument);
   val = tan(angle);
 
   gLastExpression.type = VAL_FLOATING_POINT;
@@ -80,14 +59,7 @@ int MathAsin(int arg_count){
   float val = 0.0;
   VALUE argument = GetRecord("input", gCurrentContext);
 
-
-  if(argument.type == VAL_FLOATING_POINT){
-    input = argument.floatp;
-  }
-  else if(argument.type == VAL_PRIMITIVE){
-    input = argument.primitive*1.0;
-  }
-
+  input = TypeFloat(argument);
   val = asin(input);
 
   gLastExpression.type = VAL_FLOATING_POINT;
@@ -102,14 +74,7 @@ int MathAcos(int arg_count){
   float val = 0.0;
   VALUE argument = GetRecord("input", gCurrentContext);
 
-
-  if(argument.type == VAL_FLOATING_POINT){
-    input = argument.floatp;
-  }
-  else if(argument.type == VAL_PRIMITIVE){
-    input = argument.primitive*1.0;
-  }
-
+  input = TypeFloat(argument);
   val = acos(input);
 
   gLastExpression.type = VAL_FLOATING_POINT;
@@ -124,14 +89,7 @@ int MathAtan(int arg_count){
   float val = 0.0;
   VALUE argument = GetRecord("input", gCurrentContext);
 
-
-  if(argument.type == VAL_FLOATING_POINT){
-    input = argument.floatp;
-  }
-  else if(argument.type == VAL_PRIMITIVE){
-    input = argument.primitive*1.0;
-  }
-
+  input = TypeFloat(argument);
   val = atan(input);
 
   gLastExpression.type = VAL_FLOATING_POINT;
@@ -140,27 +98,63 @@ int MathAtan(int arg_count){
   return error;
 }
 
+int MathExp(int arg_count){
+  int error = 0;
+  float input = 0.0;
+  float val = 0.0;
+  VALUE argument = GetRecord("input", gCurrentContext);
+
+  input = TypeFloat(argument);
+  val = exp(input);
+
+  gLastExpression.type = VAL_FLOATING_POINT;
+  gLastExpression.floatp = val;
+
+  return error;
+}
+
+int MathLog(int arg_count){
+  int error = 0;
+  float input = 0.0;
+  float val = 0.0;
+  VALUE argument = GetRecord("input", gCurrentContext);
+
+  input = TypeFloat(argument);
+  val = log(input);
+
+  gLastExpression.type = VAL_FLOATING_POINT;
+  gLastExpression.floatp = val;
+
+  return error;
+}
+
+int MathLog10(int arg_count){
+  int error = 0;
+  float input = 0.0;
+  float val = 0.0;
+  VALUE argument = GetRecord("input", gCurrentContext);
+
+  input = TypeFloat(argument);
+  val = log10(input);
+
+  gLastExpression.type = VAL_FLOATING_POINT;
+  gLastExpression.floatp = val;
+
+  return error;
+}
+
+
 int MathPow(int arg_count){
   int error = 0;
   float base = 0.0;
   float exponent = 0.0;
   float val = 0.0;
+
   VALUE base_arg = GetRecord("base", gCurrentContext);
   VALUE exp_arg = GetRecord("exponent", gCurrentContext);
 
-  if(base_arg.type == VAL_FLOATING_POINT){
-    base = base_arg.floatp;
-  }
-  else if(base_arg.type == VAL_PRIMITIVE){
-    base = base_arg.primitive*1.0;
-  }
-
-  if(exp_arg.type == VAL_FLOATING_POINT){
-    exponent = exp_arg.floatp;
-  }
-  else if(exp_arg.type == VAL_PRIMITIVE){
-    exponent = exp_arg.primitive*1.0;
-  }
+  base = TypeFloat(base_arg);
+  exponent = TypeFloat(exp_arg);
 
   val = pow(base, exponent);
 
@@ -170,45 +164,136 @@ int MathPow(int arg_count){
   return error;
 }
 
+int MathSqrt(int arg_count){
+  int error = 0;
+  float input = 0.0;
+  float val = 0.0;
+  VALUE argument = GetRecord("input", gCurrentContext);
+
+  input = TypeFloat(argument);
+
+  val = sqrt(input);
+
+  gLastExpression.type = VAL_FLOATING_POINT;
+  gLastExpression.floatp = val;
+
+  return error;
+}
+
+int MathCeil(int arg_count){
+  int error = 0;
+  float input = 0.0;
+  float val = 0.0;
+  VALUE argument = GetRecord("input", gCurrentContext);
+
+  input = TypeFloat(argument);
+
+  val = ceil(input);
+
+  gLastExpression.type = VAL_FLOATING_POINT;
+  gLastExpression.floatp = val;
+
+  return error;
+}
+
+int MathFloor(int arg_count){
+  int error = 0;
+  float input = 0.0;
+  float val = 0.0;
+  VALUE argument = GetRecord("input", gCurrentContext);
+
+  input = TypeFloat(argument);
+
+  val = floor(input);
+
+  gLastExpression.type = VAL_FLOATING_POINT;
+  gLastExpression.floatp = val;
+
+  return error;
+}
+
+
+int MathAbs(int arg_count){
+  int error = 0;
+  float input = 0.0;
+  float val = 0.0;
+  VALUE argument = GetRecord("input", gCurrentContext);
+
+  input = TypeFloat(argument);
+
+  val = fabs(input);
+
+  gLastExpression.type = VAL_FLOATING_POINT;
+  gLastExpression.floatp = val;
+
+  return error;
+}
+
 void BindMathLibrary()
 {
-    VALUE mathLib = LinkNamespace("math");
+    VALUE math_lib = LinkNamespace("Math");
 
     //Trig and inverse trig functions.
     VALUE dcos = CreateFunction(MathCos);
     AddParameter(dcos, "angle");
-    LinkFunction(mathLib, "cos", dcos);
+    LinkFunction(math_lib, "cos", dcos);
 
     VALUE dsin = CreateFunction(MathSin);
     AddParameter(dsin, "angle");
-    LinkFunction(mathLib, "sin", dsin);
+    LinkFunction(math_lib, "sin", dsin);
 
     VALUE dtan = CreateFunction(MathTan);
     AddParameter(dtan, "angle");
-    LinkFunction(mathLib, "tan", dtan);
+    LinkFunction(math_lib, "tan", dtan);
 
     VALUE dasin = CreateFunction(MathAsin);
     AddParameter(dasin, "input");
-    LinkFunction(mathLib, "asin", dasin);
+    LinkFunction(math_lib, "asin", dasin);
 
     VALUE dacos = CreateFunction(MathAcos);
     AddParameter(dacos, "input");
-    LinkFunction(mathLib, "acos", dacos);
+    LinkFunction(math_lib, "acos", dacos);
 
     VALUE datan = CreateFunction(MathAtan);
     AddParameter(datan, "input");
-    LinkFunction(mathLib, "atan", datan);
+    LinkFunction(math_lib, "atan", datan);
 
 
-    LinkConstFloatp(mathLib, "pi", 3.14159);
+    LinkConstFloatp(math_lib, "pi", 3.14159);
 
     //Exponentials and logs
+    VALUE dexp = CreateFunction(MathExp);
+    AddParameter(dexp, "input");
+    LinkFunction(math_lib, "exp", dexp);
 
+    VALUE dlog = CreateFunction(MathLog);
+    AddParameter(dlog, "input");
+    LinkFunction(math_lib, "log", dlog);
 
-    //Power function
+    VALUE dlog10 = CreateFunction(MathLog10);
+    AddParameter(dlog10, "input");
+    LinkFunction(math_lib, "log10", dlog10);
+
+    //Power functions
     VALUE dpow = CreateFunction(MathPow);
     AddParameter(dpow, "base");
     AddParameter(dpow, "exponent");
-    LinkFunction(mathLib, "pow", dpow);
+    LinkFunction(math_lib, "pow", dpow);
 
+    VALUE dsqrt = CreateFunction(MathSqrt);
+    AddParameter(dsqrt, "input");
+    LinkFunction(math_lib, "sqrt", dsqrt);
+
+    //Misc Functions
+    VALUE dceil = CreateFunction(MathCeil);
+    AddParameter(dceil, "input");
+    LinkFunction(math_lib, "ceil", dceil);
+
+    VALUE dfloor = CreateFunction(MathCeil);
+    AddParameter(dfloor, "input");
+    LinkFunction(math_lib, "floor", dfloor);
+
+    VALUE dabs = CreateFunction(MathAbs);
+    AddParameter(dabs, "input");
+    LinkFunction(math_lib, "floor", dabs);
 }
