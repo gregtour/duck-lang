@@ -2,6 +2,10 @@
 Author: Robert Cope
 
 These are thin wrappers over the C math libraries.
+TODO:
+  * Add Hyperbolic Trig functions?
+  * Add other non-math.h functions?
+
 */
 
 #include <math.h>
@@ -57,7 +61,7 @@ int MathAsin(int arg_count){
   int error = 0;
   float input = 0.0;
   float val = 0.0;
-  VALUE argument = GetRecord("input", gCurrentContext);
+  VALUE argument = GetRecord("num", gCurrentContext);
 
   input = TypeFloat(argument);
   val = asin(input);
@@ -72,7 +76,7 @@ int MathAcos(int arg_count){
   int error = 0;
   float input = 0.0;
   float val = 0.0;
-  VALUE argument = GetRecord("input", gCurrentContext);
+  VALUE argument = GetRecord("num", gCurrentContext);
 
   input = TypeFloat(argument);
   val = acos(input);
@@ -87,7 +91,7 @@ int MathAtan(int arg_count){
   int error = 0;
   float input = 0.0;
   float val = 0.0;
-  VALUE argument = GetRecord("input", gCurrentContext);
+  VALUE argument = GetRecord("num", gCurrentContext);
 
   input = TypeFloat(argument);
   val = atan(input);
@@ -102,7 +106,7 @@ int MathExp(int arg_count){
   int error = 0;
   float input = 0.0;
   float val = 0.0;
-  VALUE argument = GetRecord("input", gCurrentContext);
+  VALUE argument = GetRecord("num", gCurrentContext);
 
   input = TypeFloat(argument);
   val = exp(input);
@@ -117,7 +121,7 @@ int MathLog(int arg_count){
   int error = 0;
   float input = 0.0;
   float val = 0.0;
-  VALUE argument = GetRecord("input", gCurrentContext);
+  VALUE argument = GetRecord("num", gCurrentContext);
 
   input = TypeFloat(argument);
   val = log(input);
@@ -132,7 +136,7 @@ int MathLog10(int arg_count){
   int error = 0;
   float input = 0.0;
   float val = 0.0;
-  VALUE argument = GetRecord("input", gCurrentContext);
+  VALUE argument = GetRecord("num", gCurrentContext);
 
   input = TypeFloat(argument);
   val = log10(input);
@@ -168,7 +172,7 @@ int MathSqrt(int arg_count){
   int error = 0;
   float input = 0.0;
   float val = 0.0;
-  VALUE argument = GetRecord("input", gCurrentContext);
+  VALUE argument = GetRecord("num", gCurrentContext);
 
   input = TypeFloat(argument);
 
@@ -184,7 +188,7 @@ int MathCeil(int arg_count){
   int error = 0;
   float input = 0.0;
   float val = 0.0;
-  VALUE argument = GetRecord("input", gCurrentContext);
+  VALUE argument = GetRecord("num", gCurrentContext);
 
   input = TypeFloat(argument);
 
@@ -200,7 +204,7 @@ int MathFloor(int arg_count){
   int error = 0;
   float input = 0.0;
   float val = 0.0;
-  VALUE argument = GetRecord("input", gCurrentContext);
+  VALUE argument = GetRecord("num", gCurrentContext);
 
   input = TypeFloat(argument);
 
@@ -217,7 +221,7 @@ int MathAbs(int arg_count){
   int error = 0;
   float input = 0.0;
   float val = 0.0;
-  VALUE argument = GetRecord("input", gCurrentContext);
+  VALUE argument = GetRecord("num", gCurrentContext);
 
   input = TypeFloat(argument);
 
@@ -247,15 +251,15 @@ void BindMathLibrary()
     LinkFunction(math_lib, "tan", dtan);
 
     VALUE dasin = CreateFunction(MathAsin);
-    AddParameter(dasin, "input");
+    AddParameter(dasin, "num");
     LinkFunction(math_lib, "asin", dasin);
 
     VALUE dacos = CreateFunction(MathAcos);
-    AddParameter(dacos, "input");
+    AddParameter(dacos, "num");
     LinkFunction(math_lib, "acos", dacos);
 
     VALUE datan = CreateFunction(MathAtan);
-    AddParameter(datan, "input");
+    AddParameter(datan, "num");
     LinkFunction(math_lib, "atan", datan);
 
 
@@ -263,15 +267,15 @@ void BindMathLibrary()
 
     //Exponentials and logs
     VALUE dexp = CreateFunction(MathExp);
-    AddParameter(dexp, "input");
+    AddParameter(dexp, "num");
     LinkFunction(math_lib, "exp", dexp);
 
     VALUE dlog = CreateFunction(MathLog);
-    AddParameter(dlog, "input");
+    AddParameter(dlog, "num");
     LinkFunction(math_lib, "log", dlog);
 
     VALUE dlog10 = CreateFunction(MathLog10);
-    AddParameter(dlog10, "input");
+    AddParameter(dlog10, "num");
     LinkFunction(math_lib, "log10", dlog10);
 
     //Power functions
@@ -281,19 +285,19 @@ void BindMathLibrary()
     LinkFunction(math_lib, "pow", dpow);
 
     VALUE dsqrt = CreateFunction(MathSqrt);
-    AddParameter(dsqrt, "input");
+    AddParameter(dsqrt, "num");
     LinkFunction(math_lib, "sqrt", dsqrt);
 
     //Misc Functions
     VALUE dceil = CreateFunction(MathCeil);
-    AddParameter(dceil, "input");
+    AddParameter(dceil, "num");
     LinkFunction(math_lib, "ceil", dceil);
 
     VALUE dfloor = CreateFunction(MathCeil);
-    AddParameter(dfloor, "input");
+    AddParameter(dfloor, "num");
     LinkFunction(math_lib, "floor", dfloor);
 
     VALUE dabs = CreateFunction(MathAbs);
-    AddParameter(dabs, "input");
+    AddParameter(dabs, "num");
     LinkFunction(math_lib, "floor", dabs);
 }
