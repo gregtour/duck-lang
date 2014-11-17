@@ -13,6 +13,7 @@ TODO:
 #include "dmath.h"
 #include "interpreter.h"
 
+/*Math.sin(angle)*/
 int MathSin(int arg_count){
   float angle = 0.0;
   float val = 0.0;
@@ -27,6 +28,7 @@ int MathSin(int arg_count){
   return 0;
 }
 
+/*Math.cos(angle)*/
 int MathCos(int arg_count){
   float angle = 0.0;
   float val = 0.0;
@@ -41,6 +43,7 @@ int MathCos(int arg_count){
   return 0;
 }
 
+/*Math.tan(angle)*/
 int MathTan(int arg_count){
   float angle = 0.0;
   float val = 0.0;
@@ -55,6 +58,7 @@ int MathTan(int arg_count){
   return 0;
 }
 
+/*Math.asin(num)*/
 int MathAsin(int arg_count){
   float input = 0.0;
   float val = 0.0;
@@ -69,6 +73,7 @@ int MathAsin(int arg_count){
   return 0;
 }
 
+/*Math.acos(num)*/
 int MathAcos(int arg_count){
   float input = 0.0;
   float val = 0.0;
@@ -83,6 +88,7 @@ int MathAcos(int arg_count){
   return 0;
 }
 
+/*Math.atan(num)*/
 int MathAtan(int arg_count){
   float input = 0.0;
   float val = 0.0;
@@ -97,6 +103,7 @@ int MathAtan(int arg_count){
   return 0;
 }
 
+/*Math.exp(num)*/
 int MathExp(int arg_count){
   float input = 0.0;
   float val = 0.0;
@@ -111,6 +118,7 @@ int MathExp(int arg_count){
   return 0;
 }
 
+/*Math.log(num)*/
 int MathLog(int arg_count){
   float input = 0.0;
   float val = 0.0;
@@ -125,6 +133,7 @@ int MathLog(int arg_count){
   return 0;
 }
 
+/*Math.log10(num)*/
 int MathLog10(int arg_count){
   float input = 0.0;
   float val = 0.0;
@@ -139,7 +148,7 @@ int MathLog10(int arg_count){
   return 0;
 }
 
-
+/*Math.pow(base, exponent)*/
 int MathPow(int arg_count){
   float base = 0.0;
   float exponent = 0.0;
@@ -159,6 +168,7 @@ int MathPow(int arg_count){
   return 0;
 }
 
+/*Math.sqrt(num))*/
 int MathSqrt(int arg_count){
   float input = 0.0;
   float val = 0.0;
@@ -174,6 +184,7 @@ int MathSqrt(int arg_count){
   return 0;
 }
 
+/*Math.ceil(num)*/
 int MathCeil(int arg_count){
   float input = 0.0;
   float val = 0.0;
@@ -189,6 +200,7 @@ int MathCeil(int arg_count){
   return 0;
 }
 
+/*Math.floor(num)*/
 int MathFloor(int arg_count){
   float input = 0.0;
   float val = 0.0;
@@ -204,7 +216,7 @@ int MathFloor(int arg_count){
   return 0;
 }
 
-
+/*Math.abs(num)*/
 int MathAbs(int arg_count){
   int error = 0;
   float input = 0.0;
