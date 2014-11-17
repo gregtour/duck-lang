@@ -62,14 +62,17 @@ void  FreeEnvironment();
 /* library routines */
 VALUE LinkNamespace(const char* identifier);
 VALUE CreateFunction(int (*function)(int));
-void  AddParameter(VALUE functor, 
+void  AddParameter(VALUE functor,
                    const char* argument_name);
-void  LinkFunction(VALUE namespace, 
-                   const char* identifier, 
+void  LinkFunction(VALUE namespace,
+                   const char* identifier,
                    VALUE function);
 void  LinkConstPrimitive(VALUE namespace,
                          const char* identifier,
                          int value);
+void LinkConstFloatp(VALUE namespace,
+                     const char* identifier,
+                     float value);
 
 /* execution context */
 extern CONTEXT* gGlobalContext;
@@ -99,4 +102,3 @@ float TypeFloat(VALUE value);
 int TypeInt(VALUE value);
 
 #endif // _INTERPRETER_H
-
