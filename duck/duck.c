@@ -149,7 +149,7 @@ int ReduceStmtB(SYNTAX_TREE* node)
 /* 6. <stmt> -> <endl> */
 int ReduceStmtC(SYNTAX_TREE* node)
 {
-    if (node->numChildren != 1) return 4;
+    if (node->numChildren != 1) return 6;
 
     int error = 0;
 
@@ -161,7 +161,7 @@ int ReduceStmtC(SYNTAX_TREE* node)
 /* 7. <stmt> -> <expr> <endl> */
 int ReduceStmtD(SYNTAX_TREE* node)
 {
-    if (node->numChildren != 2) return 5;
+    if (node->numChildren != 2) return 7;
     SYNTAX_TREE* expr1 = node->children[0];
 
     int error = 0;
@@ -173,7 +173,7 @@ int ReduceStmtD(SYNTAX_TREE* node)
 /* 8. <stmt> -> <assignment> <endl> */
 int ReduceStmtE(SYNTAX_TREE* node)
 {
-    if (node->numChildren != 2) return 6;
+    if (node->numChildren != 2) return 8;
     SYNTAX_TREE* assignment1 = node->children[0];
 
     int error = 0;
@@ -185,7 +185,7 @@ int ReduceStmtE(SYNTAX_TREE* node)
 /* 9. <stmt> -> <function def> <endl> */
 int ReduceStmtF(SYNTAX_TREE* node)
 {
-    if (node->numChildren != 2) return 7;
+    if (node->numChildren != 2) return 9;
     SYNTAX_TREE* function_def1 = node->children[0];
 
     int error = 0;
@@ -197,7 +197,7 @@ int ReduceStmtF(SYNTAX_TREE* node)
 /* 10. <stmt> -> <if> <endl> */
 int ReduceStmtG(SYNTAX_TREE* node)
 {
-    if (node->numChildren != 2) return 8;
+    if (node->numChildren != 2) return 10;
     SYNTAX_TREE* if1 = node->children[0];
 
     int error = 0;
@@ -209,7 +209,7 @@ int ReduceStmtG(SYNTAX_TREE* node)
 /* 11. <stmt> -> <if else> <endl> */
 int ReduceStmtH(SYNTAX_TREE* node)
 {
-    if (node->numChildren != 2) return 9;
+    if (node->numChildren != 2) return 11;
     SYNTAX_TREE* if_else1 = node->children[0];
 
     int error = 0;
@@ -221,7 +221,7 @@ int ReduceStmtH(SYNTAX_TREE* node)
 /* 12. <stmt> -> <for loop> <endl> */
 int ReduceStmtI(SYNTAX_TREE* node)
 {
-    if (node->numChildren != 2) return 10;
+    if (node->numChildren != 2) return 12;
     SYNTAX_TREE* for_loop1 = node->children[0];
 
     int error = 0;
@@ -233,7 +233,7 @@ int ReduceStmtI(SYNTAX_TREE* node)
 /* 13. <stmt> -> <while loop> <endl> */
 int ReduceStmtJ(SYNTAX_TREE* node)
 {
-    if (node->numChildren != 2) return 11;
+    if (node->numChildren != 2) return 13;
     SYNTAX_TREE* while_loop1 = node->children[0];
 
     int error = 0;
@@ -245,7 +245,7 @@ int ReduceStmtJ(SYNTAX_TREE* node)
 /* 14. <stmt> -> return <expr> <endl> */
 int ReduceStmtK(SYNTAX_TREE* node)
 {
-    if (node->numChildren != 3) return 12;
+    if (node->numChildren != 3) return 14;
     SYNTAX_TREE* expr1 = node->children[1];
 
     int error = 0;
@@ -259,7 +259,7 @@ int ReduceStmtK(SYNTAX_TREE* node)
 /* 15. <stmt> -> break <endl> */
 int ReduceStmtL(SYNTAX_TREE* node)
 {
-    if (node->numChildren != 2) return 13;
+    if (node->numChildren != 2) return 15;
 
     int error = 0;
 
@@ -271,7 +271,7 @@ int ReduceStmtL(SYNTAX_TREE* node)
 /* 16. <stmt> -> continue <endl> */
 int ReduceStmtM(SYNTAX_TREE* node)
 {
-    if (node->numChildren != 2) return 14;
+    if (node->numChildren != 2) return 16;
 
     int error = 0;
     
@@ -283,7 +283,7 @@ int ReduceStmtM(SYNTAX_TREE* node)
 /* 17. <function def> -> function <identifier> <parameters> <endl> <stmt list> end */
 int ReduceFunctionDef(SYNTAX_TREE* node)
 {
-    if (node->numChildren != 6) return 15;
+    if (node->numChildren != 6) return 17;
     SYNTAX_TREE* identifier1 = node->children[1];
     SYNTAX_TREE* parameters1 = node->children[2];
     SYNTAX_TREE* stmt_list1 = node->children[4];
@@ -314,7 +314,7 @@ int ReduceFunctionDef(SYNTAX_TREE* node)
 /* 18. <parameters> -> */
 int ReduceParametersA(SYNTAX_TREE* node)
 {
-    if (node->numChildren != 0) return 16;
+    if (node->numChildren != 0) return 18;
 
     int error = 0;
 
@@ -324,7 +324,7 @@ int ReduceParametersA(SYNTAX_TREE* node)
 /* 19. <parameters> -> ( ) */
 int ReduceParametersB(SYNTAX_TREE* node)
 {
-    if (node->numChildren != 2) return 17;
+    if (node->numChildren != 2) return 19;
 
     int error = 0;
 
@@ -334,7 +334,7 @@ int ReduceParametersB(SYNTAX_TREE* node)
 /* 20. <parameters> -> ( <param decl> ) */
 int ReduceParametersC(SYNTAX_TREE* node)
 {
-    if (node->numChildren != 3) return 18;
+    if (node->numChildren != 3) return 20;
     SYNTAX_TREE* param_decl1 = node->children[1];
 
     int error = 0;
@@ -346,7 +346,7 @@ int ReduceParametersC(SYNTAX_TREE* node)
 /* 21. <param decl> -> <identifier> */
 int ReduceParamDeclA(SYNTAX_TREE* node)
 {
-    if (node->numChildren != 1) return 19;
+    if (node->numChildren != 1) return 21;
     SYNTAX_TREE* identifier1 = node->children[0];
 
     int error = 0;
@@ -362,7 +362,7 @@ int ReduceParamDeclA(SYNTAX_TREE* node)
 /* 22. <param decl> -> <param decl> , <identifier> */
 int ReduceParamDeclB(SYNTAX_TREE* node)
 {
-    if (node->numChildren != 3) return 20;
+    if (node->numChildren != 3) return 22;
     SYNTAX_TREE* param_decl1 = node->children[0];
     SYNTAX_TREE* identifier1 = node->children[2];
 
@@ -386,7 +386,7 @@ int ReduceParamDeclB(SYNTAX_TREE* node)
 /* 23. <if> -> if <condition> then <endl> <stmt list> end */
 int ReduceIf(SYNTAX_TREE* node)
 {
-    if (node->numChildren != 6) return 21;
+    if (node->numChildren != 6) return 23;
     SYNTAX_TREE* condition1 = node->children[1];
     SYNTAX_TREE* stmt_list1 = node->children[4];
 
@@ -406,7 +406,7 @@ int ReduceIf(SYNTAX_TREE* node)
 /* 24. <if else> -> if <condition> then <endl> <stmt list> else <endl> <stmt list> end */
 int ReduceIfElse(SYNTAX_TREE* node)
 {
-    if (node->numChildren != 9) return 22;
+    if (node->numChildren != 9) return 24;
     SYNTAX_TREE* condition1 = node->children[1];
     SYNTAX_TREE* stmt_list1 = node->children[4];
     SYNTAX_TREE* stmt_list2 = node->children[7];
@@ -431,7 +431,7 @@ int ReduceIfElse(SYNTAX_TREE* node)
 /* 25. <for loop> -> for <identifier> = <arithmetic> to <arithmetic> do <endl> <stmt list> loop */
 int ReduceForLoop(SYNTAX_TREE* node)
 {
-    if (node->numChildren != 10) return 23;
+    if (node->numChildren != 10) return 25;
     SYNTAX_TREE* identifier1 = node->children[1];
     SYNTAX_TREE* arithmetic1 = node->children[3];
     SYNTAX_TREE* arithmetic2 = node->children[5];
@@ -495,7 +495,7 @@ int ReduceForLoop(SYNTAX_TREE* node)
 /* 26. <while loop> -> while <condition> do <endl> <stmt list> loop */
 int ReduceWhileLoop(SYNTAX_TREE* node)
 {
-    if (node->numChildren != 6) return 24;
+    if (node->numChildren != 6) return 26;
     SYNTAX_TREE* condition1 = node->children[1];
     SYNTAX_TREE* stmt_list1 = node->children[4];
 
@@ -519,7 +519,7 @@ int ReduceWhileLoop(SYNTAX_TREE* node)
 /* 27. <assignment> -> <l-value> = <assignment> */
 int ReduceAssignmentA(SYNTAX_TREE* node)
 {
-    if (node->numChildren != 3) return 25;
+    if (node->numChildren != 3) return 27;
     SYNTAX_TREE* l_value1 = node->children[0];
     SYNTAX_TREE* assignment1 = node->children[2];
 
@@ -557,7 +557,7 @@ int ReduceAssignmentA(SYNTAX_TREE* node)
 /* 28. <assignment> -> <l-value> = <condition> */
 int ReduceAssignmentB(SYNTAX_TREE* node)
 {
-    if (node->numChildren != 3) return 26;
+    if (node->numChildren != 3) return 28;
     SYNTAX_TREE* l_value1 = node->children[0];
     SYNTAX_TREE* condition1 = node->children[2];
 
@@ -595,7 +595,7 @@ int ReduceAssignmentB(SYNTAX_TREE* node)
 /* 29. <l-value> -> <identifier> */
 int ReduceLValueA(SYNTAX_TREE* node)
 {
-    if (node->numChildren != 1) return 27;
+    if (node->numChildren != 1) return 29;
     SYNTAX_TREE* identifier1 = node->children[0];
 
     int error = 0;
@@ -609,7 +609,7 @@ int ReduceLValueA(SYNTAX_TREE* node)
 /* 30. <l-value> -> ( <l-value> ) */
 int ReduceLValueB(SYNTAX_TREE* node)
 {
-    if (node->numChildren != 3) return 28;
+    if (node->numChildren != 3) return 30;
     SYNTAX_TREE* l_value1 = node->children[1];
 
     int error = 0;
@@ -621,7 +621,7 @@ int ReduceLValueB(SYNTAX_TREE* node)
 /* 31. <l-value> -> <reference> . <identifier> */
 int ReduceLValueC(SYNTAX_TREE* node)
 {
-    if (node->numChildren != 3) return 29;
+    if (node->numChildren != 3) return 31;
     SYNTAX_TREE* reference1 = node->children[0];
     SYNTAX_TREE* identifier1 = node->children[2];
 
@@ -645,7 +645,7 @@ int ReduceLValueC(SYNTAX_TREE* node)
 /* 32. <l-value> -> <reference> [ <expr> ] */
 int ReduceLValueD(SYNTAX_TREE* node)
 {
-    if (node->numChildren != 4) return 30;
+    if (node->numChildren != 4) return 32;
     SYNTAX_TREE* reference1 = node->children[0];
     SYNTAX_TREE* expr1 = node->children[2];
 
@@ -688,7 +688,7 @@ int ReduceLValueD(SYNTAX_TREE* node)
 /* 33. <expr> -> <condition> */
 int ReduceExpr(SYNTAX_TREE* node)
 {
-    if (node->numChildren != 1) return 31;
+    if (node->numChildren != 1) return 33;
     SYNTAX_TREE* condition1 = node->children[0];
 
     int error = 0;
@@ -700,7 +700,7 @@ int ReduceExpr(SYNTAX_TREE* node)
 /* 34. <condition> -> <condition> and <logic> */
 int ReduceConditionA(SYNTAX_TREE* node)
 {
-    if (node->numChildren != 3) return 32;
+    if (node->numChildren != 3) return 34;
     SYNTAX_TREE* condition1 = node->children[0];
     SYNTAX_TREE* logic1 = node->children[2];
 
@@ -740,7 +740,7 @@ int ReduceConditionA(SYNTAX_TREE* node)
 /* 35. <condition> -> <condition> or <logic> */
 int ReduceConditionB(SYNTAX_TREE* node)
 {
-    if (node->numChildren != 3) return 33;
+    if (node->numChildren != 3) return 35;
     SYNTAX_TREE* condition1 = node->children[0];
     SYNTAX_TREE* logic1 = node->children[2];
 
@@ -780,7 +780,7 @@ int ReduceConditionB(SYNTAX_TREE* node)
 /* 36. <condition> -> <condition> nor <logic> */
 int ReduceConditionC(SYNTAX_TREE* node)
 {
-    if (node->numChildren != 3) return 34;
+    if (node->numChildren != 3) return 36;
     SYNTAX_TREE* condition1 = node->children[0];
     SYNTAX_TREE* logic1 = node->children[2];
 
@@ -820,7 +820,7 @@ int ReduceConditionC(SYNTAX_TREE* node)
 /* 37. <condition> -> <condition> xor <logic> */
 int ReduceConditionD(SYNTAX_TREE* node)
 {
-    if (node->numChildren != 3) return 35;
+    if (node->numChildren != 3) return 37;
     SYNTAX_TREE* condition1 = node->children[0];
     SYNTAX_TREE* logic1 = node->children[2];
 
@@ -860,7 +860,7 @@ int ReduceConditionD(SYNTAX_TREE* node)
 /* 38. <condition> -> <logic> */
 int ReduceConditionE(SYNTAX_TREE* node)
 {
-    if (node->numChildren != 1) return 36;
+    if (node->numChildren != 1) return 38;
     SYNTAX_TREE* logic1 = node->children[0];
 
     int error = 0;
@@ -872,7 +872,7 @@ int ReduceConditionE(SYNTAX_TREE* node)
 /* 39. <logic> -> not <comparison> */
 int ReduceLogicA(SYNTAX_TREE* node)
 {
-    if (node->numChildren != 2) return 37;
+    if (node->numChildren != 2) return 39;
     SYNTAX_TREE* comparison1 = node->children[1];
 
     int error = 0;
@@ -900,7 +900,7 @@ int ReduceLogicA(SYNTAX_TREE* node)
 /* 40. <logic> -> <comparison> */
 int ReduceLogicB(SYNTAX_TREE* node)
 {
-    if (node->numChildren != 1) return 38;
+    if (node->numChildren != 1) return 40;
     SYNTAX_TREE* comparison1 = node->children[0];
 
     int error = 0;
@@ -912,7 +912,7 @@ int ReduceLogicB(SYNTAX_TREE* node)
 /* 41. <comparison> -> <comparison> == <arithmetic> */
 int ReduceComparisonA(SYNTAX_TREE* node)
 {
-    if (node->numChildren != 3) return 39;
+    if (node->numChildren != 3) return 41;
     SYNTAX_TREE* comparison1 = node->children[0];
     SYNTAX_TREE* arithmetic1 = node->children[2];
 
@@ -969,7 +969,7 @@ int ReduceComparisonA(SYNTAX_TREE* node)
 /* 42. <comparison> -> <comparison> != <arithmetic> */
 int ReduceComparisonB(SYNTAX_TREE* node)
 {
-    if (node->numChildren != 3) return 40;
+    if (node->numChildren != 3) return 42;
     SYNTAX_TREE* comparison1 = node->children[0];
     SYNTAX_TREE* arithmetic1 = node->children[2];
 
@@ -1024,7 +1024,7 @@ int ReduceComparisonB(SYNTAX_TREE* node)
 /* 43. <comparison> -> <comparison> < <arithmetic> */
 int ReduceComparisonC(SYNTAX_TREE* node)
 {
-    if (node->numChildren != 3) return 41;
+    if (node->numChildren != 3) return 43;
     SYNTAX_TREE* comparison1 = node->children[0];
     SYNTAX_TREE* arithmetic1 = node->children[2];
 
@@ -1060,7 +1060,7 @@ int ReduceComparisonC(SYNTAX_TREE* node)
 /* 44. <comparison> -> <comparison> > <arithmetic> */
 int ReduceComparisonD(SYNTAX_TREE* node)
 {
-    if (node->numChildren != 3) return 42;
+    if (node->numChildren != 3) return 44;
     SYNTAX_TREE* comparison1 = node->children[0];
     SYNTAX_TREE* arithmetic1 = node->children[2];
 
@@ -1096,7 +1096,7 @@ int ReduceComparisonD(SYNTAX_TREE* node)
 /* 45. <comparison> -> <comparison> <= <arithmetic> */
 int ReduceComparisonE(SYNTAX_TREE* node)
 {
-    if (node->numChildren != 3) return 43;
+    if (node->numChildren != 3) return 45;
     SYNTAX_TREE* comparison1 = node->children[0];
     SYNTAX_TREE* arithmetic1 = node->children[2];
 
@@ -1132,7 +1132,7 @@ int ReduceComparisonE(SYNTAX_TREE* node)
 /* 46. <comparison> -> <comparison> >= <arithmetic> */
 int ReduceComparisonF(SYNTAX_TREE* node)
 {
-    if (node->numChildren != 3) return 44;
+    if (node->numChildren != 3) return 46;
     SYNTAX_TREE* comparison1 = node->children[0];
     SYNTAX_TREE* arithmetic1 = node->children[2];
 
@@ -1168,7 +1168,7 @@ int ReduceComparisonF(SYNTAX_TREE* node)
 /* 47. <comparison> -> <arithmetic> */
 int ReduceComparisonG(SYNTAX_TREE* node)
 {
-    if (node->numChildren != 1) return 45;
+    if (node->numChildren != 1) return 47;
     SYNTAX_TREE* arithmetic1 = node->children[0];
 
     int error = 0;
@@ -1180,7 +1180,7 @@ int ReduceComparisonG(SYNTAX_TREE* node)
 /* 48. <arithmetic> -> <arithmetic> + <term> */
 int ReduceArithmeticA(SYNTAX_TREE* node)
 {
-    if (node->numChildren != 3) return 46;
+    if (node->numChildren != 3) return 48;
     SYNTAX_TREE* arithmetic1 = node->children[0];
     SYNTAX_TREE* term1 = node->children[2];
 
@@ -1295,7 +1295,7 @@ int ReduceArithmeticA(SYNTAX_TREE* node)
 /* 49. <arithmetic> -> <arithmetic> - <term> */
 int ReduceArithmeticB(SYNTAX_TREE* node)
 {
-    if (node->numChildren != 3) return 47;
+    if (node->numChildren != 3) return 49;
     SYNTAX_TREE* arithmetic1 = node->children[0];
     SYNTAX_TREE* term1 = node->children[2];
 
@@ -1343,7 +1343,7 @@ int ReduceArithmeticB(SYNTAX_TREE* node)
 /* 50. <arithmetic> -> <arithmetic> & <term> */
 int ReduceArithmeticC(SYNTAX_TREE* node)
 {
-    if (node->numChildren != 3) return 48;
+    if (node->numChildren != 3) return 50;
     SYNTAX_TREE* arithmetic1 = node->children[0];
     SYNTAX_TREE* term1 = node->children[2];
 
@@ -1369,7 +1369,7 @@ int ReduceArithmeticC(SYNTAX_TREE* node)
 /* 51. <arithmetic> -> <arithmetic> | <term> */
 int ReduceArithmeticD(SYNTAX_TREE* node)
 {
-    if (node->numChildren != 3) return 49;
+    if (node->numChildren != 3) return 51;
     SYNTAX_TREE* arithmetic1 = node->children[0];
     SYNTAX_TREE* term1 = node->children[2];
 
@@ -1395,7 +1395,7 @@ int ReduceArithmeticD(SYNTAX_TREE* node)
 /* 52. <arithmetic> -> <term> */
 int ReduceArithmeticE(SYNTAX_TREE* node)
 {
-    if (node->numChildren != 1) return 50;
+    if (node->numChildren != 1) return 52;
     SYNTAX_TREE* term1 = node->children[0];
 
     int error = 0;
@@ -1407,7 +1407,7 @@ int ReduceArithmeticE(SYNTAX_TREE* node)
 /* 53. <term> -> <term> * <factor> */
 int ReduceTermA(SYNTAX_TREE* node)
 {
-    if (node->numChildren != 3) return 51;
+    if (node->numChildren != 3) return 53;
     SYNTAX_TREE* term1 = node->children[0];
     SYNTAX_TREE* factor1 = node->children[2];
 
@@ -1440,7 +1440,7 @@ int ReduceTermA(SYNTAX_TREE* node)
 /* 54. <term> -> <term> / <factor> */
 int ReduceTermB(SYNTAX_TREE* node)
 {
-    if (node->numChildren != 3) return 52;
+    if (node->numChildren != 3) return 54;
     SYNTAX_TREE* term1 = node->children[0];
     SYNTAX_TREE* factor1 = node->children[2];
 
@@ -1481,7 +1481,7 @@ int ReduceTermB(SYNTAX_TREE* node)
 /* 55. <term> -> <factor> */
 int ReduceTermC(SYNTAX_TREE* node)
 {
-    if (node->numChildren != 1) return 53;
+    if (node->numChildren != 1) return 55;
     SYNTAX_TREE* factor1 = node->children[0];
 
     int error = 0;
@@ -1493,7 +1493,7 @@ int ReduceTermC(SYNTAX_TREE* node)
 /* 56. <factor> -> - <factor> */
 int ReduceFactorA(SYNTAX_TREE* node)
 {
-    if (node->numChildren != 2) return 54;
+    if (node->numChildren != 2) return 56;
     SYNTAX_TREE* factor1 = node->children[1];
 
     int error = 0;
@@ -1519,7 +1519,7 @@ int ReduceFactorA(SYNTAX_TREE* node)
 /* 57. <factor> -> ! <factor> */
 int ReduceFactorB(SYNTAX_TREE* node)
 {
-    if (node->numChildren != 2) return 55;
+    if (node->numChildren != 2) return 57;
     SYNTAX_TREE* factor1 = node->children[1];
 
     int error = 0;
@@ -1541,7 +1541,7 @@ int ReduceFactorB(SYNTAX_TREE* node)
 /* 58. <factor> -> <final> */
 int ReduceFactorC(SYNTAX_TREE* node)
 {
-    if (node->numChildren != 1) return 56;
+    if (node->numChildren != 1) return 58;
     SYNTAX_TREE* final1 = node->children[0];
 
     int error = 0;
@@ -1553,7 +1553,7 @@ int ReduceFactorC(SYNTAX_TREE* node)
 /* 59. <final> -> ( <expr> ) */
 int ReduceFinalA(SYNTAX_TREE* node)
 {
-    if (node->numChildren != 3) return 57;
+    if (node->numChildren != 3) return 59;
     SYNTAX_TREE* expr1 = node->children[1];
 
     int error = 0;
@@ -1565,7 +1565,7 @@ int ReduceFinalA(SYNTAX_TREE* node)
 /* 60. <final> -> <boolean> */
 int ReduceFinalB(SYNTAX_TREE* node)
 {
-    if (node->numChildren != 1) return 58;
+    if (node->numChildren != 1) return 60;
     SYNTAX_TREE* boolean1 = node->children[0];
 
     int error = 0;
@@ -1577,7 +1577,7 @@ int ReduceFinalB(SYNTAX_TREE* node)
 /* 61. <final> -> <integer> */
 int ReduceFinalC(SYNTAX_TREE* node)
 {
-    if (node->numChildren != 1) return 59;
+    if (node->numChildren != 1) return 61;
     SYNTAX_TREE* integer1 = node->children[0];
 
     int error = 0;
@@ -1605,7 +1605,7 @@ int ReduceFinalD(SYNTAX_TREE* node)
 /* 63. <final> -> <string> */
 int ReduceFinalE(SYNTAX_TREE* node)
 {
-    if (node->numChildren != 1) return 60;
+    if (node->numChildren != 1) return 63;
     SYNTAX_TREE* string1 = node->children[0];
     
     int error = 0;
@@ -1619,7 +1619,7 @@ int ReduceFinalE(SYNTAX_TREE* node)
 /* 64. <final> -> <object> */
 int ReduceFinalF(SYNTAX_TREE* node)
 {
-    if (node->numChildren != 1) return 61;
+    if (node->numChildren != 1) return 64;
     SYNTAX_TREE* object1 = node->children[0];
 
     int error = 0;
@@ -1631,7 +1631,7 @@ int ReduceFinalF(SYNTAX_TREE* node)
 /* 65. <final> -> <reference> */
 int ReduceFinalG(SYNTAX_TREE* node)
 {
-    if (node->numChildren != 1) return 62;
+    if (node->numChildren != 1) return 65;
     SYNTAX_TREE* reference1 = node->children[0];
 
     int error = 0;
@@ -1643,7 +1643,7 @@ int ReduceFinalG(SYNTAX_TREE* node)
 /* 66. <reference> -> <l-value> */
 int ReduceReferenceA(SYNTAX_TREE* node)
 {
-    if (node->numChildren != 1) return 63;
+    if (node->numChildren != 1) return 66;
     SYNTAX_TREE* l_value1 = node->children[0];
 
     int error = 0;
@@ -1658,7 +1658,7 @@ int ReduceReferenceA(SYNTAX_TREE* node)
 // function application
 int ReduceReferenceB(SYNTAX_TREE* node)
 {
-    if (node->numChildren != 3) return 64;
+    if (node->numChildren != 3) return 67;
     SYNTAX_TREE* reference1 = node->children[0];
 
     int error = 0;
@@ -1705,7 +1705,7 @@ int ReduceReferenceB(SYNTAX_TREE* node)
 // function application
 int ReduceReferenceC(SYNTAX_TREE* node)
 {
-    if (node->numChildren != 4) return 65;
+    if (node->numChildren != 4) return 68;
     SYNTAX_TREE* reference1 = node->children[0];
     SYNTAX_TREE* arguments1 = node->children[2];
 
@@ -1797,7 +1797,7 @@ int ReduceReferenceC(SYNTAX_TREE* node)
 /* 69. <arguments> -> <arguments> , <expr> */
 int ReduceArgumentsA(SYNTAX_TREE* node)
 {
-    if (node->numChildren != 3) return 66;
+    if (node->numChildren != 3) return 69;
     SYNTAX_TREE* arguments1 = node->children[0];
     SYNTAX_TREE* expr1 = node->children[2];
 
@@ -1825,7 +1825,7 @@ int ReduceArgumentsA(SYNTAX_TREE* node)
 /* 70. <arguments> -> <expr> */
 int ReduceArgumentsB(SYNTAX_TREE* node)
 {
-    if (node->numChildren != 1) return 67;
+    if (node->numChildren != 1) return 70;
     SYNTAX_TREE* expr1 = node->children[0];
 
     int error = 0;
@@ -1842,7 +1842,7 @@ int ReduceArgumentsB(SYNTAX_TREE* node)
 /* 71. <object> -> [ ] */
 int ReduceObjectA(SYNTAX_TREE* node)
 {
-    if (node->numChildren != 2) return 68;
+    if (node->numChildren != 2) return 71;
 
     int error = 0;
     
@@ -1858,7 +1858,7 @@ int ReduceObjectA(SYNTAX_TREE* node)
 /* 72. <object> -> [ <array init> ] */
 int ReduceObjectB(SYNTAX_TREE* node)
 {
-    if (node->numChildren != 3) return 69;
+    if (node->numChildren != 3) return 72;
     SYNTAX_TREE* array_init1 = node->children[1];
 
     int error = 0;
@@ -1873,7 +1873,7 @@ int ReduceObjectB(SYNTAX_TREE* node)
 /* 73. <object> -> [ <dictionary init> ] */
 int ReduceObjectC(SYNTAX_TREE* node)
 {
-    if (node->numChildren != 3) return 70;
+    if (node->numChildren != 3) return 73;
     SYNTAX_TREE* dictionary_init1 = node->children[1];
 
     int error = 0;
@@ -1888,7 +1888,7 @@ int ReduceObjectC(SYNTAX_TREE* node)
 /* 74. <array init> -> <array init> , <expr> */
 int ReduceArrayInitA(SYNTAX_TREE* node)
 {
-    if (node->numChildren != 3) return 71;
+    if (node->numChildren != 3) return 74;
     SYNTAX_TREE* array_init1 = node->children[0];
     SYNTAX_TREE* expr1 = node->children[2];
 
@@ -1920,7 +1920,7 @@ int ReduceArrayInitA(SYNTAX_TREE* node)
 /* 75. <array init> -> <expr> */
 int ReduceArrayInitB(SYNTAX_TREE* node)
 {
-    if (node->numChildren != 1) return 72;
+    if (node->numChildren != 1) return 75;
     SYNTAX_TREE* expr1 = node->children[0];
 
     int error = 0;
@@ -1944,7 +1944,7 @@ int ReduceArrayInitB(SYNTAX_TREE* node)
 /* 76. <dictionary init> -> <dictionary init> , <identifier> : <expr> */
 int ReduceDictionaryInitA(SYNTAX_TREE* node)
 {
-    if (node->numChildren != 5) return 73;
+    if (node->numChildren != 5) return 76;
     SYNTAX_TREE* dictionary_init1 = node->children[0];
     SYNTAX_TREE* identifier1 = node->children[2];
     SYNTAX_TREE* expr1 = node->children[4];
@@ -1973,7 +1973,7 @@ int ReduceDictionaryInitA(SYNTAX_TREE* node)
 /* 77. <dictionary init> -> <identifier> : <expr> */
 int ReduceDictionaryInitB(SYNTAX_TREE* node)
 {
-    if (node->numChildren != 3) return 74;
+    if (node->numChildren != 3) return 77;
     SYNTAX_TREE* identifier1 = node->children[0];
     SYNTAX_TREE* expr1 = node->children[2];
 
@@ -1995,7 +1995,7 @@ int ReduceDictionaryInitB(SYNTAX_TREE* node)
 /* 78. <boolean> -> true */
 int ReduceBooleanA(SYNTAX_TREE* node)
 {
-    if (node->numChildren != 1) return 75;
+    if (node->numChildren != 1) return 78;
 
     int error = 0;
     
@@ -2008,7 +2008,7 @@ int ReduceBooleanA(SYNTAX_TREE* node)
 /* 79. <boolean> -> false */
 int ReduceBooleanB(SYNTAX_TREE* node)
 {
-    if (node->numChildren != 1) return 76;
+    if (node->numChildren != 1) return 79;
 
     int error = 0;
     
