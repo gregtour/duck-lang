@@ -44,7 +44,7 @@ void ForceFreeContext(CONTEXT* context)
 
 void FreeContext(CONTEXT* context)
 {
-//    return;
+    return;
     PAIR *itr, *next;
     itr = context->list;
     while (itr)
@@ -59,7 +59,7 @@ void FreeContext(CONTEXT* context)
 
 void FreeFunction(FUNCTION* func)
 {
-//    return;
+    return;
     //PAIR *itr, *next;
     if (func->closure->ref_count > 0)
     {
