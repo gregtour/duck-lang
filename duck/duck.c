@@ -82,7 +82,7 @@ int ReduceStmtA(SYNTAX_TREE* node)
     if (node->numChildren != 3) return 4;
 
     int error = 0;
-    printf("@import %s\n", node->children[1]->string);
+    //printf("@import %s\n", node->children[1]->string);
 
     /* import library */
     // change scope of [namespace] to global
