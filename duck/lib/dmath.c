@@ -293,11 +293,11 @@ void BindMathLibrary()
     AddParameter(dceil, "num");
     LinkFunction(math_lib, "ceil", dceil);
 
-    VALUE dfloor = CreateFunction(MathCeil);
+    VALUE dfloor = CreateFunction(MathFloor);
     AddParameter(dfloor, "num");
     LinkFunction(math_lib, "floor", dfloor);
 
     VALUE dabs = CreateFunction(MathAbs);
     AddParameter(dabs, "num");
-    LinkFunction(math_lib, "floor", dabs);
+    LinkFunction(math_lib, "abs", dabs);
 }

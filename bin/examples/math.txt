@@ -1,5 +1,5 @@
 import Math
-duck.println('Math Examples...')
+duck.println('Trig Examples...')
 duck.println(Math.cos(0.50))
 duck.println(Math.sin(0.50))
 duck.println(Math.tan(0.50))
@@ -12,7 +12,18 @@ duck.println(Math.acos(0.50))
 duck.println(Math.asin(0.50))
 duck.println(Math.atan(0.50))
 
-duck.println('Power function')
+duck.println('Power functions')
 for i = 0 to 30 do
   duck.println(Math.pow(2, i))
 loop
+duck.println(Math.sqrt(4))
+
+duck.println('Exponents and Logs')
+duck.println(Math.exp(1))
+duck.println(Math.log(Math.exp(1)))
+duck.println(Math.log10(100))
+
+duck.println('Misc functions...')
+duck.println(Math.ceil(5.5))
+duck.println(Math.floor(5.5))
+duck.println(Math.abs(-5.5))
