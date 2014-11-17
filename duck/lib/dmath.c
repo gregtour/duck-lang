@@ -5,6 +5,7 @@ These are thin wrappers over the C math libraries.
 TODO:
   * Add Hyperbolic Trig functions?
   * Add other non-math.h functions?
+  * Fault handling?
 
 */
 
@@ -13,7 +14,6 @@ TODO:
 #include "interpreter.h"
 
 int MathSin(int arg_count){
-  int error = 0;
   float angle = 0.0;
   float val = 0.0;
   VALUE argument = GetRecord("angle", gCurrentContext);
@@ -24,11 +24,10 @@ int MathSin(int arg_count){
   gLastExpression.type = VAL_FLOATING_POINT;
   gLastExpression.floatp = val;
 
-  return error;
+  return 0;
 }
 
 int MathCos(int arg_count){
-  int error = 0;
   float angle = 0.0;
   float val = 0.0;
   VALUE argument = GetRecord("angle", gCurrentContext);
@@ -39,11 +38,10 @@ int MathCos(int arg_count){
   gLastExpression.type = VAL_FLOATING_POINT;
   gLastExpression.floatp = val;
 
-  return error;
+  return 0;
 }
 
 int MathTan(int arg_count){
-  int error = 0;
   float angle = 0.0;
   float val = 0.0;
   VALUE argument = GetRecord("angle", gCurrentContext);
@@ -54,11 +52,10 @@ int MathTan(int arg_count){
   gLastExpression.type = VAL_FLOATING_POINT;
   gLastExpression.floatp = val;
 
-  return error;
+  return 0;
 }
 
 int MathAsin(int arg_count){
-  int error = 0;
   float input = 0.0;
   float val = 0.0;
   VALUE argument = GetRecord("num", gCurrentContext);
@@ -69,11 +66,10 @@ int MathAsin(int arg_count){
   gLastExpression.type = VAL_FLOATING_POINT;
   gLastExpression.floatp = val;
 
-  return error;
+  return 0;
 }
 
 int MathAcos(int arg_count){
-  int error = 0;
   float input = 0.0;
   float val = 0.0;
   VALUE argument = GetRecord("num", gCurrentContext);
@@ -84,11 +80,10 @@ int MathAcos(int arg_count){
   gLastExpression.type = VAL_FLOATING_POINT;
   gLastExpression.floatp = val;
 
-  return error;
+  return 0;
 }
 
 int MathAtan(int arg_count){
-  int error = 0;
   float input = 0.0;
   float val = 0.0;
   VALUE argument = GetRecord("num", gCurrentContext);
@@ -99,11 +94,10 @@ int MathAtan(int arg_count){
   gLastExpression.type = VAL_FLOATING_POINT;
   gLastExpression.floatp = val;
 
-  return error;
+  return 0;
 }
 
 int MathExp(int arg_count){
-  int error = 0;
   float input = 0.0;
   float val = 0.0;
   VALUE argument = GetRecord("num", gCurrentContext);
@@ -114,11 +108,10 @@ int MathExp(int arg_count){
   gLastExpression.type = VAL_FLOATING_POINT;
   gLastExpression.floatp = val;
 
-  return error;
+  return 0;
 }
 
 int MathLog(int arg_count){
-  int error = 0;
   float input = 0.0;
   float val = 0.0;
   VALUE argument = GetRecord("num", gCurrentContext);
@@ -129,11 +122,10 @@ int MathLog(int arg_count){
   gLastExpression.type = VAL_FLOATING_POINT;
   gLastExpression.floatp = val;
 
-  return error;
+  return 0;
 }
 
 int MathLog10(int arg_count){
-  int error = 0;
   float input = 0.0;
   float val = 0.0;
   VALUE argument = GetRecord("num", gCurrentContext);
@@ -144,12 +136,11 @@ int MathLog10(int arg_count){
   gLastExpression.type = VAL_FLOATING_POINT;
   gLastExpression.floatp = val;
 
-  return error;
+  return 0;
 }
 
 
 int MathPow(int arg_count){
-  int error = 0;
   float base = 0.0;
   float exponent = 0.0;
   float val = 0.0;
@@ -165,11 +156,10 @@ int MathPow(int arg_count){
   gLastExpression.type = VAL_FLOATING_POINT;
   gLastExpression.floatp = val;
 
-  return error;
+  return 0;
 }
 
 int MathSqrt(int arg_count){
-  int error = 0;
   float input = 0.0;
   float val = 0.0;
   VALUE argument = GetRecord("num", gCurrentContext);
@@ -181,11 +171,10 @@ int MathSqrt(int arg_count){
   gLastExpression.type = VAL_FLOATING_POINT;
   gLastExpression.floatp = val;
 
-  return error;
+  return 0;
 }
 
 int MathCeil(int arg_count){
-  int error = 0;
   float input = 0.0;
   float val = 0.0;
   VALUE argument = GetRecord("num", gCurrentContext);
@@ -197,11 +186,10 @@ int MathCeil(int arg_count){
   gLastExpression.type = VAL_FLOATING_POINT;
   gLastExpression.floatp = val;
 
-  return error;
+  return 0;
 }
 
 int MathFloor(int arg_count){
-  int error = 0;
   float input = 0.0;
   float val = 0.0;
   VALUE argument = GetRecord("num", gCurrentContext);
@@ -213,7 +201,7 @@ int MathFloor(int arg_count){
   gLastExpression.type = VAL_FLOATING_POINT;
   gLastExpression.floatp = val;
 
-  return error;
+  return 0;
 }
 
 
