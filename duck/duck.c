@@ -1,6 +1,7 @@
 /* auto-generated compiler stubs */
 #include "lr_parser.h"
 #include "interpreter.h"
+#include "memory.h"
 
 /* type stuff */
 
@@ -79,10 +80,8 @@ int ReduceStmtListB(SYNTAX_TREE* node)
 int ReduceStmtA(SYNTAX_TREE* node)
 {
     if (node->numChildren != 3) return 4;
-    //SYNTAX_TREE* identifier1 = node->children[1];
 
     int error = 0;
-    //error = error || InterpretNode(identifier1);
     printf("@import %s\n", node->children[1]->string);
 
     /* import library */
@@ -99,7 +98,7 @@ int ReduceStmtA(SYNTAX_TREE* node)
         }
     }
 
-    gLastExpression.type = VAL_NIL;
+    //gLastExpression.type = VAL_NIL;
 
     return error;
 }
@@ -118,15 +117,22 @@ int ReduceStmtB(SYNTAX_TREE* node)
     {
         // create new context
         CONTEXT* current = gCurrentContext;
-        gCurrentContext = (CONTEXT*)ALLOCATE(sizeof(CONTEXT));
+        gCurrentContext = (CONTEXT*)ALLOC(sizeof(CONTEXT));
         gCurrentContext->list = NULL;
+        gCurrentContext->ref_count = 1;
         gCurrentContext->parent = function.function->closure;
+        CONTEXT* func_context = gCurrentContext;
         
         if (function.function->built_in) {
             error = error || function.function->functor(0);
         } else {
             error = error || InterpretNode(function.function->body);
         }
+
+        // free calling context
+        func_context->ref_count--;
+        if (func_context->ref_count == 0)
+            FreeContext(func_context);
         
         // return with same context
         gCurrentContext = current;
@@ -146,6 +152,8 @@ int ReduceStmtC(SYNTAX_TREE* node)
     if (node->numChildren != 1) return 4;
 
     int error = 0;
+
+    /* do nothing */
 
     return error;
 }
@@ -272,7 +280,7 @@ int ReduceStmtM(SYNTAX_TREE* node)
     return error;
 }
 
-/* 15. <function def> -> function <identifier> <parameters> <endl> <stmt list> end */
+/* 17. <function def> -> function <identifier> <parameters> <endl> <stmt list> end */
 int ReduceFunctionDef(SYNTAX_TREE* node)
 {
     if (node->numChildren != 6) return 15;
@@ -288,10 +296,14 @@ int ReduceFunctionDef(SYNTAX_TREE* node)
     // FUNCTIONS
     VALUE record;
     record.type = VAL_FUNCTION;
-    record.function = (FUNCTION*)ALLOCATE(sizeof(FUNCTION));
+    record.function = (FUNCTION*)ALLOC(sizeof(FUNCTION));
     record.function->parameters = gParameterListing; // ??
     record.function->body = stmt_list1;
 	record.function->closure = gCurrentContext;
+    if (gCurrentContext->ref_count > 0) {
+        gCurrentContext->ref_count++;
+    }
+    record.function->ref_count = 1;
     record.function->built_in = 0;
     record.function->functor = NULL;
     StoreRecord(identifier1->string, record, gCurrentContext);
@@ -299,7 +311,7 @@ int ReduceFunctionDef(SYNTAX_TREE* node)
     return error;
 }
 
-/* 16. <parameters> -> */
+/* 18. <parameters> -> */
 int ReduceParametersA(SYNTAX_TREE* node)
 {
     if (node->numChildren != 0) return 16;
@@ -309,7 +321,7 @@ int ReduceParametersA(SYNTAX_TREE* node)
     return error;
 }
 
-/* 17. <parameters> -> ( ) */
+/* 19. <parameters> -> ( ) */
 int ReduceParametersB(SYNTAX_TREE* node)
 {
     if (node->numChildren != 2) return 17;
@@ -319,7 +331,7 @@ int ReduceParametersB(SYNTAX_TREE* node)
     return error;
 }
 
-/* 18. <parameters> -> ( <param decl> ) */
+/* 20. <parameters> -> ( <param decl> ) */
 int ReduceParametersC(SYNTAX_TREE* node)
 {
     if (node->numChildren != 3) return 18;
@@ -331,7 +343,7 @@ int ReduceParametersC(SYNTAX_TREE* node)
     return error;
 }
 
-/* 19. <param decl> -> <identifier> */
+/* 21. <param decl> -> <identifier> */
 int ReduceParamDeclA(SYNTAX_TREE* node)
 {
     if (node->numChildren != 1) return 19;
@@ -347,7 +359,7 @@ int ReduceParamDeclA(SYNTAX_TREE* node)
     return error;
 }
 
-/* 20. <param decl> -> <param decl> , <identifier> */
+/* 22. <param decl> -> <param decl> , <identifier> */
 int ReduceParamDeclB(SYNTAX_TREE* node)
 {
     if (node->numChildren != 3) return 20;
@@ -371,7 +383,7 @@ int ReduceParamDeclB(SYNTAX_TREE* node)
     return error;
 }
 
-/* 21. <if> -> if <condition> then <endl> <stmt list> end */
+/* 23. <if> -> if <condition> then <endl> <stmt list> end */
 int ReduceIf(SYNTAX_TREE* node)
 {
     if (node->numChildren != 6) return 21;
@@ -391,7 +403,7 @@ int ReduceIf(SYNTAX_TREE* node)
     return error;
 }
 
-/* 22. <if else> -> if <condition> then <endl> <stmt list> else <endl> <stmt list> end */
+/* 24. <if else> -> if <condition> then <endl> <stmt list> else <endl> <stmt list> end */
 int ReduceIfElse(SYNTAX_TREE* node)
 {
     if (node->numChildren != 9) return 22;
@@ -416,7 +428,7 @@ int ReduceIfElse(SYNTAX_TREE* node)
     return error;
 }
 
-/* 23. <for loop> -> for <identifier> = <arithmetic> to <arithmetic> do <endl> <stmt list> loop */
+/* 25. <for loop> -> for <identifier> = <arithmetic> to <arithmetic> do <endl> <stmt list> loop */
 int ReduceForLoop(SYNTAX_TREE* node)
 {
     if (node->numChildren != 10) return 23;
@@ -480,7 +492,7 @@ int ReduceForLoop(SYNTAX_TREE* node)
     return error;
 }
 
-/* 24. <while loop> -> while <condition> do <endl> <stmt list> loop */
+/* 26. <while loop> -> while <condition> do <endl> <stmt list> loop */
 int ReduceWhileLoop(SYNTAX_TREE* node)
 {
     if (node->numChildren != 6) return 24;
@@ -504,7 +516,7 @@ int ReduceWhileLoop(SYNTAX_TREE* node)
     return error;
 }
 
-/* 25. <assignment> -> <l-value> = <assignment> */
+/* 27. <assignment> -> <l-value> = <assignment> */
 int ReduceAssignmentA(SYNTAX_TREE* node)
 {
     if (node->numChildren != 3) return 25;
@@ -516,12 +528,33 @@ int ReduceAssignmentA(SYNTAX_TREE* node)
     VALUE expr = gLastExpression;
     error = error || InterpretNode(l_value1);
     
+    VALUE oldval = GetRecord(gLValueIdentifier, gLValueContext);
     StoreRecord(gLValueIdentifier, expr, gLValueContext);
+    if (expr.type == VAL_REFERENCE)
+    {
+        if (expr.reference->ref_count >= 0) {
+            expr.reference->ref_count++;
+        }
+    }
+    else if (expr.type == VAL_FUNCTION)
+    {
+        if (expr.function->ref_count >= 0) {
+            expr.function->ref_count++;
+            if (expr.function->closure &&
+                expr.function->closure->ref_count >= 0)
+            {
+                expr.function->closure->ref_count++;
+            }
+        }
+    }
+
+    InvalidateExpr(oldval);
+    gLastExpression = expr;
 
     return error;
 }
 
-/* 26. <assignment> -> <l-value> = <condition> */
+/* 28. <assignment> -> <l-value> = <condition> */
 int ReduceAssignmentB(SYNTAX_TREE* node)
 {
     if (node->numChildren != 3) return 26;
@@ -533,12 +566,33 @@ int ReduceAssignmentB(SYNTAX_TREE* node)
     VALUE expr = gLastExpression;
     error = error || InterpretNode(l_value1);
     
+    VALUE oldval = GetRecord(gLValueIdentifier, gLValueContext);
     StoreRecord(gLValueIdentifier, expr, gLValueContext);
+    if (expr.type == VAL_REFERENCE)
+    {
+        if (expr.reference->ref_count >= 0) {
+            expr.reference->ref_count++;
+        }
+    }
+    else if (expr.type == VAL_FUNCTION)
+    {
+        if (expr.function->ref_count > 0) {
+            expr.function->ref_count++;
+            if (expr.function->closure &&
+                expr.function->closure->ref_count >= 0)
+            {
+                expr.function->closure->ref_count++;
+            }
+        }
+    }
+
+    InvalidateExpr(oldval);
+    gLastExpression = expr;
 
     return error;
 }
 
-/* 27. <l-value> -> <identifier> */
+/* 29. <l-value> -> <identifier> */
 int ReduceLValueA(SYNTAX_TREE* node)
 {
     if (node->numChildren != 1) return 27;
@@ -552,7 +606,7 @@ int ReduceLValueA(SYNTAX_TREE* node)
     return error;
 }
 
-/* 28. <l-value> -> ( <l-value> ) */
+/* 30. <l-value> -> ( <l-value> ) */
 int ReduceLValueB(SYNTAX_TREE* node)
 {
     if (node->numChildren != 3) return 28;
@@ -564,7 +618,7 @@ int ReduceLValueB(SYNTAX_TREE* node)
     return error;
 }
 
-/* 29. <l-value> -> <reference> . <identifier> */
+/* 31. <l-value> -> <reference> . <identifier> */
 int ReduceLValueC(SYNTAX_TREE* node)
 {
     if (node->numChildren != 3) return 29;
@@ -588,7 +642,7 @@ int ReduceLValueC(SYNTAX_TREE* node)
     return error;
 }
 
-/* 30. <l-value> -> <reference> [ <expr> ] */
+/* 32. <l-value> -> <reference> [ <expr> ] */
 int ReduceLValueD(SYNTAX_TREE* node)
 {
     if (node->numChildren != 4) return 30;
@@ -631,7 +685,7 @@ int ReduceLValueD(SYNTAX_TREE* node)
     return error;
 }
 
-/* 31. <expr> -> <condition> */
+/* 33. <expr> -> <condition> */
 int ReduceExpr(SYNTAX_TREE* node)
 {
     if (node->numChildren != 1) return 31;
@@ -643,7 +697,7 @@ int ReduceExpr(SYNTAX_TREE* node)
     return error;
 }
 
-/* 32. <condition> -> <condition> and <logic> */
+/* 34. <condition> -> <condition> and <logic> */
 int ReduceConditionA(SYNTAX_TREE* node)
 {
     if (node->numChildren != 3) return 32;
@@ -683,7 +737,7 @@ int ReduceConditionA(SYNTAX_TREE* node)
     return error;
 }
 
-/* 33. <condition> -> <condition> or <logic> */
+/* 35. <condition> -> <condition> or <logic> */
 int ReduceConditionB(SYNTAX_TREE* node)
 {
     if (node->numChildren != 3) return 33;
@@ -723,7 +777,7 @@ int ReduceConditionB(SYNTAX_TREE* node)
     return error;
 }
 
-/* 34. <condition> -> <condition> nor <logic> */
+/* 36. <condition> -> <condition> nor <logic> */
 int ReduceConditionC(SYNTAX_TREE* node)
 {
     if (node->numChildren != 3) return 34;
@@ -763,7 +817,7 @@ int ReduceConditionC(SYNTAX_TREE* node)
     return error;
 }
 
-/* 35. <condition> -> <condition> xor <logic> */
+/* 37. <condition> -> <condition> xor <logic> */
 int ReduceConditionD(SYNTAX_TREE* node)
 {
     if (node->numChildren != 3) return 35;
@@ -803,7 +857,7 @@ int ReduceConditionD(SYNTAX_TREE* node)
     return error;
 }
 
-/* 36. <condition> -> <logic> */
+/* 38. <condition> -> <logic> */
 int ReduceConditionE(SYNTAX_TREE* node)
 {
     if (node->numChildren != 1) return 36;
@@ -815,7 +869,7 @@ int ReduceConditionE(SYNTAX_TREE* node)
     return error;
 }
 
-/* 37. <logic> -> not <comparison> */
+/* 39. <logic> -> not <comparison> */
 int ReduceLogicA(SYNTAX_TREE* node)
 {
     if (node->numChildren != 2) return 37;
@@ -843,7 +897,7 @@ int ReduceLogicA(SYNTAX_TREE* node)
     return error;
 }
 
-/* 38. <logic> -> <comparison> */
+/* 40. <logic> -> <comparison> */
 int ReduceLogicB(SYNTAX_TREE* node)
 {
     if (node->numChildren != 1) return 38;
@@ -855,7 +909,7 @@ int ReduceLogicB(SYNTAX_TREE* node)
     return error;
 }
 
-/* 39. <comparison> -> <comparison> == <arithmetic> */
+/* 41. <comparison> -> <comparison> == <arithmetic> */
 int ReduceComparisonA(SYNTAX_TREE* node)
 {
     if (node->numChildren != 3) return 39;
@@ -912,7 +966,7 @@ int ReduceComparisonA(SYNTAX_TREE* node)
     return error;
 }
 
-/* 40. <comparison> -> <comparison> != <arithmetic> */
+/* 42. <comparison> -> <comparison> != <arithmetic> */
 int ReduceComparisonB(SYNTAX_TREE* node)
 {
     if (node->numChildren != 3) return 40;
@@ -967,7 +1021,7 @@ int ReduceComparisonB(SYNTAX_TREE* node)
     return error;
 }
 
-/* 41. <comparison> -> <comparison> < <arithmetic> */
+/* 43. <comparison> -> <comparison> < <arithmetic> */
 int ReduceComparisonC(SYNTAX_TREE* node)
 {
     if (node->numChildren != 3) return 41;
@@ -1003,7 +1057,7 @@ int ReduceComparisonC(SYNTAX_TREE* node)
     return error;
 }
 
-/* 42. <comparison> -> <comparison> > <arithmetic> */
+/* 44. <comparison> -> <comparison> > <arithmetic> */
 int ReduceComparisonD(SYNTAX_TREE* node)
 {
     if (node->numChildren != 3) return 42;
@@ -1039,7 +1093,7 @@ int ReduceComparisonD(SYNTAX_TREE* node)
     return error;
 }
 
-/* 43. <comparison> -> <comparison> <= <arithmetic> */
+/* 45. <comparison> -> <comparison> <= <arithmetic> */
 int ReduceComparisonE(SYNTAX_TREE* node)
 {
     if (node->numChildren != 3) return 43;
@@ -1075,7 +1129,7 @@ int ReduceComparisonE(SYNTAX_TREE* node)
     return error;
 }
 
-/* 44. <comparison> -> <comparison> >= <arithmetic> */
+/* 46. <comparison> -> <comparison> >= <arithmetic> */
 int ReduceComparisonF(SYNTAX_TREE* node)
 {
     if (node->numChildren != 3) return 44;
@@ -1111,7 +1165,7 @@ int ReduceComparisonF(SYNTAX_TREE* node)
     return error;
 }
 
-/* 45. <comparison> -> <arithmetic> */
+/* 47. <comparison> -> <arithmetic> */
 int ReduceComparisonG(SYNTAX_TREE* node)
 {
     if (node->numChildren != 1) return 45;
@@ -1123,7 +1177,7 @@ int ReduceComparisonG(SYNTAX_TREE* node)
     return error;
 }
 
-/* 46. <arithmetic> -> <arithmetic> + <term> */
+/* 48. <arithmetic> -> <arithmetic> + <term> */
 int ReduceArithmeticA(SYNTAX_TREE* node)
 {
     if (node->numChildren != 3) return 46;
@@ -1238,7 +1292,7 @@ int ReduceArithmeticA(SYNTAX_TREE* node)
     return error;
 }
 
-/* 47. <arithmetic> -> <arithmetic> - <term> */
+/* 49. <arithmetic> -> <arithmetic> - <term> */
 int ReduceArithmeticB(SYNTAX_TREE* node)
 {
     if (node->numChildren != 3) return 47;
@@ -1286,7 +1340,7 @@ int ReduceArithmeticB(SYNTAX_TREE* node)
     return error;
 }
 
-/* 48. <arithmetic> -> <arithmetic> & <term> */
+/* 50. <arithmetic> -> <arithmetic> & <term> */
 int ReduceArithmeticC(SYNTAX_TREE* node)
 {
     if (node->numChildren != 3) return 48;
@@ -1312,7 +1366,7 @@ int ReduceArithmeticC(SYNTAX_TREE* node)
     return error;
 }
 
-/* 49. <arithmetic> -> <arithmetic> | <term> */
+/* 51. <arithmetic> -> <arithmetic> | <term> */
 int ReduceArithmeticD(SYNTAX_TREE* node)
 {
     if (node->numChildren != 3) return 49;
@@ -1338,7 +1392,7 @@ int ReduceArithmeticD(SYNTAX_TREE* node)
     return error;
 }
 
-/* 50. <arithmetic> -> <term> */
+/* 52. <arithmetic> -> <term> */
 int ReduceArithmeticE(SYNTAX_TREE* node)
 {
     if (node->numChildren != 1) return 50;
@@ -1350,7 +1404,7 @@ int ReduceArithmeticE(SYNTAX_TREE* node)
     return error;
 }
 
-/* 51. <term> -> <term> * <factor> */
+/* 53. <term> -> <term> * <factor> */
 int ReduceTermA(SYNTAX_TREE* node)
 {
     if (node->numChildren != 3) return 51;
@@ -1383,7 +1437,7 @@ int ReduceTermA(SYNTAX_TREE* node)
     return error;
 }
 
-/* 52. <term> -> <term> / <factor> */
+/* 54. <term> -> <term> / <factor> */
 int ReduceTermB(SYNTAX_TREE* node)
 {
     if (node->numChildren != 3) return 52;
@@ -1424,7 +1478,7 @@ int ReduceTermB(SYNTAX_TREE* node)
     return error;
 }
 
-/* 53. <term> -> <factor> */
+/* 55. <term> -> <factor> */
 int ReduceTermC(SYNTAX_TREE* node)
 {
     if (node->numChildren != 1) return 53;
@@ -1436,7 +1490,7 @@ int ReduceTermC(SYNTAX_TREE* node)
     return error;
 }
 
-/* 54. <factor> -> - <factor> */
+/* 56. <factor> -> - <factor> */
 int ReduceFactorA(SYNTAX_TREE* node)
 {
     if (node->numChildren != 2) return 54;
@@ -1462,7 +1516,7 @@ int ReduceFactorA(SYNTAX_TREE* node)
     return error;
 }
 
-/* 55. <factor> -> ! <factor> */
+/* 57. <factor> -> ! <factor> */
 int ReduceFactorB(SYNTAX_TREE* node)
 {
     if (node->numChildren != 2) return 55;
@@ -1484,7 +1538,7 @@ int ReduceFactorB(SYNTAX_TREE* node)
     return error;
 }
 
-/* 56. <factor> -> <final> */
+/* 58. <factor> -> <final> */
 int ReduceFactorC(SYNTAX_TREE* node)
 {
     if (node->numChildren != 1) return 56;
@@ -1496,7 +1550,7 @@ int ReduceFactorC(SYNTAX_TREE* node)
     return error;
 }
 
-/* 57. <final> -> ( <expr> ) */
+/* 59. <final> -> ( <expr> ) */
 int ReduceFinalA(SYNTAX_TREE* node)
 {
     if (node->numChildren != 3) return 57;
@@ -1508,7 +1562,7 @@ int ReduceFinalA(SYNTAX_TREE* node)
     return error;
 }
 
-/* 58. <final> -> <boolean> */
+/* 60. <final> -> <boolean> */
 int ReduceFinalB(SYNTAX_TREE* node)
 {
     if (node->numChildren != 1) return 58;
@@ -1520,14 +1574,13 @@ int ReduceFinalB(SYNTAX_TREE* node)
     return error;
 }
 
-/* 59. <final> -> <integer> */
+/* 61. <final> -> <integer> */
 int ReduceFinalC(SYNTAX_TREE* node)
 {
     if (node->numChildren != 1) return 59;
     SYNTAX_TREE* integer1 = node->children[0];
 
     int error = 0;
-    // error = error || InterpretNode(integer1);
     
     gLastExpression.type = VAL_PRIMITIVE;
     gLastExpression.primitive = atoi(integer1->string);
@@ -1540,31 +1593,30 @@ int ReduceFinalD(SYNTAX_TREE* node)
 {
     if (node->numChildren != 1) return 62;
     SYNTAX_TREE* float1 = node->children[0];
-
+    
     int error = 0;
-
+    
     gLastExpression.type = VAL_FLOATING_POINT;
     gLastExpression.floatp = atof(float1->string);
-
+    
     return error;
 }
 
-/* 60. <final> -> <string> */
+/* 63. <final> -> <string> */
 int ReduceFinalE(SYNTAX_TREE* node)
 {
     if (node->numChildren != 1) return 60;
     SYNTAX_TREE* string1 = node->children[0];
-
+    
     int error = 0;
-    // error = error || InterpretNode(string1);
     
     gLastExpression.type = VAL_STRING;
     gLastExpression.string = string1->string;
-
+    
     return error;
 }
 
-/* 61. <final> -> <object> */
+/* 64. <final> -> <object> */
 int ReduceFinalF(SYNTAX_TREE* node)
 {
     if (node->numChildren != 1) return 61;
@@ -1576,7 +1628,7 @@ int ReduceFinalF(SYNTAX_TREE* node)
     return error;
 }
 
-/* 62. <final> -> <reference> */
+/* 65. <final> -> <reference> */
 int ReduceFinalG(SYNTAX_TREE* node)
 {
     if (node->numChildren != 1) return 62;
@@ -1588,7 +1640,7 @@ int ReduceFinalG(SYNTAX_TREE* node)
     return error;
 }
 
-/* 63. <reference> -> <l-value> */
+/* 66. <reference> -> <l-value> */
 int ReduceReferenceA(SYNTAX_TREE* node)
 {
     if (node->numChildren != 1) return 63;
@@ -1602,7 +1654,7 @@ int ReduceReferenceA(SYNTAX_TREE* node)
     return error;
 }
 
-/* 64. <reference> -> <reference> ( ) */
+/* 67. <reference> -> <reference> ( ) */
 // function application
 int ReduceReferenceB(SYNTAX_TREE* node)
 {
@@ -1618,16 +1670,25 @@ int ReduceReferenceB(SYNTAX_TREE* node)
     {
         // create new context
         CONTEXT* current = gCurrentContext;
-        gCurrentContext = (CONTEXT*)ALLOCATE(sizeof(CONTEXT));
+        gCurrentContext = (CONTEXT*)ALLOC(sizeof(CONTEXT));
         gCurrentContext->list = NULL;
+        gCurrentContext->ref_count = 1;
         gCurrentContext->parent = function.function->closure;
+        CONTEXT* func_context = gCurrentContext;
         
         if (function.function->built_in) {
             error = error || function.function->functor(0);
         } else {
             error = error || InterpretNode(function.function->body);
         }
-        
+
+      // remove calling context
+        func_context->ref_count--;
+        if (func_context->ref_count == 0)
+        {
+            FreeContext(func_context);
+        }
+
         // return with same context
         gCurrentContext = current;
         returning = 0;
@@ -1640,7 +1701,7 @@ int ReduceReferenceB(SYNTAX_TREE* node)
     return error;
 }
 
-/* 65. <reference> -> <reference> ( <arguments> ) */
+/* 68. <reference> -> <reference> ( <arguments> ) */
 // function application
 int ReduceReferenceC(SYNTAX_TREE* node)
 {
@@ -1652,8 +1713,6 @@ int ReduceReferenceC(SYNTAX_TREE* node)
     int argument_count = 0;
     error = error || InterpretNode(reference1);
 	VALUE function = gLastExpression;
-	//const char* name = gLValueIdentifier;
-	//printf("%s()\n", gLValueIdentifier);
 
     if (function.type == VAL_FUNCTION)
     {
@@ -1664,9 +1723,12 @@ int ReduceReferenceC(SYNTAX_TREE* node)
 
         // create new context
         CONTEXT* current = gCurrentContext;
-        gCurrentContext = (CONTEXT*)ALLOCATE(sizeof(CONTEXT));
+        //gCurrentContext = (CONTEXT*)ALLOCATE(sizeof(CONTEXT));
+        gCurrentContext = (CONTEXT*)ALLOC(sizeof(CONTEXT));
         gCurrentContext->list = NULL;
+        gCurrentContext->ref_count = 1;
         gCurrentContext->parent = function.function->closure;
+        CONTEXT* func_context = gCurrentContext;
         
         // store arguments in the function's closure
 		PAIR* last = NULL;
@@ -1675,12 +1737,14 @@ int ReduceReferenceC(SYNTAX_TREE* node)
             //StoreRecord(param->identifier, arg->value, gCurrentContext);
 			if (last)
 			{
-				last->next = (PAIR*)ALLOCATE(sizeof(PAIR));
+				//last->next = (PAIR*)ALLOCATE(sizeof(PAIR));
+                last->next = (PAIR*)ALLOC(sizeof(PAIR));
 				last = last->next;
 			}
 			else
 			{
-				gCurrentContext->list = last = (PAIR*)ALLOCATE(sizeof(PAIR));
+				//gCurrentContext->list = last = (PAIR*)ALLOCATE(sizeof(PAIR));
+                gCurrentContext->list = last = (PAIR*)ALLOC(sizeof(PAIR));
 			}
 
 			last->identifier = param->identifier;
@@ -1692,12 +1756,29 @@ int ReduceReferenceC(SYNTAX_TREE* node)
 			param = param->next;
 			arg = arg->next;
         }
+        arg = gArgumentEvaluation;
 
+        //return_value_exists = 0;
         if (function.function->built_in)
         {
             error = error || function.function->functor(argument_count);
         } else {        
             error = error || InterpretNode(function.function->body);
+        }
+
+      // remove calling context
+        // remove evaluated arguments
+        while (arg) {
+            PAIR* next;
+            next = arg->next;
+            DEALLOC((void*)arg);
+            arg = next;
+        }
+        // remove function closure
+        func_context->ref_count--;
+        if (func_context->ref_count == 0)
+        {
+            FreeContext(func_context);
         }
 
         // return with same context
@@ -1713,7 +1794,7 @@ int ReduceReferenceC(SYNTAX_TREE* node)
     return error;
 }
 
-/* 66. <arguments> -> <arguments> , <expr> */
+/* 69. <arguments> -> <arguments> , <expr> */
 int ReduceArgumentsA(SYNTAX_TREE* node)
 {
     if (node->numChildren != 3) return 66;
@@ -1730,7 +1811,7 @@ int ReduceArgumentsA(SYNTAX_TREE* node)
     PAIR* list = arguments;
     while (list->next)
         list = list->next;
-    list->next = (PAIR*)ALLOCATE(sizeof(PAIR));
+    list->next = (PAIR*)ALLOC(sizeof(PAIR));
     list->next->identifier = NULL;
     list->next->value = gLastExpression;
     list->next->next = NULL;
@@ -1741,7 +1822,7 @@ int ReduceArgumentsA(SYNTAX_TREE* node)
     return error;
 }
 
-/* 67. <arguments> -> <expr> */
+/* 70. <arguments> -> <expr> */
 int ReduceArgumentsB(SYNTAX_TREE* node)
 {
     if (node->numChildren != 1) return 67;
@@ -1750,7 +1831,7 @@ int ReduceArgumentsB(SYNTAX_TREE* node)
     int error = 0;
     error = error || InterpretNode(expr1);
     
-    gArgumentEvaluation = (PAIR*)ALLOCATE(sizeof(PAIR));
+    gArgumentEvaluation = (PAIR*)ALLOC(sizeof(PAIR));
     gArgumentEvaluation->identifier = NULL;
     gArgumentEvaluation->value = gLastExpression;
     gArgumentEvaluation->next = NULL;
@@ -1758,7 +1839,7 @@ int ReduceArgumentsB(SYNTAX_TREE* node)
     return error;
 }
 
-/* 68. <object> -> [ ] */
+/* 71. <object> -> [ ] */
 int ReduceObjectA(SYNTAX_TREE* node)
 {
     if (node->numChildren != 2) return 68;
@@ -1766,14 +1847,15 @@ int ReduceObjectA(SYNTAX_TREE* node)
     int error = 0;
     
     gLastExpression.type = VAL_REFERENCE;
-    gLastExpression.reference = (CONTEXT*)ALLOCATE(sizeof(CONTEXT));
+    gLastExpression.reference = (CONTEXT*)ALLOC(sizeof(CONTEXT));
     gLastExpression.reference->parent = NULL;
     gLastExpression.reference->list = NULL;
+    gLastExpression.reference->ref_count = 0;
 
     return error;
 }
 
-/* 69. <object> -> [ <array init> ] */
+/* 72. <object> -> [ <array init> ] */
 int ReduceObjectB(SYNTAX_TREE* node)
 {
     if (node->numChildren != 3) return 69;
@@ -1788,7 +1870,7 @@ int ReduceObjectB(SYNTAX_TREE* node)
     return error;
 }
 
-/* 70. <object> -> [ <dictionary init> ] */
+/* 73. <object> -> [ <dictionary init> ] */
 int ReduceObjectC(SYNTAX_TREE* node)
 {
     if (node->numChildren != 3) return 70;
@@ -1803,7 +1885,7 @@ int ReduceObjectC(SYNTAX_TREE* node)
     return error;
 }
 
-/* 71. <array init> -> <array init> , <expr> */
+/* 74. <array init> -> <array init> , <expr> */
 int ReduceArrayInitA(SYNTAX_TREE* node)
 {
     if (node->numChildren != 3) return 71;
@@ -1822,7 +1904,7 @@ int ReduceArrayInitA(SYNTAX_TREE* node)
     PAIR* list = dictionary->list;
     while (list->next)
         list = list->next;
-    list->next = (PAIR*)ALLOCATE(sizeof(PAIR));
+    list->next = (PAIR*)ALLOC(sizeof(PAIR));
     char* string = (char*)ALLOCATE(sizeof(char)*16);
     sprintf(string, "%i", index++);
     list->next->identifier = string;
@@ -1835,7 +1917,7 @@ int ReduceArrayInitA(SYNTAX_TREE* node)
     return error;
 }
 
-/* 72. <array init> -> <expr> */
+/* 75. <array init> -> <expr> */
 int ReduceArrayInitB(SYNTAX_TREE* node)
 {
     if (node->numChildren != 1) return 72;
@@ -1845,10 +1927,11 @@ int ReduceArrayInitB(SYNTAX_TREE* node)
     error = error || InterpretNode(expr1);
     
     // push array gLastExpr
-    gDictionaryInit = (CONTEXT*)ALLOCATE(sizeof(CONTEXT));
+    gDictionaryInit = (CONTEXT*)ALLOC(sizeof(CONTEXT));
     gArrayIndex = 0;
     gDictionaryInit->parent = NULL;
-    gDictionaryInit->list = (PAIR*)ALLOCATE(sizeof(PAIR));
+    gDictionaryInit->ref_count = 0;
+    gDictionaryInit->list = (PAIR*)ALLOC(sizeof(PAIR));
     char* string = (char*)ALLOCATE(sizeof(char)*16);
     sprintf(string, "%i", gArrayIndex++);
     gDictionaryInit->list->identifier = string;
@@ -1858,7 +1941,7 @@ int ReduceArrayInitB(SYNTAX_TREE* node)
     return error;
 }
 
-/* 73. <dictionary init> -> <dictionary init> , <identifier> : <expr> */
+/* 76. <dictionary init> -> <dictionary init> , <identifier> : <expr> */
 int ReduceDictionaryInitA(SYNTAX_TREE* node)
 {
     if (node->numChildren != 5) return 73;
@@ -1877,7 +1960,7 @@ int ReduceDictionaryInitA(SYNTAX_TREE* node)
     PAIR* list = dictionary->list;
     while (list->next)
         list = list->next;
-    list->next = (PAIR*)ALLOCATE(sizeof(PAIR));
+    list->next = (PAIR*)ALLOC(sizeof(PAIR));
     list->next->identifier = identifier1->string;
     list->next->value = gLastExpression;
     list->next->next = NULL;
@@ -1887,7 +1970,7 @@ int ReduceDictionaryInitA(SYNTAX_TREE* node)
     return error;
 }
 
-/* 74. <dictionary init> -> <identifier> : <expr> */
+/* 77. <dictionary init> -> <identifier> : <expr> */
 int ReduceDictionaryInitB(SYNTAX_TREE* node)
 {
     if (node->numChildren != 3) return 74;
@@ -1898,9 +1981,10 @@ int ReduceDictionaryInitB(SYNTAX_TREE* node)
     error = error || InterpretNode(expr1);
     
     // push dict[identifier] gLastExpr
-    gDictionaryInit = (CONTEXT*)ALLOCATE(sizeof(CONTEXT));
+    gDictionaryInit = (CONTEXT*)ALLOC(sizeof(CONTEXT));
     gDictionaryInit->parent = NULL;
-    gDictionaryInit->list = (PAIR*)ALLOCATE(sizeof(PAIR));
+    gDictionaryInit->ref_count = 0;
+    gDictionaryInit->list = (PAIR*)ALLOC(sizeof(PAIR));
     gDictionaryInit->list->identifier = identifier1->string;
     gDictionaryInit->list->value = gLastExpression;
     gDictionaryInit->list->next = NULL;
@@ -1908,7 +1992,7 @@ int ReduceDictionaryInitB(SYNTAX_TREE* node)
     return error;
 }
 
-/* 75. <boolean> -> true */
+/* 78. <boolean> -> true */
 int ReduceBooleanA(SYNTAX_TREE* node)
 {
     if (node->numChildren != 1) return 75;
@@ -1921,7 +2005,7 @@ int ReduceBooleanA(SYNTAX_TREE* node)
     return error;
 }
 
-/* 76. <boolean> -> false */
+/* 79. <boolean> -> false */
 int ReduceBooleanB(SYNTAX_TREE* node)
 {
     if (node->numChildren != 1) return 76;

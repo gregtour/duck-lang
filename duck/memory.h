@@ -21,8 +21,18 @@ extern MEM_PAGE* gWorkingMemory;
 
 /* memory management */
 void* ALLOCATE(size_t amount);
+void  DEALLOCATE(void* memory);
 void  CreateEnvironment();
 void  FreeEnvironment();
+
+void* ALLOC(size_t amount);
+void  DEALLOC(void* addr);
+
+/* */
+void FreeContext(CONTEXT* context);
+void FreeFunction(FUNCTION* func);
+void InvalidateExpr(VALUE expression);
+void ForceFreeContext(CONTEXT* context);
 
 /* accessor functions */
 VALUE GetRecord(const char* identifier, CONTEXT* context);

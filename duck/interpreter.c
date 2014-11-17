@@ -1,6 +1,7 @@
 /* interpreter.c */
 
 #include "interpreter.h"
+#include "memory.h"
 #include "lib/library.h"
 #include "lib/stdduck.h"
 
@@ -37,6 +38,7 @@ int gFreeCalls = 0;
 
 void* MallocTrackMemory(size_t size)
 {
+    void* data;
     gTotalMemoryUsage += (int)size;
     gMallocCalls++;
     return malloc(size);
@@ -115,9 +117,10 @@ VALUE LinkNamespace(const char* identifier)
 {
     VALUE namespace;
     namespace.type = VAL_REFERENCE;
-    namespace.reference = (CONTEXT*)ALLOCATE(sizeof(CONTEXT));
+    namespace.reference = (CONTEXT*)ALLOC(sizeof(CONTEXT));
     namespace.reference->parent = NULL;
     namespace.reference->list = NULL;
+    namespace.reference->ref_count = -1;
     StoreRecord(identifier, namespace, gGlobalContext);
     return namespace;
 }
@@ -145,6 +148,7 @@ VALUE CreateFunction(int (*function)(int))
 	record.function->closure = gCurrentContext;
     record.function->built_in = 1;
     record.function->functor = function;
+    record.function->ref_count = -1;
     return record;
 }
 
@@ -176,10 +180,18 @@ int Interpret(SYNTAX_TREE* tree)
 {
     CreateEnvironment();
 
-    gCurrentContext = gGlobalContext = (CONTEXT*)ALLOCATE(sizeof(CONTEXT));
+    gCurrentContext = gGlobalContext = (CONTEXT*)ALLOC(sizeof(CONTEXT));
     gCurrentContext->parent = NULL;
     gCurrentContext->list = NULL;
+    gCurrentContext->ref_count = -1;
+
     gLastExpression.type = VAL_NIL;
+    gLastExpression.primitive = 0;
+    gLastExpression.floatp = 0.0f;
+    gLastExpression.string = NULL;
+    gLastExpression.function = NULL;
+    gLastExpression.reference = NULL;
+
     gParameterListing = NULL;
     gDictionaryInit = NULL;
     gArrayIndex = 0;
@@ -198,7 +210,10 @@ int Interpret(SYNTAX_TREE* tree)
     breaking = 0;
     continuing = 0;
 
-    return InterpretNode(tree);
+    //return InterpretNode(tree);
+    int error = InterpretNode(tree);
+    ForceFreeContext(gGlobalContext);
+    return error;
 }
 
 
@@ -247,7 +262,7 @@ int main(int argc, char* argv[])
     //PrintParseTree(ast, CONTEXT_FREE_GRAMMAR);
 
     // compile source
-    //printf("Interpretting...\n");
+    //printf("Running...\n");
     error = Interpret(ast);
     if (error)
     {

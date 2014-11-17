@@ -22,9 +22,10 @@ typedef struct FUNCTION
 {
     struct PAIR* parameters;
     SYNTAX_TREE* body;
-    unsigned int    built_in;
+    unsigned int built_in;
     int (*functor)(int);
 	struct CONTEXT* closure;
+    int ref_count;
 } FUNCTION;
 
 typedef struct VALUE
@@ -33,8 +34,9 @@ typedef struct VALUE
     int         primitive;
     float       floatp;
     const char* string;
-    struct CONTEXT* reference;
     FUNCTION*   function;
+    struct CONTEXT* reference;
+//  int         const_string;
 } VALUE;
 
 typedef struct PAIR
@@ -47,6 +49,7 @@ typedef struct PAIR
 typedef struct CONTEXT
 {
     PAIR*       list;
+    int         ref_count;
     struct CONTEXT* parent;
 } CONTEXT;
 
@@ -83,6 +86,8 @@ extern CONTEXT* gLValueContext;
 extern int returning;
 extern int breaking;
 extern int continuing;
+
+//extern int return_value_exists;
 
 /* functions */
 void PrintContext(CONTEXT* context);
