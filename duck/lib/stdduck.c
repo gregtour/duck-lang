@@ -52,8 +52,6 @@ int DuckPrint(int argument_count)
 /* duck.prompt([NIL]) */
 int DuckPrompt(int argument_count)
 {
-//    VALUE argument = GetRecord("arg1", gCurrentContext);
-
     int error = 0;
 
     char* buffer = (char*)ALLOCATE(sizeof(char)*128);
@@ -61,6 +59,55 @@ int DuckPrompt(int argument_count)
 
     gLastExpression.type = VAL_STRING;
     gLastExpression.string = buffer;
+
+    return error;
+}
+
+/* int(value) */
+int DuckInt(int argument_count)
+{
+    int error = 0;
+
+    VALUE argument = GetRecord("value", gCurrentContext);
+
+    gLastExpression.type = VAL_PRIMITIVE;
+    gLastExpression.primitive = TypeInt(argument);
+    
+    return error;
+}
+
+/* len(array) */
+int DuckLength(int argument_count)
+{
+    int error = 0;
+
+    VALUE argument = GetRecord("array", gCurrentContext);
+
+    if (argument.type == VAL_REFERENCE)
+    {
+        int count = 0;
+        CONTEXT* reference;
+        PAIR* iterator;
+
+        reference = argument.reference;
+        iterator = reference->list;
+        while (iterator)
+        {
+            count++;
+            iterator = iterator->next;
+        }
+
+        gLastExpression.type = VAL_PRIMITIVE;
+        gLastExpression.primitive = count;
+    } else {
+        if (argument.type != VAL_NIL) {
+            gLastExpression.type = VAL_PRIMITIVE;
+            gLastExpression.primitive = 1;
+        } else {
+            gLastExpression.type = VAL_PRIMITIVE;
+            gLastExpression.primitive = 0;
+        }
+    }
 
     return error;
 }
@@ -77,5 +124,17 @@ void BindStandardLibrary()
 
     VALUE prompt = CreateFunction(DuckPrompt);
     LinkFunction(duckStdLib, "prompt", prompt);
+
+    VALUE root;
+    root.type = VAL_REFERENCE;
+    root.reference = gGlobalContext;
+
+    VALUE int_c = CreateFunction(DuckInt);
+    AddParameter(int_c, "value");
+    LinkFunction(root, "int", int_c);
+
+    VALUE length = CreateFunction(DuckLength);
+    AddParameter(length, "array");
+    LinkFunction(root, "len", length);
 }
 
