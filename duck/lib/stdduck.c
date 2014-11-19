@@ -2,6 +2,7 @@
 
 #include "stdduck.h"
 #include "interpreter.h"
+#include "memory.h"
 
 /* duck.print(arg1), duck.println(arg1) */
 int DuckPrint(int argument_count)
@@ -38,6 +39,10 @@ int DuckPrint(int argument_count)
         }
         printf(")");
     }
+    else if (argument.type == VAL_DICTIONARY)
+    {
+        printf("Dictionary Object");
+    }
     else
     {
         printf("[NIL]");
@@ -59,6 +64,29 @@ int DuckPrompt(int argument_count)
 
     gLastExpression.type = VAL_STRING;
     gLastExpression.data.string = buffer;
+
+    return error;
+}
+
+/* Type(object) */
+int DuckType(int argument_count)
+{
+    int error = 0;
+
+    VALUE argument = GetRecord("object", gCurrentContext);
+
+    gLastExpression.type = VAL_STRING;
+    switch (argument.type)
+    {
+        case VAL_NIL: gLastExpression.data.string = "NIL"; break;
+        case VAL_PRIMITIVE: gLastExpression.data.string = "INT"; break;
+        case VAL_FLOATING_POINT: gLastExpression.data.string = "FLOAT"; break;
+        case VAL_STRING: gLastExpression.data.string = "STRING"; break;
+        case VAL_REFERENCE: gLastExpression.data.string = "REFERENCE"; break;
+        case VAL_FUNCTION: gLastExpression.data.string = "FUNCTION"; break;
+        case VAL_DICTIONARY: gLastExpression.data.string = "DICTIONARY"; break;
+        default: gLastExpression.data.string = "UNKNOWN";
+    }
 
     return error;
 }
@@ -99,7 +127,14 @@ int DuckLength(int argument_count)
 
         gLastExpression.type = VAL_PRIMITIVE;
         gLastExpression.data.primitive = count;
-    } else {
+    }
+    else if (argument.type == VAL_DICTIONARY)
+    {
+        gLastExpression.type = VAL_PRIMITIVE;
+        gLastExpression.data.primitive = argument.data.dictionary->size;
+    }
+    else 
+    {
         if (argument.type != VAL_NIL) {
             gLastExpression.type = VAL_PRIMITIVE;
             gLastExpression.data.primitive = 1;
@@ -136,5 +171,9 @@ void BindStandardLibrary()
     VALUE length = CreateFunction(DuckLength);
     AddParameter(length, "array");
     LinkFunction(root, "len", length);
+
+    VALUE type = CreateFunction(DuckType);
+    AddParameter(type, "object");
+    LinkFunction(root, "Type", type);
 }
 

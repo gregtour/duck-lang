@@ -12,12 +12,17 @@ CONTEXT* gCurrentContext;
 VALUE    gLastExpression;
 PAIR*    gParameterListing;
 
-CONTEXT* gDictionaryInit;
+//CONTEXT* gDictionaryInit;
+HASH_TABLE* gDictionaryInit;
 int      gArrayIndex;
 PAIR*    gArgumentEvaluation;
 
 const char* gLValueIdentifier;
-CONTEXT* gLValueContext;
+CONTEXT*    gLValueContext;
+VALUE       gLValueIndex;
+HASH_TABLE* gLValueDictionary;
+
+int array_indexing;
 
 int returning;
 int breaking;
@@ -205,6 +210,10 @@ int Interpret(SYNTAX_TREE* tree)
 
     gLValueIdentifier = NULL;
     gLValueContext = NULL;
+    gLValueIndex.type = VAL_NIL;
+    gLValueIndex.data.primitive = 0;
+    gLValueDictionary = NULL;
+    array_indexing = 0;
 
     /* libraries */
     BindStandardLibrary();

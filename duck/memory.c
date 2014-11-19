@@ -8,6 +8,7 @@ MEM_PAGE* gWorkingMemory;
 
 void ForceFreeFunction(FUNCTION* func)
 {
+    return;
     {
         if (func->closure->ref_count >= 0)
         {
@@ -20,6 +21,7 @@ void ForceFreeFunction(FUNCTION* func)
 
 void ForceFreeContext(CONTEXT* context)
 {
+    return;
     PAIR *itr, *next;
     itr = context->list;
     context->ref_count = -1;
@@ -74,6 +76,7 @@ void FreeFunction(FUNCTION* func)
 
 void InvalidateExpr(VALUE expression)
 {
+    return;
     if (expression.type == VAL_REFERENCE)
     {
         if (expression.data.reference->ref_count > 0)
@@ -257,8 +260,9 @@ unsigned int HashFunction(VALUE value)
         case VAL_NIL: return 0;
         case VAL_PRIMITIVE: return (unsigned int)value.data.primitive;
         case VAL_FLOATING_POINT: return (unsigned int)value.data.floatp;
-        case VAL_REFERENCE: return (unsigned int)value.data.reference;
-        case VAL_FUNCTION: return (unsigned int)value.data.function;
+        case VAL_REFERENCE: return (unsigned long)value.data.reference;
+        case VAL_FUNCTION: return (unsigned long)value.data.function;
+        case VAL_DICTIONARY: return (unsigned long)value.data.dictionary;
         case VAL_STRING:
             hash = 0;
             p = value.data.string;
@@ -297,7 +301,7 @@ void ResizeHashTable(HASH_TABLE* table)
     KEY_VALUE_PAIR* new_table;
 
     new_capacity = table->capacity * HT_RESIZE_FACTOR;
-//    printf("Resizing hash table to %i entries.\n", new_capacity);
+    printf("Resizing hash table to %i entries.\n", new_capacity);
     // if (new_capacity < table->size) new_capacity += ...
     new_table = (KEY_VALUE_PAIR*)malloc(new_capacity * sizeof(KEY_VALUE_PAIR));
     memset((void*)new_table, 0, new_capacity * sizeof(KEY_VALUE_PAIR));
@@ -348,8 +352,8 @@ VALUE HashGet(VALUE key_identifier, HASH_TABLE* table)
         }
     } else {
         while (table_entries[index].key.type != VAL_NIL &&
-               memcmp(&key_identifier, &table_entries[index].key, sizeof(VALUE)) 
-                   != 0)
+               !(key_identifier.type == table_entries[index].key.type &&
+                 key_identifier.data.primitive == table_entries[index].key.data.primitive))
         {
             index = (index+1) % table->capacity;
         }
@@ -369,7 +373,7 @@ void HashStore(VALUE key_identifier, VALUE store, HASH_TABLE* table)
 //    printf("Hash Store: %i %x, %p => %i %x\n", key_identifier.type, key_identifier.data.primitive, table, store.type, store.data.primitive);
 
     if (key_identifier.type == VAL_NIL) return;
-    if (table->size > 3*table->capacity/5) 
+    if (table->size > 5*table->capacity/7) 
     {
         ResizeHashTable(table);
     }
@@ -394,8 +398,8 @@ void HashStore(VALUE key_identifier, VALUE store, HASH_TABLE* table)
     else
     {
         while (table_entries[index].key.type != VAL_NIL &&
-               memcmp(&key_identifier, &table_entries[index].key, sizeof(VALUE))
-                   != 0)
+               !(key_identifier.type == table_entries[index].key.type &&
+                 key_identifier.data.primitive == table_entries[index].key.data.primitive))
         {
             index = (index+1) % table->capacity;
         }

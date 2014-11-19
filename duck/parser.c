@@ -242,7 +242,7 @@ SYNTAX_TREE* ParseSource(L_TOKEN*      input,
             node->numChildren = r.rhsLength;
             for (rhs = 0; rhs < r.rhsLength; rhs++)
             {
-                PARSE_STACK state = StackPop();
+                /*PARSE_STACK state = */ StackPop();
                 PARSE_STACK symbol = StackPop();
                 if (symbol.token == NULL)
                 {

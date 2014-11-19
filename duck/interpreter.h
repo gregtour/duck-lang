@@ -75,21 +75,26 @@ void  LinkFunction(VALUE namespace,
 void  LinkConstPrimitive(VALUE namespace,
                          const char* identifier,
                          int value);
-void LinkConstFloatp(VALUE namespace,
-                     const char* identifier,
-                     float value);
+void  LinkConstFloatp(VALUE namespace,
+                      const char* identifier,
+                      float value);
 
 /* execution context */
 extern CONTEXT* gGlobalContext;
 extern CONTEXT* gCurrentContext;
 extern VALUE    gLastExpression;
 extern PAIR*    gParameterListing;
-extern CONTEXT* gDictionaryInit;
+//extern CONTEXT* gDictionaryInit;
+extern struct HASH_TABLE* gDictionaryInit;
 extern int      gArrayIndex;
 extern PAIR*    gArgumentEvaluation;
 
 extern const char* gLValueIdentifier;
-extern CONTEXT* gLValueContext;
+extern CONTEXT*    gLValueContext;
+extern VALUE       gLValueIndex;
+extern struct HASH_TABLE* gLValueDictionary;
+
+extern int array_indexing;
 
 extern int returning;
 extern int breaking;

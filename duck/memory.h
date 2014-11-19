@@ -39,8 +39,8 @@ VALUE GetRecord(const char* identifier, CONTEXT* context);
 void  StoreRecord(const char* identifier, VALUE value, CONTEXT* context);
 
 /* hash table */
-#define HT_MIN_CAPACITY     2000
-#define HT_RESIZE_FACTOR    4
+#define HT_MIN_CAPACITY     2048
+#define HT_RESIZE_FACTOR    8
 
 typedef struct KEY_VALUE_PAIR
 {
