@@ -23,7 +23,7 @@ int MathSin(int arg_count){
   val = sin(angle);
 
   gLastExpression.type = VAL_FLOATING_POINT;
-  gLastExpression.floatp = val;
+  gLastExpression.data.floatp = val;
 
   return 0;
 }
@@ -38,7 +38,7 @@ int MathCos(int arg_count){
   val = cos(angle);
 
   gLastExpression.type = VAL_FLOATING_POINT;
-  gLastExpression.floatp = val;
+  gLastExpression.data.floatp = val;
 
   return 0;
 }
@@ -53,7 +53,7 @@ int MathTan(int arg_count){
   val = tan(angle);
 
   gLastExpression.type = VAL_FLOATING_POINT;
-  gLastExpression.floatp = val;
+  gLastExpression.data.floatp = val;
 
   return 0;
 }
@@ -68,7 +68,7 @@ int MathAsin(int arg_count){
   val = asin(input);
 
   gLastExpression.type = VAL_FLOATING_POINT;
-  gLastExpression.floatp = val;
+  gLastExpression.data.floatp = val;
 
   return 0;
 }
@@ -83,7 +83,7 @@ int MathAcos(int arg_count){
   val = acos(input);
 
   gLastExpression.type = VAL_FLOATING_POINT;
-  gLastExpression.floatp = val;
+  gLastExpression.data.floatp = val;
 
   return 0;
 }
@@ -98,7 +98,7 @@ int MathAtan(int arg_count){
   val = atan(input);
 
   gLastExpression.type = VAL_FLOATING_POINT;
-  gLastExpression.floatp = val;
+  gLastExpression.data.floatp = val;
 
   return 0;
 }
@@ -113,7 +113,7 @@ int MathExp(int arg_count){
   val = exp(input);
 
   gLastExpression.type = VAL_FLOATING_POINT;
-  gLastExpression.floatp = val;
+  gLastExpression.data.floatp = val;
 
   return 0;
 }
@@ -128,7 +128,7 @@ int MathLog(int arg_count){
   val = log(input);
 
   gLastExpression.type = VAL_FLOATING_POINT;
-  gLastExpression.floatp = val;
+  gLastExpression.data.floatp = val;
 
   return 0;
 }
@@ -143,7 +143,7 @@ int MathLog10(int arg_count){
   val = log10(input);
 
   gLastExpression.type = VAL_FLOATING_POINT;
-  gLastExpression.floatp = val;
+  gLastExpression.data.floatp = val;
 
   return 0;
 }
@@ -163,7 +163,7 @@ int MathPow(int arg_count){
   val = pow(base, exponent);
 
   gLastExpression.type = VAL_FLOATING_POINT;
-  gLastExpression.floatp = val;
+  gLastExpression.data.floatp = val;
 
   return 0;
 }
@@ -179,7 +179,7 @@ int MathSqrt(int arg_count){
   val = sqrt(input);
 
   gLastExpression.type = VAL_FLOATING_POINT;
-  gLastExpression.floatp = val;
+  gLastExpression.data.floatp = val;
 
   return 0;
 }
@@ -195,7 +195,7 @@ int MathCeil(int arg_count){
   val = ceil(input);
 
   gLastExpression.type = VAL_FLOATING_POINT;
-  gLastExpression.floatp = val;
+  gLastExpression.data.floatp = val;
 
   return 0;
 }
@@ -211,7 +211,7 @@ int MathFloor(int arg_count){
   val = floor(input);
 
   gLastExpression.type = VAL_FLOATING_POINT;
-  gLastExpression.floatp = val;
+  gLastExpression.data.floatp = val;
 
   return 0;
 }
@@ -228,7 +228,7 @@ int MathAbs(int arg_count){
   val = fabs(input);
 
   gLastExpression.type = VAL_FLOATING_POINT;
-  gLastExpression.floatp = val;
+  gLastExpression.data.floatp = val;
 
   return error;
 }

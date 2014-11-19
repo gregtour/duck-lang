@@ -12,6 +12,7 @@
 #define VAL_REFERENCE       3
 #define VAL_FUNCTION        4
 #define VAL_FLOATING_POINT  5
+#define VAL_DICTIONARY      6
 
 /* types */
 
@@ -28,14 +29,18 @@ typedef struct FUNCTION
     int ref_count;
 } FUNCTION;
 
+struct HASH_TABLE;
 typedef struct VALUE
 {
     int         type;
-    int         primitive;
-    float       floatp;
-    const char* string;
-    FUNCTION*   function;
-    struct CONTEXT* reference;
+    union {
+        int         primitive;
+        float       floatp;
+        const char* string;
+        FUNCTION*   function;
+        struct CONTEXT* reference;
+        struct HASH_TABLE* dictionary;
+    } data;
 //  int         const_string;
 } VALUE;
 

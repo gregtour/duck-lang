@@ -27,14 +27,14 @@ void ForceFreeContext(CONTEXT* context)
     {
         next = itr->next;
         if (itr->value.type == VAL_REFERENCE
-            && itr->value.reference
+            && itr->value.data.reference
             /*&& itr->value.reference->ref_count != -1*/)
         {
-            ForceFreeContext(itr->value.reference);
+            ForceFreeContext(itr->value.data.reference);
         }
         else if (itr->value.type == VAL_FUNCTION)
         {
-            ForceFreeFunction(itr->value.function);
+            ForceFreeFunction(itr->value.data.function);
         }
         DEALLOC(itr);
         itr = next;
@@ -76,23 +76,23 @@ void InvalidateExpr(VALUE expression)
 {
     if (expression.type == VAL_REFERENCE)
     {
-        if (expression.reference->ref_count > 0)
+        if (expression.data.reference->ref_count > 0)
         {
-            expression.reference->ref_count--;
-            if (expression.reference->ref_count == 0)
+            expression.data.reference->ref_count--;
+            if (expression.data.reference->ref_count == 0)
             {
-                FreeContext(expression.reference);
+                FreeContext(expression.data.reference);
             }
         }
     }
     else if (expression.type == VAL_FUNCTION)
     {
-        if (expression.function->ref_count > 0)
+        if (expression.data.function->ref_count > 0)
         {
-            expression.function->ref_count--;
-            if (expression.function->ref_count == 0)
+            expression.data.function->ref_count--;
+            if (expression.data.function->ref_count == 0)
             {
-                FreeFunction(expression.function);
+                FreeFunction(expression.data.function);
             }
         }
     }
@@ -205,12 +205,7 @@ VALUE GetRecord(const char* identifier, CONTEXT* context)
     
     VALUE nill;
     nill.type = VAL_NIL;
-    nill.primitive = 0;
-    nill.floatp = 0.0f;
-    nill.string = NULL;
-    nill.function = NULL;
-    nill.reference = NULL;
-
+    nill.data.primitive = 0;
     return nill;
 }
 
@@ -251,4 +246,166 @@ void StoreRecord(const char* identifier, VALUE value, CONTEXT* context)
         }
     }
 }
+
+
+/* hash function */
+unsigned int HashFunction(VALUE value)
+{
+    unsigned int hash;
+    const char* p;
+    switch (value.type) {
+        case VAL_NIL: return 0;
+        case VAL_PRIMITIVE: return (unsigned int)value.data.primitive;
+        case VAL_FLOATING_POINT: return (unsigned int)value.data.floatp;
+        case VAL_REFERENCE: return (unsigned int)value.data.reference;
+        case VAL_FUNCTION: return (unsigned int)value.data.function;
+        case VAL_STRING:
+            hash = 0;
+            p = value.data.string;
+            while (*p) {
+                hash = hash * 8;
+                hash += (*p);
+                p++;
+            }
+            return hash;
+    }
+    return 0;
+}
+
+/* hash table */
+HASH_TABLE* CreateHashTable()
+{
+    HASH_TABLE* ht = (HASH_TABLE*)malloc(sizeof(HASH_TABLE));
+    ht->capacity = HT_MIN_CAPACITY;
+    ht->size = 0;
+    ht->table = (KEY_VALUE_PAIR*)malloc(HT_MIN_CAPACITY * sizeof(KEY_VALUE_PAIR));
+    memset((void*)ht->table, 0, HT_MIN_CAPACITY * sizeof(KEY_VALUE_PAIR));
+//    printf("Creating hash table.\n");
+    return ht;
+}
+
+void FreeHashTable(HASH_TABLE* table)
+{
+    free(table->table);
+    free(table);
+}
+
+void ResizeHashTable(HASH_TABLE* table)
+{
+    // double size
+    int new_capacity;
+    KEY_VALUE_PAIR* new_table;
+
+    new_capacity = table->capacity * HT_RESIZE_FACTOR;
+//    printf("Resizing hash table to %i entries.\n", new_capacity);
+    // if (new_capacity < table->size) new_capacity += ...
+    new_table = (KEY_VALUE_PAIR*)malloc(new_capacity * sizeof(KEY_VALUE_PAIR));
+    memset((void*)new_table, 0, new_capacity * sizeof(KEY_VALUE_PAIR));
+
+    int itr; int cap;
+    unsigned int index;
+    KEY_VALUE_PAIR pair;
+    cap = table->capacity;
+    // copy table
+    for (itr = 0; itr < cap; itr++)
+    {
+        if (table->table[itr].key.type != VAL_NIL)
+        {
+            pair = table->table[itr];
+            index = HashFunction(pair.key) % new_capacity;
+            while (new_table[index].key.type != VAL_NIL)
+                { index = (index + 1) % new_capacity; }
+            new_table[index] = pair;
+        }
+    }
+    
+    table->capacity = new_capacity;
+    // free old array
+    free(table->table);
+    table->table = new_table;
+}
+
+/* hash table */
+VALUE HashGet(VALUE key_identifier, HASH_TABLE* table)
+{
+//    printf("Hash Get: %i %x, %p\n", key_identifier.type, key_identifier.data.primitive, table);
+
+    unsigned int index;
+    index = HashFunction(key_identifier);
+    index = index % table->capacity;
+
+    KEY_VALUE_PAIR* table_entries;
+    table_entries = table->table;
+
+    if (key_identifier.type == VAL_STRING) 
+    {
+        while (table_entries[index].key.type != VAL_NIL &&
+               !(table_entries[index].key.type == VAL_STRING &&
+                 strcmp(table_entries[index].key.data.string,
+                        key_identifier.data.string) == 0))
+        {
+            index = (index+1) % table->capacity;
+        }
+    } else {
+        while (table_entries[index].key.type != VAL_NIL &&
+               memcmp(&key_identifier, &table_entries[index].key, sizeof(VALUE)) 
+                   != 0)
+        {
+            index = (index+1) % table->capacity;
+        }
+    }
+    if (table_entries[index].key.type == VAL_NIL) 
+    {
+        VALUE null;
+        null.type = VAL_NIL;
+        null.data.primitive = 0;
+        return null;
+    }
+    return table_entries[index].value;
+}
+
+void HashStore(VALUE key_identifier, VALUE store, HASH_TABLE* table)
+{
+//    printf("Hash Store: %i %x, %p => %i %x\n", key_identifier.type, key_identifier.data.primitive, table, store.type, store.data.primitive);
+
+    if (key_identifier.type == VAL_NIL) return;
+    if (table->size > 3*table->capacity/5) 
+    {
+        ResizeHashTable(table);
+    }
+
+    unsigned int index;
+    index = HashFunction(key_identifier);
+    index = index % table->capacity;
+
+    KEY_VALUE_PAIR* table_entries;
+    table_entries = table->table;
+
+    if (key_identifier.type == VAL_STRING)
+    {
+        while (table_entries[index].key.type != VAL_NIL &&
+               !(table_entries[index].key.type == VAL_STRING &&
+                 strcmp(table_entries[index].key.data.string,
+                        key_identifier.data.string) == 0))
+        {
+            index = (index+1) % table->capacity;
+        }
+    }
+    else
+    {
+        while (table_entries[index].key.type != VAL_NIL &&
+               memcmp(&key_identifier, &table_entries[index].key, sizeof(VALUE))
+                   != 0)
+        {
+            index = (index+1) % table->capacity;
+        }
+    }
+
+    if (table_entries[index].key.type == VAL_NIL) table->size++;
+    table_entries[index].key = key_identifier;
+    table_entries[index].value = store;
+    return;    
+}
+
+
 

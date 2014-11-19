@@ -88,13 +88,13 @@ void PrintContext(CONTEXT* context)
             printf("%s: ", list->identifier);
             VALUE value = list->value;
             if (value.type == VAL_PRIMITIVE)
-                printf("%i", value.primitive);
+                printf("%i", value.data.primitive);
             else if (value.type == VAL_STRING)
-                printf("%s", value.string);
+                printf("%s", value.data.string);
             else if (value.type == VAL_REFERENCE)
             {
                 printf("[");
-                PrintContext(value.reference);
+                PrintContext(value.data.reference);
                 printf("]");
             }
             else if (value.type == VAL_FUNCTION)
@@ -118,46 +118,46 @@ VALUE LinkNamespace(const char* identifier)
 {
     VALUE namespace;
     namespace.type = VAL_REFERENCE;
-    namespace.reference = (CONTEXT*)ALLOC(sizeof(CONTEXT));
-    namespace.reference->parent = NULL;
-    namespace.reference->list = NULL;
-    namespace.reference->ref_count = -1;
+    namespace.data.reference = (CONTEXT*)ALLOC(sizeof(CONTEXT));
+    namespace.data.reference->parent = NULL;
+    namespace.data.reference->list = NULL;
+    namespace.data.reference->ref_count = -1;
     StoreRecord(identifier, namespace, gGlobalContext);
     return namespace;
 }
 
 void  LinkFunction(VALUE namespace, const char* identifier, VALUE function)
 {
-    StoreRecord(identifier, function, namespace.reference);
+    StoreRecord(identifier, function, namespace.data.reference);
 }
 
 void  LinkConstPrimitive(VALUE namespace, const char* identifier, int value)
 {
     VALUE constant;
     constant.type = VAL_PRIMITIVE;
-    constant.primitive = value;
-    StoreRecord(identifier, constant, namespace.reference);
+    constant.data.primitive = value;
+    StoreRecord(identifier, constant, namespace.data.reference);
 }
 
 void  LinkConstFloatp(VALUE namespace, const char* identifier, float value)
 {
     VALUE constant;
     constant.type = VAL_FLOATING_POINT;
-    constant.floatp = value;
-    StoreRecord(identifier, constant, namespace.reference);
+    constant.data.floatp = value;
+    StoreRecord(identifier, constant, namespace.data.reference);
 }
 
 VALUE CreateFunction(int (*function)(int))
 {
     VALUE record;
     record.type = VAL_FUNCTION;
-    record.function = (FUNCTION*)ALLOCATE(sizeof(FUNCTION));
-    record.function->parameters = NULL; // ??
-    record.function->body = NULL;
-	record.function->closure = gCurrentContext;
-    record.function->built_in = 1;
-    record.function->functor = function;
-    record.function->ref_count = -1;
+    record.data.function = (FUNCTION*)ALLOCATE(sizeof(FUNCTION));
+    record.data.function->parameters = NULL; // ??
+    record.data.function->body = NULL;
+	record.data.function->closure = gCurrentContext;
+    record.data.function->built_in = 1;
+    record.data.function->functor = function;
+    record.data.function->ref_count = -1;
     return record;
 }
 
@@ -166,18 +166,19 @@ void  AddParameter(VALUE functor, const char* argument_name)
     PAIR* parameter = (PAIR*)ALLOCATE(sizeof(PAIR));
     parameter->identifier = argument_name;
     parameter->value.type = VAL_NIL;
+    parameter->value.data.primitive = 0;
     parameter->next = NULL;
 
     PAIR* iterator;
-    if (functor.function->parameters)
+    if (functor.data.function->parameters)
     {
-        for (iterator = functor.function->parameters;
+        for (iterator = functor.data.function->parameters;
              iterator->next;
              iterator = iterator->next);
         iterator->next = parameter;
         return;
     }
-    functor.function->parameters = parameter;
+    functor.data.function->parameters = parameter;
 }
 
 /*
@@ -195,11 +196,7 @@ int Interpret(SYNTAX_TREE* tree)
     gCurrentContext->ref_count = -1;
 
     gLastExpression.type = VAL_NIL;
-    gLastExpression.primitive = 0;
-    gLastExpression.floatp = 0.0f;
-    gLastExpression.string = NULL;
-    gLastExpression.function = NULL;
-    gLastExpression.reference = NULL;
+    gLastExpression.data.primitive = 0;
 
     gParameterListing = NULL;
     gDictionaryInit = NULL;

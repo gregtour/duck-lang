@@ -11,24 +11,24 @@ int DuckPrint(int argument_count)
     
     if (argument.type == VAL_PRIMITIVE)
     {
-        printf("%i", argument.primitive);
+        printf("%i", argument.data.primitive);
     }
     else if (argument.type == VAL_FLOATING_POINT)
     {
-        printf("%g", argument.floatp);
+        printf("%g", argument.data.floatp);
     }
     else if (argument.type == VAL_STRING)
     {
-        printf("%s", argument.string);
+        printf("%s", argument.data.string);
     }
     else if (argument.type == VAL_REFERENCE)
     {
-        PrintObject(argument.reference);
+        PrintObject(argument.data.reference);
     }
     else if (argument.type == VAL_FUNCTION)
     {
         printf("f(");
-        PAIR* list = argument.function->parameters;
+        PAIR* list = argument.data.function->parameters;
         while (list)
         {
             printf("%s", list->identifier);
@@ -58,7 +58,7 @@ int DuckPrompt(int argument_count)
     fgets(buffer, 128, stdin);
 
     gLastExpression.type = VAL_STRING;
-    gLastExpression.string = buffer;
+    gLastExpression.data.string = buffer;
 
     return error;
 }
@@ -71,7 +71,7 @@ int DuckInt(int argument_count)
     VALUE argument = GetRecord("value", gCurrentContext);
 
     gLastExpression.type = VAL_PRIMITIVE;
-    gLastExpression.primitive = TypeInt(argument);
+    gLastExpression.data.primitive = TypeInt(argument);
     
     return error;
 }
@@ -89,7 +89,7 @@ int DuckLength(int argument_count)
         CONTEXT* reference;
         PAIR* iterator;
 
-        reference = argument.reference;
+        reference = argument.data.reference;
         iterator = reference->list;
         while (iterator)
         {
@@ -98,14 +98,14 @@ int DuckLength(int argument_count)
         }
 
         gLastExpression.type = VAL_PRIMITIVE;
-        gLastExpression.primitive = count;
+        gLastExpression.data.primitive = count;
     } else {
         if (argument.type != VAL_NIL) {
             gLastExpression.type = VAL_PRIMITIVE;
-            gLastExpression.primitive = 1;
+            gLastExpression.data.primitive = 1;
         } else {
             gLastExpression.type = VAL_PRIMITIVE;
-            gLastExpression.primitive = 0;
+            gLastExpression.data.primitive = 0;
         }
     }
 
@@ -127,7 +127,7 @@ void BindStandardLibrary()
 
     VALUE root;
     root.type = VAL_REFERENCE;
-    root.reference = gGlobalContext;
+    root.data.reference = gGlobalContext;
 
     VALUE int_c = CreateFunction(DuckInt);
     AddParameter(int_c, "value");

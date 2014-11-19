@@ -8,11 +8,11 @@
 float TypeFloat(VALUE value)
 {
     if (value.type == VAL_PRIMITIVE) {
-        return (float)value.primitive;
+        return (float)value.data.primitive;
     } else if (value.type == VAL_FLOATING_POINT) {
-        return value.floatp;
+        return value.data.floatp;
     } else if (value.type == VAL_STRING) {
-        return atof(value.string);
+        return atof(value.data.string);
     } else {
         return 0.0f;
     }
@@ -21,11 +21,11 @@ float TypeFloat(VALUE value)
 int TypeInt(VALUE value)
 {
     if (value.type == VAL_PRIMITIVE) {
-        return value.primitive;
+        return value.data.primitive;
     } else if (value.type == VAL_FLOATING_POINT) {
-        return (int)value.floatp;
+        return (int)value.data.floatp;
     } else if (value.type == VAL_STRING) {
-        return atoi(value.string);
+        return atoi(value.data.string);
     } else {
         return 0;
     }
@@ -89,7 +89,7 @@ int ReduceStmtA(SYNTAX_TREE* node)
     VALUE library = GetRecord(node->children[1]->string, gCurrentContext);
     if (library.type == VAL_REFERENCE)
     {
-        CONTEXT* namespace = library.reference;
+        CONTEXT* namespace = library.data.reference;
         PAIR* iterator = namespace->list;
         while (iterator)
         {
@@ -120,13 +120,13 @@ int ReduceStmtB(SYNTAX_TREE* node)
         gCurrentContext = (CONTEXT*)ALLOC(sizeof(CONTEXT));
         gCurrentContext->list = NULL;
         gCurrentContext->ref_count = 1;
-        gCurrentContext->parent = function.function->closure;
+        gCurrentContext->parent = function.data.function->closure;
         CONTEXT* func_context = gCurrentContext;
         
-        if (function.function->built_in) {
-            error = error || function.function->functor(0);
+        if (function.data.function->built_in) {
+            error = error || function.data.function->functor(0);
         } else {
-            error = error || InterpretNode(function.function->body);
+            error = error || InterpretNode(function.data.function->body);
         }
 
         // free calling context
@@ -296,16 +296,16 @@ int ReduceFunctionDef(SYNTAX_TREE* node)
     // FUNCTIONS
     VALUE record;
     record.type = VAL_FUNCTION;
-    record.function = (FUNCTION*)ALLOC(sizeof(FUNCTION));
-    record.function->parameters = gParameterListing; // ??
-    record.function->body = stmt_list1;
-	record.function->closure = gCurrentContext;
+    record.data.function = (FUNCTION*)ALLOC(sizeof(FUNCTION));
+    record.data.function->parameters = gParameterListing; // ??
+    record.data.function->body = stmt_list1;
+	record.data.function->closure = gCurrentContext;
     if (gCurrentContext->ref_count > 0) {
         gCurrentContext->ref_count++;
     }
-    record.function->ref_count = 1;
-    record.function->built_in = 0;
-    record.function->functor = NULL;
+    record.data.function->ref_count = 1;
+    record.data.function->built_in = 0;
+    record.data.function->functor = NULL;
     StoreRecord(identifier1->string, record, gCurrentContext);
 
     return error;
@@ -393,7 +393,7 @@ int ReduceIf(SYNTAX_TREE* node)
     int error = 0;
     error = error || InterpretNode(condition1);
     if ((gLastExpression.type == VAL_PRIMITIVE
-            && gLastExpression.primitive)
+            && gLastExpression.data.primitive)
     || (gLastExpression.type != VAL_PRIMITIVE
             && gLastExpression.type != VAL_NIL))
     {
@@ -414,7 +414,7 @@ int ReduceIfElse(SYNTAX_TREE* node)
     int error = 0;
     error = error || InterpretNode(condition1);
     if ((gLastExpression.type == VAL_PRIMITIVE
-            && gLastExpression.primitive)
+            && gLastExpression.data.primitive)
     || (gLastExpression.type != VAL_PRIMITIVE
             && gLastExpression.type != VAL_NIL))
     {
@@ -452,7 +452,7 @@ int ReduceForLoop(SYNTAX_TREE* node)
     {
         while (start.type == VAL_FLOATING_POINT
                && end.type == VAL_FLOATING_POINT
-               && start.floatp <= end.floatp
+               && start.data.floatp <= end.data.floatp
                && error == 0
                && breaking == 0)
         {
@@ -461,7 +461,7 @@ int ReduceForLoop(SYNTAX_TREE* node)
             if (breaking == 0)
             {
                 continuing = 0;
-                start.floatp = start.floatp + 1.0f;
+                start.data.floatp = start.data.floatp + 1.0f;
             }
         }
     }
@@ -470,7 +470,7 @@ int ReduceForLoop(SYNTAX_TREE* node)
     {
         while (start.type == VAL_PRIMITIVE
                && end.type == VAL_PRIMITIVE
-               && start.primitive <= end.primitive
+               && start.data.primitive <= end.data.primitive
                && error == 0
                && breaking == 0)
         {
@@ -479,7 +479,7 @@ int ReduceForLoop(SYNTAX_TREE* node)
             if (breaking == 0)
             {
                 continuing = 0;
-                start.primitive++;
+                start.data.primitive++;
             }
         }
     }
@@ -502,7 +502,7 @@ int ReduceWhileLoop(SYNTAX_TREE* node)
     int error = 0;
     error = error || InterpretNode(condition1);
     while (gLastExpression.type != VAL_NIL
-           && (gLastExpression.primitive ||
+           && (gLastExpression.data.primitive ||
                gLastExpression.type != VAL_PRIMITIVE)
            && error == 0
            && breaking == 0)
@@ -532,18 +532,18 @@ int ReduceAssignmentA(SYNTAX_TREE* node)
     StoreRecord(gLValueIdentifier, expr, gLValueContext);
     if (expr.type == VAL_REFERENCE)
     {
-        if (expr.reference->ref_count >= 0) {
-            expr.reference->ref_count++;
+        if (expr.data.reference->ref_count >= 0) {
+            expr.data.reference->ref_count++;
         }
     }
     else if (expr.type == VAL_FUNCTION)
     {
-        if (expr.function->ref_count >= 0) {
-            expr.function->ref_count++;
-            if (expr.function->closure &&
-                expr.function->closure->ref_count >= 0)
+        if (expr.data.function->ref_count >= 0) {
+            expr.data.function->ref_count++;
+            if (expr.data.function->closure &&
+                expr.data.function->closure->ref_count >= 0)
             {
-                expr.function->closure->ref_count++;
+                expr.data.function->closure->ref_count++;
             }
         }
     }
@@ -570,18 +570,18 @@ int ReduceAssignmentB(SYNTAX_TREE* node)
     StoreRecord(gLValueIdentifier, expr, gLValueContext);
     if (expr.type == VAL_REFERENCE)
     {
-        if (expr.reference->ref_count >= 0) {
-            expr.reference->ref_count++;
+        if (expr.data.reference->ref_count >= 0) {
+            expr.data.reference->ref_count++;
         }
     }
     else if (expr.type == VAL_FUNCTION)
     {
-        if (expr.function->ref_count > 0) {
-            expr.function->ref_count++;
-            if (expr.function->closure &&
-                expr.function->closure->ref_count >= 0)
+        if (expr.data.function->ref_count > 0) {
+            expr.data.function->ref_count++;
+            if (expr.data.function->closure &&
+                expr.data.function->closure->ref_count >= 0)
             {
-                expr.function->closure->ref_count++;
+                expr.data.function->closure->ref_count++;
             }
         }
     }
@@ -631,7 +631,7 @@ int ReduceLValueC(SYNTAX_TREE* node)
     if (gLastExpression.type == VAL_REFERENCE)
     {
         gLValueIdentifier = identifier1->string;
-        gLValueContext = gLastExpression.reference;
+        gLValueContext = gLastExpression.data.reference;
     }
     else
     {
@@ -661,20 +661,20 @@ int ReduceLValueD(SYNTAX_TREE* node)
         if (index.type == VAL_PRIMITIVE)
         {
             char* string = (char*)ALLOCATE(sizeof(char) * 16);
-            sprintf(string, "%i", index.primitive);
+            sprintf(string, "%i", index.data.primitive);
             index.type = VAL_STRING;
-            index.string = string;
+            index.data.string = string;
         }
         else if (index.type == VAL_FLOATING_POINT)
         {
             char* string = (char*)ALLOCATE(sizeof(char) * 16);
-            sprintf(string, "%x", (unsigned int)index.floatp);
+            sprintf(string, "%x", (unsigned int)index.data.floatp);
             index.type = VAL_STRING;
-            index.string = string;
+            index.data.string = string;
         }
 
-        gLValueIdentifier = index.string;
-        gLValueContext = reference.reference;
+        gLValueIdentifier = index.data.string;
+        gLValueContext = reference.data.reference;
     }
     else
     {
@@ -713,7 +713,7 @@ int ReduceConditionA(SYNTAX_TREE* node)
     int truths = 0;
     if (condition.type == VAL_PRIMITIVE)
     {
-        if (condition.primitive)
+        if (condition.data.primitive)
             truths++;
     }
     else if (condition.type != VAL_NIL)
@@ -723,7 +723,7 @@ int ReduceConditionA(SYNTAX_TREE* node)
 
     if (logic.type == VAL_PRIMITIVE)
     {
-        if (logic.primitive)
+        if (logic.data.primitive)
             truths++;
     }
     else if (logic.type != VAL_NIL)
@@ -732,7 +732,7 @@ int ReduceConditionA(SYNTAX_TREE* node)
     }
 
     gLastExpression.type = VAL_PRIMITIVE;
-    gLastExpression.primitive = (truths == 2) ? 1 : 0;
+    gLastExpression.data.primitive = (truths == 2) ? 1 : 0;
 
     return error;
 }
@@ -753,7 +753,7 @@ int ReduceConditionB(SYNTAX_TREE* node)
     int truths = 0;
     if (condition.type == VAL_PRIMITIVE)
     {
-        if (condition.primitive)
+        if (condition.data.primitive)
             truths++;
     }
     else if (condition.type != VAL_NIL)
@@ -763,7 +763,7 @@ int ReduceConditionB(SYNTAX_TREE* node)
 
     if (logic.type == VAL_PRIMITIVE)
     {
-        if (logic.primitive)
+        if (logic.data.primitive)
             truths++;
     }
     else if (logic.type != VAL_NIL)
@@ -772,7 +772,7 @@ int ReduceConditionB(SYNTAX_TREE* node)
     }
 
     gLastExpression.type = VAL_PRIMITIVE;
-    gLastExpression.primitive = (truths > 0) ? 1 : 0;
+    gLastExpression.data.primitive = (truths > 0) ? 1 : 0;
 
     return error;
 }
@@ -793,7 +793,7 @@ int ReduceConditionC(SYNTAX_TREE* node)
     int truths = 0;
     if (condition.type == VAL_PRIMITIVE)
     {
-        if (condition.primitive)
+        if (condition.data.primitive)
             truths++;
     }
     else if (condition.type != VAL_NIL)
@@ -803,7 +803,7 @@ int ReduceConditionC(SYNTAX_TREE* node)
 
     if (logic.type == VAL_PRIMITIVE)
     {
-        if (logic.primitive)
+        if (logic.data.primitive)
             truths++;
     }
     else if (logic.type != VAL_NIL)
@@ -812,7 +812,7 @@ int ReduceConditionC(SYNTAX_TREE* node)
     }
 
     gLastExpression.type = VAL_PRIMITIVE;
-    gLastExpression.primitive = (truths == 0) ? 1 : 0;
+    gLastExpression.data.primitive = (truths == 0) ? 1 : 0;
 
     return error;
 }
@@ -833,7 +833,7 @@ int ReduceConditionD(SYNTAX_TREE* node)
     int truths = 0;
     if (condition.type == VAL_PRIMITIVE)
     {
-        if (condition.primitive)
+        if (condition.data.primitive)
             truths++;
     }
     else if (condition.type != VAL_NIL)
@@ -843,7 +843,7 @@ int ReduceConditionD(SYNTAX_TREE* node)
     
     if (logic.type == VAL_PRIMITIVE)
     {
-        if (logic.primitive)
+        if (logic.data.primitive)
             truths++;
     }
     else if (logic.type != VAL_NIL)
@@ -852,7 +852,7 @@ int ReduceConditionD(SYNTAX_TREE* node)
     }
     
     gLastExpression.type = VAL_PRIMITIVE;
-    gLastExpression.primitive = (truths == 1) ? 1 : 0;
+    gLastExpression.data.primitive = (truths == 1) ? 1 : 0;
 
     return error;
 }
@@ -880,12 +880,12 @@ int ReduceLogicA(SYNTAX_TREE* node)
     
     if (gLastExpression.type == VAL_PRIMITIVE)
     {
-        gLastExpression.primitive = gLastExpression.primitive ? 0 : 1;
+        gLastExpression.data.primitive = gLastExpression.data.primitive ? 0 : 1;
     }
     else if (gLastExpression.type == VAL_NIL)
     {
         gLastExpression.type = VAL_PRIMITIVE;
-        gLastExpression.primitive = 1;
+        gLastExpression.data.primitive = 1;
     }
     else
     {
@@ -927,41 +927,41 @@ int ReduceComparisonA(SYNTAX_TREE* node)
         if (comparison.type == VAL_PRIMITIVE)
         {
             gLastExpression.type = VAL_PRIMITIVE;
-            gLastExpression.primitive = (comparison.primitive == arithmetic.primitive);
+            gLastExpression.data.primitive = (comparison.data.primitive == arithmetic.data.primitive);
         }
         else if (comparison.type == VAL_FLOATING_POINT)
         {
             gLastExpression.type = VAL_PRIMITIVE;
-            gLastExpression.primitive = (comparison.floatp == arithmetic.floatp);
+            gLastExpression.data.primitive = (comparison.data.floatp == arithmetic.data.floatp);
         }
         else if (comparison.type == VAL_STRING)
         {
             gLastExpression.type = VAL_PRIMITIVE;
-            gLastExpression.primitive = strcmp(comparison.string, arithmetic.string) ? 0 : 1;
+            gLastExpression.data.primitive = strcmp(comparison.data.string, arithmetic.data.string) ? 0 : 1;
         }
         else if (comparison.type == VAL_REFERENCE)
         {
             gLastExpression.type = VAL_PRIMITIVE;
-            gLastExpression.primitive = (comparison.reference == arithmetic.reference);
+            gLastExpression.data.primitive = (comparison.data.reference == arithmetic.data.reference);
         }
         else if (comparison.type == VAL_FUNCTION)
         {
             gLastExpression.type = VAL_PRIMITIVE;
-            gLastExpression.primitive = (comparison.function == arithmetic.function);
+            gLastExpression.data.primitive = (comparison.data.function == arithmetic.data.function);
         }
         else
         {
             gLastExpression.type = VAL_PRIMITIVE;
-            gLastExpression.primitive = 1;
+            gLastExpression.data.primitive = 1;
         }
     }
     else
     {
         gLastExpression.type = VAL_PRIMITIVE;
-        gLastExpression.primitive = 0;
+        gLastExpression.data.primitive = 0;
     }
     
-    gLastExpression.primitive = gLastExpression.primitive ? 1 : 0;
+    gLastExpression.data.primitive = gLastExpression.data.primitive ? 1 : 0;
 
     return error;
 }
@@ -984,38 +984,38 @@ int ReduceComparisonB(SYNTAX_TREE* node)
         if (comparison.type == VAL_PRIMITIVE)
         {
             gLastExpression.type = VAL_PRIMITIVE;
-            gLastExpression.primitive = (comparison.primitive != arithmetic.primitive);
+            gLastExpression.data.primitive = (comparison.data.primitive != arithmetic.data.primitive);
         }
         else if (comparison.type == VAL_FLOATING_POINT)
         {
             gLastExpression.type = VAL_PRIMITIVE;
-            gLastExpression.primitive = (comparison.floatp != arithmetic.floatp);
+            gLastExpression.data.primitive = (comparison.data.floatp != arithmetic.data.floatp);
         }
         else if (comparison.type == VAL_STRING)
         {
             gLastExpression.type = VAL_PRIMITIVE;
-            gLastExpression.primitive = strcmp(comparison.string, arithmetic.string) ? 1 : 0;
+            gLastExpression.data.primitive = strcmp(comparison.data.string, arithmetic.data.string) ? 1 : 0;
         }
         else if (comparison.type == VAL_REFERENCE)
         {
             gLastExpression.type = VAL_PRIMITIVE;
-            gLastExpression.primitive = (comparison.reference != arithmetic.reference);
+            gLastExpression.data.primitive = (comparison.data.reference != arithmetic.data.reference);
         }
         else if (comparison.type == VAL_FUNCTION)
         {
             gLastExpression.type = VAL_PRIMITIVE;
-            gLastExpression.primitive = (comparison.function != arithmetic.function);
+            gLastExpression.data.primitive = (comparison.data.function != arithmetic.data.function);
         }
         else
         {
             gLastExpression.type = VAL_PRIMITIVE;
-            gLastExpression.primitive = 0;
+            gLastExpression.data.primitive = 0;
         }
     }
     else
     {
         gLastExpression.type = VAL_PRIMITIVE;
-        gLastExpression.primitive = 1;
+        gLastExpression.data.primitive = 1;
     }
 
     return error;
@@ -1037,22 +1037,22 @@ int ReduceComparisonC(SYNTAX_TREE* node)
     if (comparison.type == VAL_PRIMITIVE && arithmetic.type == VAL_PRIMITIVE)
     {
         gLastExpression.type = VAL_PRIMITIVE;
-        gLastExpression.primitive = comparison.primitive < arithmetic.primitive;
+        gLastExpression.data.primitive = comparison.data.primitive < arithmetic.data.primitive;
     }
     else if (comparison.type == VAL_FLOATING_POINT || arithmetic.type == VAL_FLOATING_POINT)
     {
         float a = TypeFloat(comparison);
         float b = TypeFloat(arithmetic);
         gLastExpression.type = VAL_PRIMITIVE;
-        gLastExpression.primitive = a < b;
+        gLastExpression.data.primitive = a < b;
     }
     else
     {
         // string comparison
-        gLastExpression.primitive = VAL_NIL;
+        gLastExpression.data.primitive = VAL_NIL;
     }
     
-    gLastExpression.primitive = gLastExpression.primitive ? 1 : 0;
+    gLastExpression.data.primitive = gLastExpression.data.primitive ? 1 : 0;
 
     return error;
 }
@@ -1073,14 +1073,14 @@ int ReduceComparisonD(SYNTAX_TREE* node)
     if (comparison.type == VAL_PRIMITIVE && arithmetic.type == VAL_PRIMITIVE)
     {
         gLastExpression.type = VAL_PRIMITIVE;
-        gLastExpression.primitive = comparison.primitive > arithmetic.primitive;
+        gLastExpression.data.primitive = comparison.data.primitive > arithmetic.data.primitive;
     }
     else if (comparison.type == VAL_FLOATING_POINT || arithmetic.type == VAL_FLOATING_POINT)
     {
         float a = TypeFloat(comparison);
         float b = TypeFloat(arithmetic);
         gLastExpression.type = VAL_PRIMITIVE;
-        gLastExpression.primitive = a > b;
+        gLastExpression.data.primitive = a > b;
     }
     else
     {
@@ -1088,7 +1088,7 @@ int ReduceComparisonD(SYNTAX_TREE* node)
         gLastExpression.type = VAL_NIL;
     }
     
-    gLastExpression.primitive = gLastExpression.primitive ? 1 : 0;
+    gLastExpression.data.primitive = gLastExpression.data.primitive ? 1 : 0;
 
     return error;
 }
@@ -1109,14 +1109,14 @@ int ReduceComparisonE(SYNTAX_TREE* node)
     if (comparison.type == VAL_PRIMITIVE && arithmetic.type == VAL_PRIMITIVE)
     {
         gLastExpression.type = VAL_PRIMITIVE;
-        gLastExpression.primitive = comparison.primitive <= arithmetic.primitive;
+        gLastExpression.data.primitive = comparison.data.primitive <= arithmetic.data.primitive;
     }
     else if (comparison.type == VAL_FLOATING_POINT || arithmetic.type == VAL_FLOATING_POINT)
     {
         float a = TypeFloat(comparison);
         float b = TypeFloat(arithmetic);
         gLastExpression.type = VAL_PRIMITIVE;
-        gLastExpression.primitive = a <= b;
+        gLastExpression.data.primitive = a <= b;
     }
     else
     {
@@ -1124,7 +1124,7 @@ int ReduceComparisonE(SYNTAX_TREE* node)
         gLastExpression.type = VAL_NIL;
     }
     
-    gLastExpression.primitive = gLastExpression.primitive ? 1 : 0;
+    gLastExpression.data.primitive = gLastExpression.data.primitive ? 1 : 0;
 
     return error;
 }
@@ -1145,14 +1145,14 @@ int ReduceComparisonF(SYNTAX_TREE* node)
     if (comparison.type == VAL_PRIMITIVE && arithmetic.type == VAL_PRIMITIVE)
     {
         gLastExpression.type = VAL_PRIMITIVE;
-        gLastExpression.primitive = comparison.primitive >= arithmetic.primitive;
+        gLastExpression.data.primitive = comparison.data.primitive >= arithmetic.data.primitive;
     }
     else if (comparison.type == VAL_FLOATING_POINT || arithmetic.type == VAL_FLOATING_POINT)
     {
         float a = TypeFloat(comparison);
         float b = TypeFloat(arithmetic);
         gLastExpression.type = VAL_PRIMITIVE;
-        gLastExpression.primitive = a >= b;
+        gLastExpression.data.primitive = a >= b;
     }
     else
     {
@@ -1160,7 +1160,7 @@ int ReduceComparisonF(SYNTAX_TREE* node)
         gLastExpression.type = VAL_NIL;
     }
     
-    gLastExpression.primitive = gLastExpression.primitive ? 1 : 0;
+    gLastExpression.data.primitive = gLastExpression.data.primitive ? 1 : 0;
 
     return error;
 }
@@ -1193,22 +1193,22 @@ int ReduceArithmeticA(SYNTAX_TREE* node)
     if (arithmetic.type == VAL_PRIMITIVE && term.type == VAL_PRIMITIVE)
     {
         gLastExpression.type = VAL_PRIMITIVE;
-        gLastExpression.primitive = arithmetic.primitive + term.primitive;
+        gLastExpression.data.primitive = arithmetic.data.primitive + term.data.primitive;
     }
     else if (arithmetic.type == VAL_PRIMITIVE && term.type == VAL_FLOATING_POINT)
     {
         gLastExpression.type = VAL_FLOATING_POINT;
-        gLastExpression.floatp = (float)arithmetic.primitive + term.floatp;
+        gLastExpression.data.floatp = (float)arithmetic.data.primitive + term.data.floatp;
     }
     else if (arithmetic.type == VAL_FLOATING_POINT && term.type == VAL_PRIMITIVE)
     {
         gLastExpression.type = VAL_FLOATING_POINT;
-        gLastExpression.floatp = arithmetic.floatp + (float)term.primitive;
+        gLastExpression.data.floatp = arithmetic.data.floatp + (float)term.data.primitive;
     }
     else if (arithmetic.type == VAL_FLOATING_POINT && term.type == VAL_FLOATING_POINT)
     {
         gLastExpression.type = VAL_FLOATING_POINT;
-        gLastExpression.floatp = arithmetic.floatp + term.floatp;
+        gLastExpression.data.floatp = arithmetic.data.floatp + term.data.floatp;
     }
     else if (arithmetic.type == VAL_STRING || term.type == VAL_STRING)
     {
@@ -1218,31 +1218,31 @@ int ReduceArithmeticA(SYNTAX_TREE* node)
             if (arithmetic.type == VAL_PRIMITIVE)
             {
                 char* string = (char*)ALLOCATE(sizeof(char) * 16);
-                sprintf(string, "%i", arithmetic.primitive);
+                sprintf(string, "%i", arithmetic.data.primitive);
                 arithmetic.type = VAL_STRING;
-                arithmetic.string = string;
+                arithmetic.data.string = string;
             }
             else if (arithmetic.type == VAL_FLOATING_POINT)
             {
                 char* string = (char*)ALLOCATE(sizeof(char) * 16);
-                sprintf(string, "%g", arithmetic.floatp);
+                sprintf(string, "%g", arithmetic.data.floatp);
                 arithmetic.type = VAL_STRING;
-                arithmetic.string = string;
+                arithmetic.data.string = string;
             }
             else if (arithmetic.type == VAL_REFERENCE)
             {
                 arithmetic.type = VAL_STRING;
-                arithmetic.string = "[OBJECT REFERENCE]";
+                arithmetic.data.string = "[OBJECT REFERENCE]";
             }
             else if (arithmetic.type == VAL_FUNCTION)
             {
                 arithmetic.type = VAL_STRING;
-                arithmetic.string = "[FUNCTION]";
+                arithmetic.data.string = "[FUNCTION]";
             }
             else
             {
                 arithmetic.type = VAL_STRING;
-                arithmetic.string = "[NIL]";
+                arithmetic.data.string = "[NIL]";
             }
         }
         
@@ -1251,38 +1251,38 @@ int ReduceArithmeticA(SYNTAX_TREE* node)
             if (term.type == VAL_PRIMITIVE)
             {
                 char* string = (char*)ALLOCATE(sizeof(char) * 16);
-                sprintf(string, "%i", term.primitive);
+                sprintf(string, "%i", term.data.primitive);
                 term.type = VAL_STRING;
-                term.string = string;
+                term.data.string = string;
             }
             else if (term.type == VAL_FLOATING_POINT)
             {
                 char* string = (char*)ALLOCATE(sizeof(char) * 16);
-                sprintf(string, "%g", term.floatp);
+                sprintf(string, "%g", term.data.floatp);
                 term.type = VAL_STRING;
-                term.string = string;
+                term.data.string = string;
             }
             else if (term.type == VAL_REFERENCE)
             {
                 term.type = VAL_STRING;
-                term.string = "[OBJECT REFERENCE]";
+                term.data.string = "[OBJECT REFERENCE]";
             }
             else if (term.type == VAL_FUNCTION)
             {
                 term.type = VAL_STRING;
-                term.string = "[FUNCTION]";
+                term.data.string = "[FUNCTION]";
             }
             else
             {
                 term.type = VAL_STRING;
-                term.string = "[NIL]";
+                term.data.string = "[NIL]";
             }
         }
         
-        int length = strlen(arithmetic.string) + strlen(term.string) + 1;
+        int length = strlen(arithmetic.data.string) + strlen(term.data.string) + 1;
         char* string = (char*)ALLOCATE(sizeof(char) * length);
-        sprintf(string, "%s%s", arithmetic.string, term.string);
-        gLastExpression.string = string;
+        sprintf(string, "%s%s", arithmetic.data.string, term.data.string);
+        gLastExpression.data.string = string;
     }
     else
     {
@@ -1308,24 +1308,24 @@ int ReduceArithmeticB(SYNTAX_TREE* node)
     if (arithmetic.type == VAL_PRIMITIVE && term.type == VAL_PRIMITIVE)
     {
         gLastExpression.type = VAL_PRIMITIVE;
-        gLastExpression.primitive = arithmetic.primitive - term.primitive;
+        gLastExpression.data.primitive = arithmetic.data.primitive - term.data.primitive;
     }
     else if (arithmetic.type == VAL_FLOATING_POINT || term.type == VAL_FLOATING_POINT)
     {
         if (arithmetic.type == VAL_FLOATING_POINT && term.type == VAL_FLOATING_POINT)
         {
             gLastExpression.type = VAL_FLOATING_POINT;
-            gLastExpression.floatp = arithmetic.floatp - term.floatp;
+            gLastExpression.data.floatp = arithmetic.data.floatp - term.data.floatp;
         }
         else if (arithmetic.type == VAL_FLOATING_POINT && term.type == VAL_PRIMITIVE)
         {
             gLastExpression.type = VAL_FLOATING_POINT;
-            gLastExpression.floatp = arithmetic.floatp - (float)term.primitive;
+            gLastExpression.data.floatp = arithmetic.data.floatp - (float)term.data.primitive;
         }
         else if (arithmetic.type == VAL_PRIMITIVE && term.type == VAL_FLOATING_POINT)
         {
             gLastExpression.type = VAL_FLOATING_POINT;
-            gLastExpression.floatp = (float)arithmetic.primitive - term.floatp;
+            gLastExpression.data.floatp = (float)arithmetic.data.primitive - term.data.floatp;
         }
         else
         {
@@ -1356,7 +1356,7 @@ int ReduceArithmeticC(SYNTAX_TREE* node)
     if (arithmetic.type == VAL_PRIMITIVE && term.type == VAL_PRIMITIVE)
     {
         gLastExpression.type = VAL_PRIMITIVE;
-        gLastExpression.primitive = arithmetic.primitive & term.primitive;
+        gLastExpression.data.primitive = arithmetic.data.primitive & term.data.primitive;
     }
     else
     {
@@ -1382,7 +1382,7 @@ int ReduceArithmeticD(SYNTAX_TREE* node)
     if (arithmetic.type == VAL_PRIMITIVE && term.type == VAL_PRIMITIVE)
     {
         gLastExpression.type = VAL_PRIMITIVE;
-        gLastExpression.primitive = arithmetic.primitive | term.primitive;
+        gLastExpression.data.primitive = arithmetic.data.primitive | term.data.primitive;
     }
     else
     {
@@ -1420,14 +1420,14 @@ int ReduceTermA(SYNTAX_TREE* node)
     if (term.type == VAL_PRIMITIVE && factor.type == VAL_PRIMITIVE)
     {
         gLastExpression.type = VAL_PRIMITIVE;
-        gLastExpression.primitive = term.primitive * factor.primitive;
+        gLastExpression.data.primitive = term.data.primitive * factor.data.primitive;
     }
     else if (term.type == VAL_FLOATING_POINT || factor.type == VAL_FLOATING_POINT)
     {
         float a = TypeFloat(term);
         float b = TypeFloat(factor);
         gLastExpression.type = VAL_FLOATING_POINT;
-        gLastExpression.floatp = (a * b);
+        gLastExpression.data.floatp = (a * b);
     }
     else
     {
@@ -1453,22 +1453,22 @@ int ReduceTermB(SYNTAX_TREE* node)
     if (term.type == VAL_PRIMITIVE && factor.type == VAL_PRIMITIVE)
     {
         gLastExpression.type = VAL_PRIMITIVE;
-        gLastExpression.primitive = term.primitive / factor.primitive;
+        gLastExpression.data.primitive = term.data.primitive / factor.data.primitive;
     }
     else if (term.type == VAL_FLOATING_POINT && factor.type == VAL_FLOATING_POINT)
     {
         gLastExpression.type = VAL_FLOATING_POINT;
-        gLastExpression.floatp = term.floatp / factor.floatp;
+        gLastExpression.data.floatp = term.data.floatp / factor.data.floatp;
     }
     else if (term.type == VAL_FLOATING_POINT && factor.type == VAL_PRIMITIVE)
     {
         gLastExpression.type = VAL_FLOATING_POINT;
-        gLastExpression.floatp = term.floatp / (float)factor.primitive;
+        gLastExpression.data.floatp = term.data.floatp / (float)factor.data.primitive;
     }
     else if (term.type == VAL_PRIMITIVE && factor.type == VAL_FLOATING_POINT)
     {
         gLastExpression.type = VAL_FLOATING_POINT;
-        gLastExpression.floatp = (float)term.primitive / factor.floatp;
+        gLastExpression.data.floatp = (float)term.data.primitive / factor.data.floatp;
     }
     else
     {
@@ -1501,11 +1501,11 @@ int ReduceFactorA(SYNTAX_TREE* node)
     
     if (gLastExpression.type == VAL_PRIMITIVE)
     {
-        gLastExpression.primitive = -gLastExpression.primitive;
+        gLastExpression.data.primitive = -gLastExpression.data.primitive;
     }
     else if (gLastExpression.type == VAL_FLOATING_POINT)
     {
-        gLastExpression.floatp = -gLastExpression.floatp;
+        gLastExpression.data.floatp = -gLastExpression.data.floatp;
     }
     else
     {
@@ -1527,7 +1527,7 @@ int ReduceFactorB(SYNTAX_TREE* node)
     
     if (gLastExpression.type == VAL_PRIMITIVE)
     {
-        gLastExpression.primitive = !gLastExpression.primitive;
+        gLastExpression.data.primitive = !gLastExpression.data.primitive;
     }
     else
     {
@@ -1583,7 +1583,7 @@ int ReduceFinalC(SYNTAX_TREE* node)
     int error = 0;
     
     gLastExpression.type = VAL_PRIMITIVE;
-    gLastExpression.primitive = atoi(integer1->string);
+    gLastExpression.data.primitive = atoi(integer1->string);
 
     return error;
 }
@@ -1597,7 +1597,7 @@ int ReduceFinalD(SYNTAX_TREE* node)
     int error = 0;
     
     gLastExpression.type = VAL_FLOATING_POINT;
-    gLastExpression.floatp = atof(float1->string);
+    gLastExpression.data.floatp = atof(float1->string);
     
     return error;
 }
@@ -1611,7 +1611,7 @@ int ReduceFinalE(SYNTAX_TREE* node)
     int error = 0;
     
     gLastExpression.type = VAL_STRING;
-    gLastExpression.string = string1->string;
+    gLastExpression.data.string = string1->string;
     
     return error;
 }
@@ -1673,13 +1673,13 @@ int ReduceReferenceB(SYNTAX_TREE* node)
         gCurrentContext = (CONTEXT*)ALLOC(sizeof(CONTEXT));
         gCurrentContext->list = NULL;
         gCurrentContext->ref_count = 1;
-        gCurrentContext->parent = function.function->closure;
+        gCurrentContext->parent = function.data.function->closure;
         CONTEXT* func_context = gCurrentContext;
         
-        if (function.function->built_in) {
-            error = error || function.function->functor(0);
+        if (function.data.function->built_in) {
+            error = error || function.data.function->functor(0);
         } else {
-            error = error || InterpretNode(function.function->body);
+            error = error || InterpretNode(function.data.function->body);
         }
 
       // remove calling context
@@ -1718,7 +1718,7 @@ int ReduceReferenceC(SYNTAX_TREE* node)
     {
         // evaluate arguments
         error = error || InterpretNode(arguments1);
-        PAIR* param = function.function->parameters;
+        PAIR* param = function.data.function->parameters;
         PAIR* arg = gArgumentEvaluation;
 
         // create new context
@@ -1727,7 +1727,7 @@ int ReduceReferenceC(SYNTAX_TREE* node)
         gCurrentContext = (CONTEXT*)ALLOC(sizeof(CONTEXT));
         gCurrentContext->list = NULL;
         gCurrentContext->ref_count = 1;
-        gCurrentContext->parent = function.function->closure;
+        gCurrentContext->parent = function.data.function->closure;
         CONTEXT* func_context = gCurrentContext;
         
         // store arguments in the function's closure
@@ -1759,11 +1759,11 @@ int ReduceReferenceC(SYNTAX_TREE* node)
         arg = gArgumentEvaluation;
 
         //return_value_exists = 0;
-        if (function.function->built_in)
+        if (function.data.function->built_in)
         {
-            error = error || function.function->functor(argument_count);
+            error = error || function.data.function->functor(argument_count);
         } else {        
-            error = error || InterpretNode(function.function->body);
+            error = error || InterpretNode(function.data.function->body);
         }
 
       // remove calling context
@@ -1847,10 +1847,10 @@ int ReduceObjectA(SYNTAX_TREE* node)
     int error = 0;
     
     gLastExpression.type = VAL_REFERENCE;
-    gLastExpression.reference = (CONTEXT*)ALLOC(sizeof(CONTEXT));
-    gLastExpression.reference->parent = NULL;
-    gLastExpression.reference->list = NULL;
-    gLastExpression.reference->ref_count = 0;
+    gLastExpression.data.reference = (CONTEXT*)ALLOC(sizeof(CONTEXT));
+    gLastExpression.data.reference->parent = NULL;
+    gLastExpression.data.reference->list = NULL;
+    gLastExpression.data.reference->ref_count = 0;
 
     return error;
 }
@@ -1865,7 +1865,7 @@ int ReduceObjectB(SYNTAX_TREE* node)
     error = error || InterpretNode(array_init1);
     
     gLastExpression.type = VAL_REFERENCE;
-    gLastExpression.reference = gDictionaryInit;
+    gLastExpression.data.reference = gDictionaryInit;
 
     return error;
 }
@@ -1880,7 +1880,7 @@ int ReduceObjectC(SYNTAX_TREE* node)
     error = error || InterpretNode(dictionary_init1);
     
     gLastExpression.type = VAL_REFERENCE;
-    gLastExpression.reference = gDictionaryInit;
+    gLastExpression.data.reference = gDictionaryInit;
 
     return error;
 }
@@ -2000,7 +2000,7 @@ int ReduceBooleanA(SYNTAX_TREE* node)
     int error = 0;
     
     gLastExpression.type = VAL_PRIMITIVE;
-    gLastExpression.primitive = 1;
+    gLastExpression.data.primitive = 1;
 
     return error;
 }
@@ -2013,7 +2013,7 @@ int ReduceBooleanB(SYNTAX_TREE* node)
     int error = 0;
     
     gLastExpression.type = VAL_PRIMITIVE;
-    gLastExpression.primitive = 0;
+    gLastExpression.data.primitive = 0;
 
     return error;
 }
@@ -2026,21 +2026,21 @@ void PrintObject(CONTEXT* context)
     {
         if (list->value.type == VAL_PRIMITIVE)
         {
-            printf("%i", list->value.primitive);
+            printf("%i", list->value.data.primitive);
         }
         else if (list->value.type == VAL_STRING)
         {
-            printf("'%s'", list->value.string);
+            printf("'%s'", list->value.data.string);
         }
         else if (list->value.type == VAL_REFERENCE)
         {
             //printf("[OBJECT REFERENCE]");
-            PrintObject(list->value.reference);
+            PrintObject(list->value.data.reference);
         }
         else if (list->value.type == VAL_FUNCTION)
         {
             printf("f(");
-            PAIR* itr = list->value.function->parameters;
+            PAIR* itr = list->value.data.function->parameters;
             while (itr)
             {
                 printf("%s", itr->identifier);

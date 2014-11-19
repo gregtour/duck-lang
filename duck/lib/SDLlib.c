@@ -118,7 +118,7 @@ int MakeWindow(int argument_count)
 
     width = TypeInt(r_width);
     height = TypeInt(r_height);
-    szClassName = (r_title.type == VAL_STRING) ? r_title.string : "Untitled";
+    szClassName = (r_title.type == VAL_STRING) ? r_title.data.string : "Untitled";
 
     SDL_Init(SDL_INIT_VIDEO | SDL_INIT_NOPARACHUTE);
     SDL_ShowCursor(0);
@@ -137,6 +137,7 @@ int MakeWindow(int argument_count)
     game_is_running = 1;
 
     gLastExpression.type = VAL_NIL;
+    gLastExpression.data.primitive = 0;
     return error;
 }
 
@@ -148,6 +149,7 @@ int ClearScreen(int argument_count)
     glLoadIdentity();
 
     gLastExpression.type = VAL_NIL;
+    gLastExpression.data.primitive = 0;
     return error;
 }
 
@@ -159,6 +161,7 @@ int PageFlip(int argument_count)
     SDL_GL_SwapBuffers();
 
     gLastExpression.type = VAL_NIL;
+    gLastExpression.data.primitive = 0;
     return error;
 }
 
@@ -169,25 +172,23 @@ int EventLoop(int argument_count)
     {
         if (event.type == SDL_QUIT) 
         {
-	    	//SDL_Quit();
             game_is_running = 0;
 		} else if ((event.type == SDL_KEYDOWN) 
                 &&  event.key.keysym.sym == 27) 
         {
-            // entity::Shutdown();
-            //SDL_Quit();
             game_is_running = 0;
         }
     }
     
     gLastExpression.type = VAL_NIL;
+    gLastExpression.data.primitive = 0;
     return 0;
 }
 
 int StillRunning(int argument_count)
 {
     gLastExpression.type = VAL_PRIMITIVE;
-    gLastExpression.primitive = game_is_running;
+    gLastExpression.data.primitive = game_is_running;
     return 0;
 }
 
@@ -202,7 +203,8 @@ int WaitKey(int argument_count)
             if (event.type == SDL_QUIT) 
             {
                 return 0;
-		    } else if ((event.type == SDL_KEYDOWN)) 
+		    } 
+            else if (event.type == SDL_KEYDOWN)
             {
                 return 0;
             }
@@ -210,6 +212,7 @@ int WaitKey(int argument_count)
     }
     
     gLastExpression.type = VAL_NIL;
+    gLastExpression.data.primitive = 0;
     return 0;
 }
 
@@ -217,6 +220,7 @@ int Quit(int argument_count)
 {
     SDL_Quit();
     gLastExpression.type = VAL_NIL;
+    gLastExpression.data.primitive = 0;
     return 0;
 }
 
@@ -229,6 +233,7 @@ int GlLoadIdentity(int argument_count)
     glLoadIdentity();
 
     gLastExpression.type = VAL_NIL;
+    gLastExpression.data.primitive = 0;
     return error;
 }
 
@@ -245,6 +250,7 @@ int GlTranslatef(int argument_count)
                  TypeFloat(Z));
 
     gLastExpression.type = VAL_NIL;
+    gLastExpression.data.primitive = 0;
     return error;
 }
 
@@ -263,6 +269,7 @@ int GlRotatef(int argument_count)
               TypeFloat(Z));
 
     gLastExpression.type = VAL_NIL;
+    gLastExpression.data.primitive = 0;
     return error;
 }
 
@@ -279,6 +286,7 @@ int GlScalef(int argument_count)
              TypeFloat(Z));
 
     gLastExpression.type = VAL_NIL;
+    gLastExpression.data.primitive = 0;
     return error;
 }
 
@@ -289,11 +297,13 @@ int GlBegin(int argument_count)
 
     VALUE mode = GetRecord("primitive", gCurrentContext);
 
-    if (mode.type == VAL_PRIMITIVE) {
-        glBegin(mode.primitive);
+    if (mode.type == VAL_PRIMITIVE) 
+    {
+        glBegin(mode.data.primitive);
     }
 
     gLastExpression.type = VAL_NIL;
+    gLastExpression.data.primitive = 0;
     return error;
 }
 
@@ -304,6 +314,7 @@ int GlEnd(int argument_count)
     glEnd();
 
     gLastExpression.type = VAL_NIL;
+    gLastExpression.data.primitive = 0;
     return error;
 }
 
@@ -320,6 +331,7 @@ int GlColor3f(int argument_count)
               TypeFloat(B));
 
     gLastExpression.type = VAL_NIL;
+    gLastExpression.data.primitive = 0;
     return error;
 }
 
@@ -336,6 +348,7 @@ int GlVertex3f(int argument_count)
                TypeFloat(Z));
 
     gLastExpression.type = VAL_NIL;
+    gLastExpression.data.primitive = 0;
     return error;
 }
 
@@ -352,6 +365,7 @@ int GlNormal3f(int argument_count)
                TypeFloat(Z));
 
     gLastExpression.type = VAL_NIL;
+    gLastExpression.data.primitive = 0;
     return error;
 }
 

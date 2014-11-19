@@ -38,5 +38,31 @@ void ForceFreeContext(CONTEXT* context);
 VALUE GetRecord(const char* identifier, CONTEXT* context);
 void  StoreRecord(const char* identifier, VALUE value, CONTEXT* context);
 
+/* hash table */
+#define HT_MIN_CAPACITY     2000
+#define HT_RESIZE_FACTOR    4
+
+typedef struct KEY_VALUE_PAIR
+{
+    VALUE key;
+    VALUE value;
+} KEY_VALUE_PAIR;
+
+typedef struct HASH_TABLE
+{
+    int capacity;
+    int size;
+    KEY_VALUE_PAIR* table;    
+    // ...
+} HASH_TABLE;
+
+VALUE HashGet(VALUE key_identifier, HASH_TABLE* table);
+void  HashStore(VALUE key_identifier, VALUE store, HASH_TABLE* table);
+
+unsigned int HashFunction(VALUE value);
+HASH_TABLE* CreateHashTable();
+void FreeHashTable(HASH_TABLE* table);
+void ResizeHashTable(HASH_TABLE* table);
+
 #endif // _MEMORY_H
 
