@@ -1,6 +1,9 @@
 import Rand
 import duck
-Rand.seed(3)
+Rand.seed()
+duck.println("--------------")
+duck.println("Rand Int")
+duck.println("--------------")
 for i = 0 to 10 do
   duck.println(Rand.rand())
 loop

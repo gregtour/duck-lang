@@ -3,7 +3,7 @@
   Author: Robert Cope
 
   TODO:
-    * More functions? 
+    * More functions?
     * Clean up code, make sure implementation of XORSHIFT works well.
 
 */
@@ -25,14 +25,14 @@ worldwide. This software is distributed without any warranty.
 
 See <http://creativecommons.org/publicdomain/zero/1.0/>. */
 
-uint64_t xor_s[ 2 ] = {0x021f9c6a70ca0c24ULL, 0xbae766b26645aa22ULL};
+uint64_t xorshift_seed[ 2 ] = {0x021f9c6a70ca0c24ULL, 0xbae766b26645aa22ULL};
 
-uint64_t xorshift_next(void) { 
-	uint64_t s1 = xor_s[ 0 ];
-	const uint64_t s0 = xor_s[ 1 ];
-	xor_s[ 0 ] = s0;
+uint64_t XORShiftNext() { 
+	uint64_t s1 = xorshift_seed[ 0 ];
+	const uint64_t s0 = xorshift_seed[ 1 ];
+	xorshift_seed[ 0 ] = s0;
 	s1 ^= s1 << 23; // a
-	return ( xor_s[ 1 ] = ( s1 ^ s0 ^ ( s1 >> 17 ) ^ ( s0 >> 26 ) ) ) + s0; // b, c
+	return ( xorshift_seed[ 1 ] = ( s1 ^ s0 ^ ( s1 >> 17 ) ^ ( s0 >> 26 ) ) ) + s0; // b, c
 }
 
 const uint64_t XORSHIFT_MAX = 0xffffffffffffffffULL;
@@ -50,11 +50,11 @@ int SeedRand(int arg_count){
     seed = TypeInt(argument);
   else
     seed = time(NULL);
-    
+
   srand(seed);
   //Seed the XORSHIFT128+ PRNG with whatever junky random number generator was built in.
-  xor_s[0] = ((long long)rand() << 32) | rand();
-  xor_s[1] = ((long long)rand() << 32) | rand();
+  xorshift_seed[0] = ((long long)rand() << 32) | rand();
+  xorshift_seed[1] = ((long long)rand() << 32) | rand();
 
   gLastExpression.type = VAL_PRIMITIVE;
   gLastExpression.data.primitive = seed;
@@ -73,24 +73,24 @@ int GetBoundedRand(int arg_count){
     int num = 0;
     long lower_bound = 0;
     long upper_bound = 0;
-    if(fb_arg.type != VAL_NIL) 
+    if(fb_arg.type != VAL_NIL)
         lower_bound = TypeInt(fb_arg);
     else
         lower_bound = INT_MIN;
     if(sb_arg.type != VAL_NIL)
         upper_bound = TypeInt(sb_arg);
-    else        
+    else
         upper_bound = INT_MAX;
-    
+
     //Swap if user has misordered bounds..
     if(upper_bound < lower_bound){
       int tmp = lower_bound;
       lower_bound = upper_bound;
       upper_bound = tmp;
     }
- 
+
     //TODO: Fix this hack.
-    num = (int)((xorshift_next() & UINT_MAX) % (upper_bound - lower_bound + 1)) + lower_bound;
+    num = (int)((XORShiftNext() & UINT_MAX) % (upper_bound - lower_bound + 1)) + lower_bound;
     gLastExpression.type = VAL_PRIMITIVE;
     gLastExpression.data.primitive = num;
 
@@ -117,7 +117,7 @@ int GetBoundedRandFloat(int arg_count){
     }
 
 
-    num =   (xorshift_next() * (upper_bound - lower_bound))/(XORSHIFT_MAX) + lower_bound;
+    num =   (XORShiftNext() * (upper_bound - lower_bound))/(XORSHIFT_MAX) + lower_bound;
 
     gLastExpression.type = VAL_FLOATING_POINT;
     gLastExpression.data.floatp = num;
