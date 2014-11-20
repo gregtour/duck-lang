@@ -5,6 +5,7 @@ include(FindOpenGL)
 
 # duck
 add_executable(duck
+  ../duck/main.c
   ../duck/interpreter.c
   ../duck/lexer.c
   ../duck/parser.c
@@ -19,6 +20,7 @@ add_executable(duck
 
 # gduck
 add_executable(gduck
+  ../duck/main.c
   ../duck/interpreter.c
   ../duck/lexer.c
   ../duck/parser.c
