@@ -1,5 +1,13 @@
+/*
+    Duck Programming Language - main.c
+    Thursday November 20th, 2014
+*/
 #include "interpreter.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
 
+/* main(args) accepts program file to run */
 int main(int argc, char* argv[])
 {
     const char*   program;
@@ -8,9 +16,10 @@ int main(int argc, char* argv[])
     char*         buffer;
     int           error;
 
-    if (argc > 1)
+    // choose program source
+    if (argc > 1) {
         program = argv[1];
-    else {
+    } else {
 #ifdef _GDUCK
         printf("Usage: gduck program.src\n");
 #else
@@ -19,9 +28,13 @@ int main(int argc, char* argv[])
         return 1;
     }
 
-    //printf("%s\n", program);
-    // lex source
+#ifdef _PROFILING
+    // time execution
+    struct timespec start, finish;
+    double elapsed;
+#endif
 
+    // lex source
     buffer = 0;
     lexing = LexSource(program, &buffer, CONTEXT_FREE_GRAMMAR);
     if (lexing == NULL)
@@ -31,7 +44,6 @@ int main(int argc, char* argv[])
         getchar();
         return 1;
     }
-    //PrintLexing(lexing);
 
     // parse source
     ast = ParseSource(lexing, PARSE_TABLE, CONTEXT_FREE_GRAMMAR);
@@ -42,10 +54,12 @@ int main(int argc, char* argv[])
         getchar();
         return 1;
     }
-    //PrintParseTree(ast, CONTEXT_FREE_GRAMMAR);
 
-    // compile source
-    //printf("Running...\n");
+#ifdef _PROFILING
+    clock_gettime(CLOCK_MONOTONIC, &start);
+#endif
+
+    // interpret source and run
     error = Interpret(ast);
     if (error)
     {
@@ -56,8 +70,12 @@ int main(int argc, char* argv[])
         return 1;
     }
 
-    //printf("Done.\n");
-    //getchar();
+#ifdef _PROFILING
+    clock_gettime(CLOCK_MONOTONIC, &finish);
+    elapsed = (finish.tv_sec - start.tv_sec);
+    elapsed += (finish.tv_nsec - start.tv_nsec) / 1000000000.0;
+    printf("Time elapsed: %g\n", elapsed);
+#endif
 
     // clean up
     FreeEnvironment();
@@ -69,3 +87,4 @@ int main(int argc, char* argv[])
 #endif // _MEM_TRACKING
     return 0;
 }
+

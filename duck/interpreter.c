@@ -188,27 +188,33 @@ void  AddParameter(VALUE functor, const char* argument_name)
 }
 
 /*
-    identifiers & scope
-    types
+int Interpret(SYNTAX_TRE* tree)
+    ---------------------------------------------------------
+    Run a duck program from the command console by parsing it
+    into a syntax tree and then interating over the program
+    definitions.
 */
-
 int Interpret(SYNTAX_TREE* tree)
 {
     CreateEnvironment();
 
+    /* global namespace */
     gCurrentContext = gGlobalContext = (CONTEXT*)ALLOC(sizeof(CONTEXT));
     gCurrentContext->parent = NULL;
     gCurrentContext->list = NULL;
     gCurrentContext->ref_count = -1;
 
+    /* current expression */
     gLastExpression.type = VAL_NIL;
     gLastExpression.data.primitive = 0;
 
+    /* global variables */
     gParameterListing = NULL;
     gDictionaryInit = NULL;
     gArrayIndex = 0;
     gArgumentEvaluation = NULL;
 
+    /* l-value bound context */
     gLValueIdentifier = NULL;
     gLValueContext = NULL;
     gLValueIndex.type = VAL_NIL;
@@ -222,16 +228,17 @@ int Interpret(SYNTAX_TREE* tree)
     BindAdditionalLibraries();
     BindRandLibrary();
 
+    /* function definition */
     gParameterListing = NULL;
 
+    /* program control */
     returning = 0;
     breaking = 0;
     continuing = 0;
-
-    //return InterpretNode(tree);
+    
+    /* run */
     int error = InterpretNode(tree);
     ForceFreeContext(gGlobalContext);
     return error;
 }
-
 

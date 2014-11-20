@@ -4,51 +4,78 @@
 #include "interpreter.h"
 #include "memory.h"
 
+void PrintValue(VALUE value)
+{
+    switch (value.type)
+    {
+        case VAL_PRIMITIVE: printf("%i", value.data.primitive); break;
+        case VAL_FLOATING_POINT: printf("%g", value.data.floatp); break;
+        case VAL_STRING: printf("%s", value.data.string); break;
+        case VAL_REFERENCE: PrintObject(value.data.reference); break;
+        case VAL_FUNCTION: PrintFunction(value.data.function); break;
+        case VAL_DICTIONARY: PrintDictionary(value.data.dictionary); break;
+        default:
+        case VAL_NIL: printf("[NIL]"); break;
+    }
+}
+
+void PrintFunction(FUNCTION* function)
+{
+    printf("f(");
+    PAIR* itr = function->parameters;
+    while (itr)
+    {
+        printf("%s", itr->identifier);
+        if (itr->next)
+            printf(", ");
+        itr = itr->next;
+    }
+    printf(")");
+}
+
+void PrintDictionary(HASH_TABLE* dictionary)
+{
+    int i, size;
+    size = dictionary->size;
+    printf("[");
+    for (i = 0; i < dictionary->capacity; i++)
+    {
+        if (dictionary->table[i].key.type != VAL_NIL)
+        {
+            size--;
+            PrintValue(dictionary->table[i].key);
+            printf(": ");
+            PrintValue(dictionary->table[i].value);
+            if (size) printf(", ");
+        }
+    }
+    printf("]");
+}
+
+void PrintObject(CONTEXT* context)
+{
+    printf("[");
+    PAIR* list = context->list;
+    while (list)
+    {
+        PrintValue(list->value);
+
+        if (list->next)
+            printf(", ");
+        list = list->next;
+    }
+    printf("]");
+}
+
 /* duck.print(arg1), duck.println(arg1) */
 int DuckPrint(int argument_count)
 {
     int error = 0;
     VALUE argument = GetRecord("output", gCurrentContext);
     
-    if (argument.type == VAL_PRIMITIVE)
-    {
-        printf("%i", argument.data.primitive);
-    }
-    else if (argument.type == VAL_FLOATING_POINT)
-    {
-        printf("%g", argument.data.floatp);
-    }
-    else if (argument.type == VAL_STRING)
-    {
-        printf("%s", argument.data.string);
-    }
-    else if (argument.type == VAL_REFERENCE)
-    {
-        PrintObject(argument.data.reference);
-    }
-    else if (argument.type == VAL_FUNCTION)
-    {
-        printf("f(");
-        PAIR* list = argument.data.function->parameters;
-        while (list)
-        {
-            printf("%s", list->identifier);
-            if (list->next)
-                printf(", ");
-            list = list->next;
-        }
-        printf(")");
-    }
-    else if (argument.type == VAL_DICTIONARY)
-    {
-        printf("Dictionary Object");
-    }
-    else
-    {
-        printf("[NIL]");
-    }
-    
+    PrintValue(argument);
     gLastExpression.type = VAL_NIL;
+    gLastExpression.data.primitive = 0;
     printf("\n");
 
     return error;
@@ -147,6 +174,7 @@ int DuckLength(int argument_count)
     return error;
 }
 
+/* bind the duck standard library */
 void BindStandardLibrary()
 {
     VALUE duckStdLib = LinkNamespace("duck");

@@ -133,7 +133,7 @@ int ReduceStmtB(SYNTAX_TREE* node)
     }
     else
     {
-        error = error || 12345;
+        error = 12345;
     }
 
     return error;
@@ -1708,7 +1708,7 @@ int ReduceReferenceB(SYNTAX_TREE* node)
     }
     else
     {
-        error = error || 12345;
+        error = 12345;
     }
 
     return error;
@@ -1799,8 +1799,7 @@ int ReduceReferenceC(SYNTAX_TREE* node)
     }
     else
     {
-        error = error || 12345;
-		PrintNode(node);
+        error = 12345;
     }
 
     return error;
@@ -2057,64 +2056,7 @@ int ReduceBooleanB(SYNTAX_TREE* node)
     return error;
 }
 
-void PrintObject(CONTEXT* context)
-{
-    printf("[");
-    PAIR* list = context->list;
-    while (list)
-    {
-        if (list->value.type == VAL_PRIMITIVE)
-        {
-            printf("%i", list->value.data.primitive);
-        }
-        else if (list->value.type == VAL_STRING)
-        {
-            printf("'%s'", list->value.data.string);
-        }
-        else if (list->value.type == VAL_REFERENCE)
-        {
-            //printf("[OBJECT REFERENCE]");
-            PrintObject(list->value.data.reference);
-        }
-        else if (list->value.type == VAL_FUNCTION)
-        {
-            printf("f(");
-            PAIR* itr = list->value.data.function->parameters;
-            while (itr)
-            {
-                printf("%s", itr->identifier);
-                if (itr->next)
-                    printf(", ");
-                itr = itr->next;
-            }
-            printf(")");
-        }
-        else
-        {
-            printf("[NIL]");
-        }
 
-        if (list->next)
-            printf(", ");
-        list = list->next;
-    }
-    printf("]");
-}
-
-
-void PrintNode(SYNTAX_TREE* node)
-{
-    int i;
-    for (i = 0; i < node->numChildren; i++)
-    {
-        PrintNode(node->children[i]);
-        if (node->children[i]->string)
-        {
-            printf("%s", node->children[i]->string);
-            printf(" ");
-        }
-    }
-}
 
 
 /* reduce one node */

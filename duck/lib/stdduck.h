@@ -4,11 +4,18 @@
 
 #include "interpreter.h"
 
+void PrintValue(VALUE);
+void PrintFunction(FUNCTION*);
+void PrintDictionary(struct HASH_TABLE*);
+void PrintObject(CONTEXT*);
+
 void BindStandardLibrary();
+
 int DuckPrint(int argument_count);
 int DuckPrompt(int argument_count);
-/* int Length(int argument_count); */
-void PrintObject(CONTEXT*);
+int DuckType(int argument_count);
+int DuckInt(int argument_count);
+int DuckLength(int argument_count);
 
 #endif // _STDDUCK_H
 
