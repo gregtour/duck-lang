@@ -267,7 +267,7 @@ unsigned int HashFunction(VALUE value)
             hash = 0;
             p = value.data.string;
             while (*p) {
-                hash = hash * 8;
+                hash = (hash << 7) ^ hash;
                 hash += (*p);
                 p++;
             }
@@ -301,7 +301,7 @@ void ResizeHashTable(HASH_TABLE* table)
     KEY_VALUE_PAIR* new_table;
 
     new_capacity = table->capacity * HT_RESIZE_FACTOR;
-    printf("Resizing hash table to %i entries.\n", new_capacity);
+    //printf("Resizing hash table to %i entries.\n", new_capacity);
     // if (new_capacity < table->size) new_capacity += ...
     new_table = (KEY_VALUE_PAIR*)malloc(new_capacity * sizeof(KEY_VALUE_PAIR));
     memset((void*)new_table, 0, new_capacity * sizeof(KEY_VALUE_PAIR));
