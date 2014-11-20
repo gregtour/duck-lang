@@ -127,35 +127,35 @@ void PrintContext(CONTEXT* context)
 
 VALUE LinkNamespace(const char* identifier)
 {
-    VALUE namespace;
-    namespace.type = VAL_REFERENCE;
-    namespace.data.reference = (CONTEXT*)ALLOC(sizeof(CONTEXT));
-    namespace.data.reference->parent = NULL;
-    namespace.data.reference->list = NULL;
-    namespace.data.reference->ref_count = -1;
-    StoreRecord(identifier, namespace, gGlobalContext);
-    return namespace;
+    VALUE ref_namespace;
+    ref_namespace.type = VAL_REFERENCE;
+    ref_namespace.data.reference = (CONTEXT*)ALLOC(sizeof(CONTEXT));
+    ref_namespace.data.reference->parent = NULL;
+    ref_namespace.data.reference->list = NULL;
+    ref_namespace.data.reference->ref_count = -1;
+    StoreRecord(identifier, ref_namespace, gGlobalContext);
+    return ref_namespace;
 }
 
-void  LinkFunction(VALUE namespace, const char* identifier, VALUE function)
+void  LinkFunction(VALUE ref_namespace, const char* identifier, VALUE function)
 {
-    StoreRecord(identifier, function, namespace.data.reference);
+    StoreRecord(identifier, function, ref_namespace.data.reference);
 }
 
-void  LinkConstPrimitive(VALUE namespace, const char* identifier, int value)
+void  LinkConstPrimitive(VALUE ref_namespace, const char* identifier, int value)
 {
     VALUE constant;
     constant.type = VAL_PRIMITIVE;
     constant.data.primitive = value;
-    StoreRecord(identifier, constant, namespace.data.reference);
+    StoreRecord(identifier, constant, ref_namespace.data.reference);
 }
 
-void  LinkConstFloatp(VALUE namespace, const char* identifier, float value)
+void  LinkConstFloatp(VALUE ref_namespace, const char* identifier, float value)
 {
     VALUE constant;
     constant.type = VAL_FLOATING_POINT;
     constant.data.floatp = value;
-    StoreRecord(identifier, constant, namespace.data.reference);
+    StoreRecord(identifier, constant, ref_namespace.data.reference);
 }
 
 void  LinkConstString(VALUE namespace, const char* identifier, const char* string)

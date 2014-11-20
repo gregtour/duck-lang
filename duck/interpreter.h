@@ -69,16 +69,16 @@ VALUE LinkNamespace(const char* identifier);
 VALUE CreateFunction(int (*function)(int));
 void  AddParameter(VALUE functor,
                    const char* argument_name);
-void  LinkFunction(VALUE namespace,
+void  LinkFunction(VALUE ref_namespace,
                    const char* identifier,
                    VALUE function);
-void  LinkConstPrimitive(VALUE namespace,
+void  LinkConstPrimitive(VALUE ref_namespace,
                          const char* identifier,
                          int value);
-void  LinkConstFloatp(VALUE namespace,
+void  LinkConstFloatp(VALUE ref_namespace,
                       const char* identifier,
                       float value);
-void  LinkConstString(VALUE namespace,
+void  LinkConstString(VALUE ref_namespace,
                       const char* identifier,
                       const char* string);
 
