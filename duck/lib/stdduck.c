@@ -283,6 +283,9 @@ int DuckQuit(int argument_count)
     int error = 0;
 
     halting = 1;
+    
+    gLastExpression.type = VAL_PRIMITIVE;
+    gLastExpression.type = 0;
 
     return error;
 }

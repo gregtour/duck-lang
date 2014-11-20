@@ -53,14 +53,25 @@ int ReduceStmtListA(SYNTAX_TREE* node)
 
     int error = 0;
     if (halting == 0) {
-        if (returning == 0 &&
-            breaking == 0 &&
-            continuing == 0)
-        {
-            error = error || InterpretNode(stmt1);
+        while (node->numChildren) {
+            if (returning == 0 &&
+                breaking == 0 &&
+                continuing == 0 &&
+                halting == 0)
+            {
+                error = error || InterpretNode(node->children[0]);
+            } else {
+                if (halting) {
+                    returning = 1;
+                    breaking = 1;
+                }
+                return error;
+            }
+
+            node = node->children[1];
         }
-        
-        error = error || InterpretNode(stmt_list1);
+
+        //error = error || InterpretNode(stmt_list1);
     } else {
         returning = 1;
         breaking = 1;
@@ -96,7 +107,8 @@ int ReduceStmtA(SYNTAX_TREE* node)
         }
     }
 
-    //gLastExpression.type = VAL_NIL;
+    gLastExpression.type = VAL_NIL;
+    gLastExpression.data.primitive = 0;
 
     return error;
 }
@@ -192,8 +204,11 @@ int ReduceStmtG(SYNTAX_TREE* node)
     int error = 0;
     error = error || InterpretNode(if1);
 
-    gLastExpression.type = VAL_NIL;
-    gLastExpression.data.primitive = 0;
+    if (returning == 0) 
+    {
+        gLastExpression.type = VAL_NIL;
+        gLastExpression.data.primitive = 0;
+    }
 
     return error;
 }
@@ -206,8 +221,11 @@ int ReduceStmtH(SYNTAX_TREE* node)
     int error = 0;
     error = error || InterpretNode(if_else1);
 
-    gLastExpression.type = VAL_NIL;
-    gLastExpression.data.primitive = 0;
+    if (returning == 0) 
+    {
+        gLastExpression.type = VAL_NIL;
+        gLastExpression.data.primitive = 0;
+    }
 
     return error;
 }
@@ -220,8 +238,11 @@ int ReduceStmtI(SYNTAX_TREE* node)
     int error = 0;
     error = error || InterpretNode(for_loop1);
 
-    gLastExpression.type = VAL_NIL;
-    gLastExpression.data.primitive = 0;
+    if (returning == 0) 
+    {
+        gLastExpression.type = VAL_NIL;
+        gLastExpression.data.primitive = 0;
+    }
 
     return error;
 }
@@ -234,8 +255,11 @@ int ReduceStmtJ(SYNTAX_TREE* node)
     int error = 0;
     error = error || InterpretNode(while_loop1);
 
-    gLastExpression.type = VAL_NIL;
-    gLastExpression.data.primitive = 0;
+    if (returning == 0) 
+    {
+        gLastExpression.type = VAL_NIL;
+        gLastExpression.data.primitive = 0;
+    }
 
     return error;
 }
