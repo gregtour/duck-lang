@@ -290,13 +290,13 @@ int ReduceFunctionDef(SYNTAX_TREE* node)
 }
 
 /* 18. <parameters> -> */
-inline int ReduceParametersA(SYNTAX_TREE* node)
+int ReduceParametersA(SYNTAX_TREE* node)
 {
     return 0;
 }
 
 /* 19. <parameters> -> ( ) */
-inline int ReduceParametersB(SYNTAX_TREE* node)
+int ReduceParametersB(SYNTAX_TREE* node)
 {
     return 0;
 }
@@ -636,6 +636,7 @@ int ReduceLValueC(SYNTAX_TREE* node)
         gLValueDictionary = NULL;
         array_indexing = 0;
     }
+
 
     return error;
 }
