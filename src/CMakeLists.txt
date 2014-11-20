@@ -16,6 +16,7 @@ add_executable(duck
   ../duck/lib/library.c
   ../duck/lib/stdduck.c
   ../duck/lib/dmath.c
+  ../duck/lib/drand.c
 )
 
 # gduck
@@ -32,6 +33,7 @@ add_executable(gduck
   ../duck/lib/stdduck.c
   ../duck/lib/SDLlib.c
   ../duck/lib/dmath.c
+  ../duck/lib/drand.c
 )
 
 include_directories(../duck)
@@ -39,4 +41,3 @@ include_directories(../duck)
 TARGET_LINK_LIBRARIES(duck -lm)
 SET_TARGET_PROPERTIES(gduck PROPERTIES COMPILE_FLAGS "-D_GDUCK -D_LIB_SDL")
 TARGET_LINK_LIBRARIES(gduck ${SDL_LIBRARY} ${OPENGL_LIBRARY} -lm)
-

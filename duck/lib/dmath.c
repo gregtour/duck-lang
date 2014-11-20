@@ -218,7 +218,6 @@ int MathFloor(int arg_count){
 
 /*Math.abs(num)*/
 int MathAbs(int arg_count){
-  int error = 0;
   float input = 0.0;
   float val = 0.0;
   VALUE argument = GetRecord("num", gCurrentContext);
@@ -230,7 +229,7 @@ int MathAbs(int arg_count){
   gLastExpression.type = VAL_FLOATING_POINT;
   gLastExpression.data.floatp = val;
 
-  return error;
+  return 0;
 }
 
 void BindMathLibrary()
