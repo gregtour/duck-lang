@@ -49,4 +49,4 @@ function main(limit)
 	loop
 end
 
-main(10000)
+main(100000)
