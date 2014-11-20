@@ -2195,6 +2195,8 @@ int InterpretNode(SYNTAX_TREE* node)
         case 0x4D: return ReduceDictionaryInitB(node);
         case 0x4E: return ReduceBooleanA(node);
         case 0x4F: return ReduceBooleanB(node);
+        // empty production
+        case 0xFF: return 0;
     default:
         printf("Unknown production %i.\n", node->production);
         return 1;

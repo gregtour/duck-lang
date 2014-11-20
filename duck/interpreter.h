@@ -104,6 +104,9 @@ extern int breaking;
 extern int continuing;
 extern int halting;
 
+extern int stack_depth;
+extern int greatest_stack_depth;
+
 //extern int return_value_exists;
 
 /* functions */
@@ -114,6 +117,11 @@ void  StoreRecord(const char* identifier, VALUE value, CONTEXT* context);
 /* type-casting */
 float TypeFloat(VALUE value);
 int TypeInt(VALUE value);
+
+/* interpreter */
+int Interpret(SYNTAX_TREE*);
+/* remove redundant abstract syntax tree branches */
+void ReduceProgramAST(SYNTAX_TREE**);
 
 #endif // _INTERPRETER_H
 
