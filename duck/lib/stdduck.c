@@ -4,6 +4,7 @@
 #include "interpreter.h"
 #include "memory.h"
 
+/* printing functions */
 void PrintValue(VALUE value)
 {
     switch (value.type)
@@ -21,7 +22,7 @@ void PrintValue(VALUE value)
 
 void PrintFunction(FUNCTION* function)
 {
-    printf("f(");
+    printf("function(");
     PAIR* itr = function->parameters;
     while (itr)
     {
@@ -31,6 +32,21 @@ void PrintFunction(FUNCTION* function)
         itr = itr->next;
     }
     printf(")");
+}
+
+void PrintObject(CONTEXT* context)
+{
+    printf("[");
+    PAIR* list = context->list;
+    while (list)
+    {
+        PrintValue(list->value);
+
+        if (list->next)
+            printf(", ");
+        list = list->next;
+    }
+    printf("]");
 }
 
 void PrintDictionary(HASH_TABLE* dictionary)
@@ -52,19 +68,94 @@ void PrintDictionary(HASH_TABLE* dictionary)
     printf("]");
 }
 
-void PrintObject(CONTEXT* context)
-{
-    printf("[");
-    PAIR* list = context->list;
-    while (list)
-    {
-        PrintValue(list->value);
+/* TODO: Implement or come up with another scheme to manage strings. */
+void ReallocStringsRef(CONTEXT* context) { return; }
+void ReallocStringsFunc(FUNCTION* func) { return; }
+void ReallocStringsDict(HASH_TABLE* table) { return; }
 
-        if (list->next)
-            printf(", ");
-        list = list->next;
+/* sanitize strings */
+VALUE ReallocStrings(VALUE value)
+{
+    int   size;
+    char* copy;
+    switch (value.type)
+    {
+        case VAL_STRING:
+            size = strlen(value.data.string);
+            copy = (char*)ALLOCATE(sizeof(char) * (size+1));
+            sprintf(copy, "%s", value.data.string);
+            value.data.string = copy;
+            return value;
+        case VAL_REFERENCE: 
+            ReallocStringsRef(value.data.reference);
+            return value;
+        case VAL_FUNCTION: 
+            ReallocStringsFunc(value.data.function);
+            return value;
+        case VAL_DICTIONARY: 
+            ReallocStringsDict(value.data.dictionary);
+            return value;
+        case VAL_PRIMITIVE:
+        case VAL_FLOATING_POINT:
+        case VAL_NIL: 
+        default:
+            break;
     }
-    printf("]");
+    return value;
+}
+
+/* eval(source) */
+int DuckEval(int argument_count)
+{
+    L_TOKEN*      lexing;
+    SYNTAX_TREE*  ast;
+    char*         buffer;
+    int           error = 0;
+
+    VALUE argument = GetRecord("source", gCurrentContext);
+
+    gLastExpression.type = VAL_NIL;
+    gLastExpression.data.primitive = 0;
+
+    CONTEXT* currentContext;
+    currentContext = gCurrentContext;
+
+//  if (gCurrentContext->parent) gCurrentContext = gCurrentContext->parent;
+    gCurrentContext = gGlobalContext;
+
+    if (argument.type == VAL_STRING) 
+    {
+        lexing = LexSourceBuffer(argument.data.string, &buffer, CONTEXT_FREE_GRAMMAR);
+        if (lexing == NULL) {
+            printf("Error lexing source or empty source string.\n");
+            FreeLexing(lexing, buffer);
+            return 1;
+        }
+        ast = ParseSource(lexing, PARSE_TABLE, CONTEXT_FREE_GRAMMAR);
+        if (ast == NULL) {
+            printf("Error parsing source.\n");
+            FreeLexing(lexing, buffer);
+            return 1;
+        }
+        error = InterpretNode(ast);
+        if (error)
+        {
+            printf("Error %i.\n", error);
+            FreeLexing(lexing, buffer);
+            FreeParseTree(ast);
+            return 1;
+        }
+
+        /* sanitize gLastExpression for use in program */
+        gLastExpression = ReallocStrings(gLastExpression);
+
+        /* free lexing and parse tree */
+        FreeLexing(lexing, buffer);
+        FreeParseTree(ast);
+    }
+
+    gCurrentContext = currentContext;
+    return error;
 }
 
 /* duck.print(arg1), duck.println(arg1) */
@@ -81,13 +172,25 @@ int DuckPrint(int argument_count)
     return error;
 }
 
-/* duck.prompt([NIL]) */
+/* duck.prompt(message) */
 int DuckPrompt(int argument_count)
 {
     int error = 0;
 
+    // optional message prompt
+    VALUE opt_message = GetRecord("message", gCurrentContext);
+    if (opt_message.type != VAL_NIL) {
+        PrintValue(opt_message);
+    }
+
+    // get string
     char* buffer = (char*)ALLOCATE(sizeof(char)*128);
-    fgets(buffer, 128, stdin);
+    fgets(buffer, 127, stdin);
+    buffer[127] = '\0';
+
+    // remove trailing newline
+    int len = strlen(buffer);
+    if (len && buffer[len-1] == '\n') buffer[len-1] = '\0';
 
     gLastExpression.type = VAL_STRING;
     gLastExpression.data.string = buffer;
@@ -174,6 +277,16 @@ int DuckLength(int argument_count)
     return error;
 }
 
+/* quit() */
+int DuckQuit(int argument_count)
+{
+    int error = 0;
+
+    halting = 1;
+
+    return error;
+}
+
 /* bind the duck standard library */
 void BindStandardLibrary()
 {
@@ -186,7 +299,10 @@ void BindStandardLibrary()
     LinkFunction(duckStdLib, "println", print);
 
     VALUE prompt = CreateFunction(DuckPrompt);
+    AddParameter(prompt, "message");
     LinkFunction(duckStdLib, "prompt", prompt);
+
+    LinkConstString(duckStdLib, "newline", "\n");
 
     VALUE root;
     root.type = VAL_REFERENCE;
@@ -203,5 +319,12 @@ void BindStandardLibrary()
     VALUE type = CreateFunction(DuckType);
     AddParameter(type, "object");
     LinkFunction(root, "Type", type);
+
+    VALUE evalFun = CreateFunction(DuckEval);
+    AddParameter(evalFun, "source");
+    LinkFunction(root, "eval", evalFun);
+
+    VALUE duckQuit = CreateFunction(DuckQuit);
+    LinkFunction(root, "quit", duckQuit);
 }
 

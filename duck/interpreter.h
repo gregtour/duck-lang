@@ -78,6 +78,9 @@ void  LinkConstPrimitive(VALUE namespace,
 void  LinkConstFloatp(VALUE namespace,
                       const char* identifier,
                       float value);
+void  LinkConstString(VALUE namespace,
+                      const char* identifier,
+                      const char* string);
 
 /* execution context */
 extern CONTEXT* gGlobalContext;
@@ -99,6 +102,7 @@ extern int array_indexing;
 extern int returning;
 extern int breaking;
 extern int continuing;
+extern int halting;
 
 //extern int return_value_exists;
 
@@ -112,3 +116,4 @@ float TypeFloat(VALUE value);
 int TypeInt(VALUE value);
 
 #endif // _INTERPRETER_H
+

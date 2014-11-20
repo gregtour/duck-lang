@@ -212,13 +212,8 @@ L_TOKEN* LexSource(const char*    file,
 {
     FILE* input;
     char* buffer;
-    char* format;
-    int*  lineNumbers;
-    int   line;
     int   size;
     int   read;
-    int   i, j;
-    int   a, b;
 
     // read source file
     input = fopen(file, "rb");
@@ -238,6 +233,31 @@ L_TOKEN* LexSource(const char*    file,
         printf("Unable to read source file.\n");
         return 0;
     }
+
+    // lex source file
+    L_TOKEN* result = LexSourceBuffer(buffer, 
+                                      stripped, 
+                                      table);
+    free(buffer);
+    return result;
+}
+
+/* lex a source buffer for a program */
+L_TOKEN* LexSourceBuffer(const char*    source_buffer,
+                         char**         stripped,
+                         GRAMMAR_TABLE  table)
+{
+    const char* buffer;
+    char*       format;
+    int*        lineNumbers;
+    int         line;
+    int         size;
+    int         read;
+    int         i, j;
+    int         a, b;
+
+    buffer = source_buffer;
+    size = strlen(buffer);
     
     // count lines
     lineNumbers = (int*)malloc((size+1)*sizeof(int));
@@ -246,6 +266,7 @@ L_TOKEN* LexSource(const char*    file,
     {
         lineNumbers[i] = line;
         if (buffer[i] == '\n')
+
             line++;
     }
 
@@ -332,7 +353,7 @@ L_TOKEN* LexSource(const char*    file,
             j++;
         }
     }
-    free(buffer);
+    
     format[j] = 0;
     size = j;
 

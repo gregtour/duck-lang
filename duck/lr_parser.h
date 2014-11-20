@@ -222,6 +222,9 @@ int isGlyph(char c);
 L_TOKEN* LexSource(const char*    file,
                    char**         stripped,
                    GRAMMAR_TABLE  table);
+L_TOKEN* LexSourceBuffer(const char*    source_buffer,
+                         char**         stripped,
+                         GRAMMAR_TABLE  table);
 void FreeLexing(L_TOKEN* lexing, char* buffer);
 void PrintLexing(L_TOKEN* lexing);
 

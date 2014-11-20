@@ -6,16 +6,18 @@
 
 void PrintValue(VALUE);
 void PrintFunction(FUNCTION*);
-void PrintDictionary(struct HASH_TABLE*);
 void PrintObject(CONTEXT*);
+void PrintDictionary(struct HASH_TABLE*);
 
 void BindStandardLibrary();
 
+int DuckEval(int argument_count);
 int DuckPrint(int argument_count);
 int DuckPrompt(int argument_count);
 int DuckType(int argument_count);
 int DuckInt(int argument_count);
 int DuckLength(int argument_count);
+int DuckQuit(int argument_count);
 
 #endif // _STDDUCK_H
 

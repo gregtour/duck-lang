@@ -28,6 +28,7 @@ int array_indexing;
 int returning;
 int breaking;
 int continuing;
+int halting;
 
 // memory tracker
 #ifdef _MEM_TRACKING
@@ -153,6 +154,14 @@ void  LinkConstFloatp(VALUE namespace, const char* identifier, float value)
     StoreRecord(identifier, constant, namespace.data.reference);
 }
 
+void  LinkConstString(VALUE namespace, const char* identifier, const char* string)
+{
+    VALUE constant;
+    constant.type = VAL_STRING;
+    constant.data.string = string;
+    StoreRecord(identifier, constant, namespace.data.reference);
+}
+
 VALUE CreateFunction(int (*function)(int))
 {
     VALUE record;
@@ -235,6 +244,7 @@ int Interpret(SYNTAX_TREE* tree)
     returning = 0;
     breaking = 0;
     continuing = 0;
+    halting = 0;
     
     /* run */
     int error = InterpretNode(tree);

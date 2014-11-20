@@ -52,15 +52,19 @@ int ReduceStmtListA(SYNTAX_TREE* node)
     SYNTAX_TREE* stmt_list1 = node->children[1];
 
     int error = 0;
-    if (returning == 0 &&
-        breaking == 0 &&
-        continuing == 0)
-    {
-        error = error || InterpretNode(stmt1);
+    if (halting == 0) {
+        if (returning == 0 &&
+            breaking == 0 &&
+            continuing == 0)
+        {
+            error = error || InterpretNode(stmt1);
+        }
+        
+        error = error || InterpretNode(stmt_list1);
+    } else {
+        returning = 1;
+        breaking = 1;
     }
-    
-    error = error || InterpretNode(stmt_list1);
-
     return error;
 }
 
@@ -144,8 +148,6 @@ int ReduceStmtC(SYNTAX_TREE* node)
 {
     int error = 0;
 
-    /* do nothing */
-
     return error;
 }
 
@@ -190,6 +192,9 @@ int ReduceStmtG(SYNTAX_TREE* node)
     int error = 0;
     error = error || InterpretNode(if1);
 
+    gLastExpression.type = VAL_NIL;
+    gLastExpression.data.primitive = 0;
+
     return error;
 }
 
@@ -200,6 +205,9 @@ int ReduceStmtH(SYNTAX_TREE* node)
 
     int error = 0;
     error = error || InterpretNode(if_else1);
+
+    gLastExpression.type = VAL_NIL;
+    gLastExpression.data.primitive = 0;
 
     return error;
 }
@@ -212,6 +220,9 @@ int ReduceStmtI(SYNTAX_TREE* node)
     int error = 0;
     error = error || InterpretNode(for_loop1);
 
+    gLastExpression.type = VAL_NIL;
+    gLastExpression.data.primitive = 0;
+
     return error;
 }
 
@@ -222,6 +233,9 @@ int ReduceStmtJ(SYNTAX_TREE* node)
 
     int error = 0;
     error = error || InterpretNode(while_loop1);
+
+    gLastExpression.type = VAL_NIL;
+    gLastExpression.data.primitive = 0;
 
     return error;
 }
@@ -246,6 +260,9 @@ int ReduceStmtL(SYNTAX_TREE* node)
 
     breaking = 1;
 
+    gLastExpression.type = VAL_NIL;
+    gLastExpression.data.primitive = 0;
+
     return error;
 }
 
@@ -255,6 +272,9 @@ int ReduceStmtM(SYNTAX_TREE* node)
     int error = 0;
     
     continuing = 1;
+
+    gLastExpression.type = VAL_NIL;
+    gLastExpression.data.primitive = 0;
 
     return error;
 }
@@ -285,6 +305,8 @@ int ReduceFunctionDef(SYNTAX_TREE* node)
     record.data.function->built_in = 0;
     record.data.function->functor = NULL;
     StoreRecord(identifier1->string, record, gCurrentContext);
+
+    gLastExpression = record;
 
     return error;
 }
@@ -639,6 +661,7 @@ int ReduceLValueC(SYNTAX_TREE* node)
 
 
     return error;
+
 }
 
 /* 32. <l-value> -> <reference> [ <expr> ] */
@@ -1199,6 +1222,7 @@ int ReduceArithmeticA(SYNTAX_TREE* node)
     }
     else if (arithmetic.type == VAL_PRIMITIVE && term.type == VAL_FLOATING_POINT)
     {
+
         gLastExpression.type = VAL_FLOATING_POINT;
         gLastExpression.data.floatp = (float)arithmetic.data.primitive + term.data.floatp;
     }
@@ -2055,6 +2079,7 @@ int ReduceBooleanB(SYNTAX_TREE* node)
 
     return error;
 }
+
 
 
 
