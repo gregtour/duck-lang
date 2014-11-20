@@ -5,6 +5,7 @@
 #include "lib/library.h"
 #include "lib/stdduck.h"
 #include "lib/dmath.h"
+#include "lib/drand.h"
 
 // global data
 CONTEXT* gGlobalContext;
@@ -219,6 +220,7 @@ int Interpret(SYNTAX_TREE* tree)
     BindStandardLibrary();
     BindMathLibrary();
     BindAdditionalLibraries();
+    BindRandLibrary();
 
     gParameterListing = NULL;
 
