@@ -27,7 +27,7 @@ See <http://creativecommons.org/publicdomain/zero/1.0/>. */
 
 uint64_t xorshift_seed[ 2 ] = {0x021f9c6a70ca0c24ULL, 0xbae766b26645aa22ULL};
 
-uint64_t XORShiftNext() { 
+uint64_t XORShiftNext() {
 	uint64_t s1 = xorshift_seed[ 0 ];
 	const uint64_t s0 = xorshift_seed[ 1 ];
 	xorshift_seed[ 0 ] = s0;
@@ -35,11 +35,12 @@ uint64_t XORShiftNext() {
 	return ( xorshift_seed[ 1 ] = ( s1 ^ s0 ^ ( s1 >> 17 ) ^ ( s0 >> 26 ) ) ) + s0; // b, c
 }
 
+
 const uint64_t XORSHIFT_MAX = 0xffffffffffffffffULL;
 
 
-
 /*Rand.seed((OPTIONAL) seed_num)*/
+/*If no seed given, will seed using current UNIX second.*/
 /*Returns the seed used.*/
 int SeedRand(int arg_count){
   VALUE argument = GetRecord("seed_number", gCurrentContext);
@@ -61,7 +62,6 @@ int SeedRand(int arg_count){
 
   return 0;
 }
-
 
 
 /*Rand.rand((OPTIONAL) first_bound, (OPTIONAL) second_bound)*/
@@ -98,7 +98,6 @@ int GetBoundedRand(int arg_count){
 }
 
 
-
 /*Rand.randfloat(first_bound, second_bound)*/
 /*Returns a random float.*/
 int GetBoundedRandFloat(int arg_count){
@@ -124,6 +123,7 @@ int GetBoundedRandFloat(int arg_count){
 
     return 0;
 }
+
 
 void BindRandLibrary()
 {
