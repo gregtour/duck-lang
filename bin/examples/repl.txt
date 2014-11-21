@@ -1,0 +1,28 @@
+/* Duck REPL * * Enter two blank lines to evaluate. */
+duck.print("Duck Language REPL - type quit() to exit")
+
+while expr != -1 do
+    program = ""
+    typing = true
+    blank_lines = 0
+    expr = 0
+
+    duck.print("Enter source code:")
+
+    while typing do
+        line = duck.prompt(" > ")
+        if line == "" then
+            blank_lines = blank_lines + 1
+            if blank_lines > 0 then
+                typing = false
+            end
+        end
+        program = program + line + duck.newline
+    loop
+    
+    expr = eval(program)
+    if expr then
+        duck.print(">> " + expr)
+    end
+loop
+
