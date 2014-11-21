@@ -7,13 +7,31 @@ compiler:
   - gcc
 
 before_install:
+  # build deps
   - sudo apt-get install libsdl1.2-dev
 
+  # test deps
+  - sudo apt-get install libgtest-dev
+  - pushd /usr/src/gtest &&
+    sudo cmake CMakeLists.txt &&
+    sudo make &&
+    sudo cp libg* /usr/local/lib/ &&
+    popd
+
 install:
+  # build duck lang
   - cmake ./
   - make
   - sudo make install
 
+  # build tests
+  - pushd test/
+  - cmake .
+  - make
+  - popd
+
 script:
   - echo hello-duck | duck bin/examples/echo.txt
   - echo hello-gduck | gduck bin/examples/echo.txt
+  - test/run_memory_tests
+
