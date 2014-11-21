@@ -1,5 +1,5 @@
 /* Duck Programming Language Random Numbers Library */
-#ifndef _DRANG_H
+#ifndef _DRAND_H
 #define _DRAND_H
 
 #include "interpreter.h"
