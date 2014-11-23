@@ -104,13 +104,13 @@ int GetBoundedRandFloat(int arg_count){
     VALUE fb_arg = GetRecord("first_bound", gCurrentContext);
     VALUE sb_arg = GetRecord("second_bound", gCurrentContext);
 
-    float num = 0;
-    float lower_bound = TypeFloat(fb_arg);
-    float upper_bound = TypeFloat(sb_arg);
+    double num = 0;
+    double lower_bound = TypeFloat(fb_arg);
+    double upper_bound = TypeFloat(sb_arg);
 
     //Swap if user has misordered bounds.
     if(upper_bound < lower_bound){
-      float tmp = lower_bound;
+      double tmp = lower_bound;
       lower_bound = upper_bound;
       upper_bound = tmp;
     }
