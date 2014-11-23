@@ -1,29 +1,31 @@
-import Rand
+import rand
 import duck
-Rand.seed()
+duck.println("Hello!")
+rand.seed()
+duck.println("Seeded...")
 duck.println("--------------")
 duck.println("Rand Int")
 duck.println("--------------")
 for i = 0 to 10 do
-  duck.println(Rand.rand())
+  duck.println(rand.randint())
 loop
 duck.println("--------------")
-duck.println("Bounded Int Rand")
+duck.println("Bounded Int rand")
 duck.println("--------------")
 num = 0
 for i = 0 to 100 do
-  tmp = Rand.rand(0, 100)
+  tmp = rand.randint(0, 100)
   duck.println(tmp)
   num = num + tmp
 loop
 duck.println("Avg:")
 duck.println(num/100.0)
 duck.println("--------------")
-duck.println("Bounded Float Rand")
+duck.println("Bounded Float rand")
 duck.println("--------------")
 num = 0
 for i = 0 to 100 do
-  tmp = Rand.randfloat(0, 100)
+  tmp = rand.randfloat(0, 100)
   duck.println(tmp)
   num = num + tmp
 loop

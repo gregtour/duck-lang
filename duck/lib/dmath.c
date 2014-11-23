@@ -234,7 +234,7 @@ int MathAbs(int arg_count){
 
 void BindMathLibrary()
 {
-    VALUE math_lib = LinkNamespace("Math");
+    VALUE math_lib = LinkNamespace("math");
 
     //Trig and inverse trig functions.
     VALUE dcos = CreateFunction(MathCos);

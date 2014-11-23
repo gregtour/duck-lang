@@ -127,7 +127,7 @@ int GetBoundedRandFloat(int arg_count){
 
 void BindRandLibrary()
 {
-  VALUE rand_lib = LinkNamespace("Rand");
+  VALUE rand_lib = LinkNamespace("rand");
 
   //Trig and inverse trig functions.
   VALUE rand_seedrand = CreateFunction(SeedRand);
@@ -137,7 +137,7 @@ void BindRandLibrary()
   VALUE rand_getrand = CreateFunction(GetBoundedRand);
   AddParameter(rand_getrand, "first_bound");
   AddParameter(rand_getrand, "second_bound");
-  LinkFunction(rand_lib, "rand", rand_getrand);
+  LinkFunction(rand_lib, "randint", rand_getrand);
 
   VALUE rand_getrandfloat = CreateFunction(GetBoundedRandFloat);
   AddParameter(rand_getrandfloat, "first_bound");
