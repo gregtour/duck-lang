@@ -10,7 +10,7 @@ void PrintValue(VALUE value)
     switch (value.type)
     {
         case VAL_PRIMITIVE: printf("%i", value.data.primitive); break;
-        case VAL_FLOATING_POINT: printf("%g", value.data.floatp); break;
+        case VAL_FLOATING_POINT: printf("%.16g", value.data.floatp); break;
         case VAL_STRING: printf("%s", value.data.string); break;
         case VAL_REFERENCE: PrintObject(value.data.reference); break;
         case VAL_FUNCTION: PrintFunction(value.data.function); break;

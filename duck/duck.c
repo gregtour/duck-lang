@@ -1319,8 +1319,8 @@ int ReduceArithmeticA(SYNTAX_TREE* node)
             }
             else if (arithmetic.type == VAL_FLOATING_POINT)
             {
-                char* string = (char*)ALLOCATE(sizeof(char) * 16);
-                sprintf(string, "%g", arithmetic.data.floatp);
+                char* string = (char*)ALLOCATE(sizeof(char) * 24);
+                sprintf(string, "%.16g", arithmetic.data.floatp);
                 arithmetic.type = VAL_STRING;
                 arithmetic.data.string = string;
             }
@@ -1362,8 +1362,8 @@ int ReduceArithmeticA(SYNTAX_TREE* node)
             }
             else if (term.type == VAL_FLOATING_POINT)
             {
-                char* string = (char*)ALLOCATE(sizeof(char) * 16);
-                sprintf(string, "%g", term.data.floatp);
+                char* string = (char*)ALLOCATE(sizeof(char) * 24);
+                sprintf(string, "%.16g", term.data.floatp);
                 term.type = VAL_STRING;
                 term.data.string = string;
             }

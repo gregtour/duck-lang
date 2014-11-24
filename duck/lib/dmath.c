@@ -262,7 +262,7 @@ void BindMathLibrary()
     LinkFunction(math_lib, "atan", datan);
 
 
-    LinkConstFloatp(math_lib, "pi", 3.14159);
+    LinkConstFloatp(math_lib, "pi", 3.141592653589793238);
 
     //Exponentials and logs
     VALUE dexp = CreateFunction(MathExp);
