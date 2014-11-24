@@ -24,13 +24,13 @@ before_install:
 
 install:
   # build duck lang
-  - cmake ./
+  - cmake -DCMAKE_C_COMPILER=$CC -DCMAKE_CXX_COMPILER=$CXX ./
   - make
   - sudo make install
 
   # build tests
   - pushd test/
-  - cmake .
+  - cmake -DCMAKE_C_COMPILER=$CC -DCMAKE_CXX_COMPILER=$CXX ./
   - make
   - popd
 
