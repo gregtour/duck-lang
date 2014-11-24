@@ -25,3 +25,7 @@ target_link_libraries(run_memory_tests
   -pthread
 )
 
+# gcov
+if(CMAKE_COMPILER_IS_GNUCXX)
+  add_library(gcov SHARED IMPORTED)
+endif()
