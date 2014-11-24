@@ -21,6 +21,9 @@ before_install:
     sudo make &&
     sudo cp libg* /usr/local/lib/ &&
     popd
+  - if [[ ${CC} = gcc ]]; then 
+      sudo pip install cpp-coveralls;
+    fi
 
 install:
   # build duck lang
@@ -39,3 +42,16 @@ script:
   - echo hello-gduck | gduck bin/examples/echo.txt
   - test/run_memory_tests
 
+after_success:
+  - if [[ ${CC} = gcc ]]; then 
+      coveralls 
+        --extension .c 
+        --exclude parser-generator/output/ 
+        --exclude-pattern '.*/CMakeFiles/CompilerIdC.*' 
+        --exclude-pattern '.*/test/.*_test\..*' 
+        --gcov-options '\-lp';
+    fi
+
+env:
+  global:
+    - COVERALLS_SERVICE_NAME=travis-ci
