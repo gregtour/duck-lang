@@ -5,16 +5,16 @@
 
 /* type stuff */
 
-float TypeFloat(VALUE value)
+double TypeFloat(VALUE value)
 {
     if (value.type == VAL_PRIMITIVE) {
-        return (float)value.data.primitive;
+        return (double)value.data.primitive;
     } else if (value.type == VAL_FLOATING_POINT) {
         return value.data.floatp;
     } else if (value.type == VAL_STRING) {
         return atof(value.data.string);
     } else {
-        return 0.0f;
+        return 0.0;
     }
 }
 
@@ -40,7 +40,7 @@ int ReduceProgram(SYNTAX_TREE* node)
     SYNTAX_TREE* stmt_list1 = node->children[0];
 
     int error = 0;
-    error = error || InterpretNode(stmt_list1);
+    error = InterpretNode(stmt_list1);
 
     return error;
 }
@@ -57,9 +57,10 @@ int ReduceStmtListA(SYNTAX_TREE* node)
             if (returning == 0 &&
                 breaking == 0 &&
                 continuing == 0 &&
+                error == 0 &&
                 halting == 0)
             {
-                error = error || InterpretNode(node->children[0]);
+                error = InterpretNode(node->children[0]);
             } else {
                 if (halting) {
                     returning = 1;
@@ -119,10 +120,11 @@ int ReduceStmtB(SYNTAX_TREE* node)
     SYNTAX_TREE* reference1 = node->children[1];
 
     int error = 0;
-    error = error || InterpretNode(reference1);
+    error = InterpretNode(reference1);
 	VALUE function = gLastExpression;
     
-    if (function.type == VAL_FUNCTION)
+    if (function.type == VAL_FUNCTION
+        && error == 0)
     {
         // create new context
         CONTEXT* current = gCurrentContext;
@@ -133,9 +135,9 @@ int ReduceStmtB(SYNTAX_TREE* node)
         CONTEXT* func_context = gCurrentContext;
         
         if (function.data.function->built_in) {
-            error = error || function.data.function->functor(0);
+            error = function.data.function->functor(0);
         } else {
-            error = error || InterpretNode(function.data.function->body);
+            error = InterpretNode(function.data.function->body);
         }
 
         // free calling context
@@ -169,7 +171,7 @@ int ReduceStmtD(SYNTAX_TREE* node)
     SYNTAX_TREE* expr1 = node->children[0];
 
     int error = 0;
-    error = error || InterpretNode(expr1);
+    error = InterpretNode(expr1);
 
     return error;
 }
@@ -180,7 +182,7 @@ int ReduceStmtE(SYNTAX_TREE* node)
     SYNTAX_TREE* assignment1 = node->children[0];
 
     int error = 0;
-    error = error || InterpretNode(assignment1);
+    error = InterpretNode(assignment1);
 
     return error;
 }
@@ -191,7 +193,7 @@ int ReduceStmtF(SYNTAX_TREE* node)
     SYNTAX_TREE* function_def1 = node->children[0];
 
     int error = 0;
-    error = error || InterpretNode(function_def1);
+    error = InterpretNode(function_def1);
 
     return error;
 }
@@ -202,7 +204,7 @@ int ReduceStmtG(SYNTAX_TREE* node)
     SYNTAX_TREE* if1 = node->children[0];
 
     int error = 0;
-    error = error || InterpretNode(if1);
+    error = InterpretNode(if1);
 
     if (returning == 0) 
     {
@@ -219,7 +221,7 @@ int ReduceStmtH(SYNTAX_TREE* node)
     SYNTAX_TREE* if_else1 = node->children[0];
 
     int error = 0;
-    error = error || InterpretNode(if_else1);
+    error = InterpretNode(if_else1);
 
     if (returning == 0) 
     {
@@ -236,7 +238,7 @@ int ReduceStmtI(SYNTAX_TREE* node)
     SYNTAX_TREE* for_loop1 = node->children[0];
 
     int error = 0;
-    error = error || InterpretNode(for_loop1);
+    error = InterpretNode(for_loop1);
 
     if (returning == 0) 
     {
@@ -253,7 +255,7 @@ int ReduceStmtJ(SYNTAX_TREE* node)
     SYNTAX_TREE* while_loop1 = node->children[0];
 
     int error = 0;
-    error = error || InterpretNode(while_loop1);
+    error = InterpretNode(while_loop1);
 
     if (returning == 0) 
     {
@@ -270,7 +272,7 @@ int ReduceStmtK(SYNTAX_TREE* node)
     SYNTAX_TREE* expr1 = node->children[1];
 
     int error = 0;
-    error = error || InterpretNode(expr1);
+    error = InterpretNode(expr1);
 
     returning = 1;
 
@@ -313,25 +315,27 @@ int ReduceFunctionDef(SYNTAX_TREE* node)
     int error = 0;
 
     gParameterListing = NULL;
-    error = error || InterpretNode(parameters1);
+    error = InterpretNode(parameters1);
 
     // FUNCTIONS
     VALUE record;
-    record.type = VAL_FUNCTION;
-    record.data.function = (FUNCTION*)ALLOC(sizeof(FUNCTION));
-    record.data.function->parameters = gParameterListing; // ??
-    record.data.function->body = stmt_list1;
-	record.data.function->closure = gCurrentContext;
-    if (gCurrentContext->ref_count > 0) {
-        gCurrentContext->ref_count++;
+    if (error == 0)
+    {
+        record.type = VAL_FUNCTION;
+        record.data.function = (FUNCTION*)ALLOC(sizeof(FUNCTION));
+        record.data.function->parameters = gParameterListing; // ??
+        record.data.function->body = stmt_list1;
+	    record.data.function->closure = gCurrentContext;
+        if (gCurrentContext->ref_count > 0) {
+            gCurrentContext->ref_count++;
+        }
+        record.data.function->ref_count = 1;
+        record.data.function->built_in = 0;
+        record.data.function->functor = NULL;
+        StoreRecord(identifier1->string, record, gCurrentContext);
+
+        gLastExpression = record;
     }
-    record.data.function->ref_count = 1;
-    record.data.function->built_in = 0;
-    record.data.function->functor = NULL;
-    StoreRecord(identifier1->string, record, gCurrentContext);
-
-    gLastExpression = record;
-
     return error;
 }
 
@@ -353,7 +357,7 @@ int ReduceParametersC(SYNTAX_TREE* node)
     SYNTAX_TREE* param_decl1 = node->children[1];
 
     int error = 0;
-    error = error || InterpretNode(param_decl1);
+    error = InterpretNode(param_decl1);
 
     return error;
 }
@@ -380,7 +384,7 @@ int ReduceParamDeclB(SYNTAX_TREE* node)
     SYNTAX_TREE* identifier1 = node->children[2];
 
     int error = 0;
-    error = error || InterpretNode(param_decl1);
+    error = InterpretNode(param_decl1);
 
     PAIR* last = gParameterListing;
     while (last->next)
@@ -403,13 +407,15 @@ int ReduceIf(SYNTAX_TREE* node)
     SYNTAX_TREE* stmt_list1 = node->children[4];
 
     int error = 0;
-    error = error || InterpretNode(condition1);
-    if ((gLastExpression.type == VAL_PRIMITIVE
-            && gLastExpression.data.primitive)
-    || (gLastExpression.type != VAL_PRIMITIVE
-            && gLastExpression.type != VAL_NIL))
-    {
-        error = error || InterpretNode(stmt_list1);
+    error = InterpretNode(condition1);
+    if (error == 0) {
+        if ((gLastExpression.type == VAL_PRIMITIVE
+                && gLastExpression.data.primitive)
+            || (gLastExpression.type != VAL_PRIMITIVE
+                && gLastExpression.type != VAL_NIL))
+        {
+            error = InterpretNode(stmt_list1);
+        }
     }
 
     return error;
@@ -423,17 +429,19 @@ int ReduceIfElse(SYNTAX_TREE* node)
     SYNTAX_TREE* stmt_list2 = node->children[7];
 
     int error = 0;
-    error = error || InterpretNode(condition1);
-    if ((gLastExpression.type == VAL_PRIMITIVE
-            && gLastExpression.data.primitive)
-    || (gLastExpression.type != VAL_PRIMITIVE
-            && gLastExpression.type != VAL_NIL))
-    {
-        error = error || InterpretNode(stmt_list1);
-    }
-    else
-    {
-        error = error || InterpretNode(stmt_list2);
+    error = InterpretNode(condition1);
+    if (error == 0) {
+        if ((gLastExpression.type == VAL_PRIMITIVE
+                && gLastExpression.data.primitive)
+            || (gLastExpression.type != VAL_PRIMITIVE
+                && gLastExpression.type != VAL_NIL))
+        {
+            error = InterpretNode(stmt_list1);
+        }
+        else
+        {
+            error = InterpretNode(stmt_list2);
+        }
     }
 
     return error;
@@ -451,11 +459,15 @@ int ReduceForLoop(SYNTAX_TREE* node)
     const char* id = identifier1->string;
 
     int error = 0;
+    start.type = VAL_NIL;
+    end.type = VAL_NIL;
 
-    error = error || InterpretNode(arithmetic1);
+    error = InterpretNode(arithmetic1);
     start = gLastExpression;
-    error = error || InterpretNode(arithmetic2);
-    end = gLastExpression;
+    if (error == 0) {
+        error = InterpretNode(arithmetic2);
+        end = gLastExpression;
+    }
 
     if (start.type == VAL_FLOATING_POINT
        && end.type == VAL_FLOATING_POINT)
@@ -467,11 +479,11 @@ int ReduceForLoop(SYNTAX_TREE* node)
                && breaking == 0)
         {
             StoreRecord(id, start, gCurrentContext);
-            error = error || InterpretNode(stmt_list1);
+            error = InterpretNode(stmt_list1);
             if (breaking == 0)
             {
                 continuing = 0;
-                start.data.floatp = start.data.floatp + 1.0f;
+                start.data.floatp = start.data.floatp + 1.0;
             }
         }
     }
@@ -485,7 +497,7 @@ int ReduceForLoop(SYNTAX_TREE* node)
                && breaking == 0)
         {
             StoreRecord(id, start, gCurrentContext);
-            error = error || InterpretNode(stmt_list1);
+            error = InterpretNode(stmt_list1);
             if (breaking == 0)
             {
                 continuing = 0;
@@ -509,15 +521,17 @@ int ReduceWhileLoop(SYNTAX_TREE* node)
     SYNTAX_TREE* stmt_list1 = node->children[4];
 
     int error = 0;
-    error = error || InterpretNode(condition1);
+    error = InterpretNode(condition1);
     while (gLastExpression.type != VAL_NIL
            && (gLastExpression.data.primitive ||
                gLastExpression.type != VAL_PRIMITIVE)
            && error == 0
            && breaking == 0)
     {
-        error = error || InterpretNode(stmt_list1);
-        error = error || InterpretNode(condition1);
+        error = InterpretNode(stmt_list1);
+        if (error == 0) {
+            error = InterpretNode(condition1);
+        }
         continuing = 0;
     }
     breaking = 0;
@@ -532,9 +546,11 @@ int ReduceAssignmentA(SYNTAX_TREE* node)
     SYNTAX_TREE* assignment1 = node->children[2];
 
     int error = 0;
-    error = error || InterpretNode(assignment1);
+    error = InterpretNode(assignment1);
     VALUE expr = gLastExpression;
-    error = error || InterpretNode(l_value1);
+    if (error) return error;
+    error = InterpretNode(l_value1);
+    if (error) return error;
     
     //VALUE oldval = GetRecord(gLValueIdentifier, gLValueContext);
     if (array_indexing)
@@ -577,9 +593,11 @@ int ReduceAssignmentB(SYNTAX_TREE* node)
     SYNTAX_TREE* condition1 = node->children[2];
 
     int error = 0;
-    error = error || InterpretNode(condition1);
+    error = InterpretNode(condition1);
     VALUE expr = gLastExpression;
-    error = error || InterpretNode(l_value1);
+    if (error) return error;
+    error = InterpretNode(l_value1);
+    if (error) return error;
     
     //VALUE oldval = GetRecord(gLValueIdentifier, gLValueContext);
     if (array_indexing)
@@ -639,7 +657,7 @@ int ReduceLValueB(SYNTAX_TREE* node)
     SYNTAX_TREE* l_value1 = node->children[1];
 
     int error = 0;
-    error = error || InterpretNode(l_value1);
+    error = InterpretNode(l_value1);
 
     return error;
 }
@@ -651,7 +669,8 @@ int ReduceLValueC(SYNTAX_TREE* node)
     SYNTAX_TREE* identifier1 = node->children[2];
 
     int error = 0;
-    error = error || InterpretNode(reference1);
+    error = InterpretNode(reference1);
+    if (error) return error;
 
     if (gLastExpression.type == VAL_REFERENCE)
     {
@@ -675,6 +694,7 @@ int ReduceLValueC(SYNTAX_TREE* node)
     }
     else
     {
+        error = 31;
         gLValueIdentifier = NULL;
         gLValueContext = NULL;
         gLValueIndex.type = VAL_NIL;
@@ -683,9 +703,7 @@ int ReduceLValueC(SYNTAX_TREE* node)
         array_indexing = 0;
     }
 
-
     return error;
-
 }
 
 /* 32. <l-value> -> <reference> [ <expr> ] */
@@ -695,10 +713,12 @@ int ReduceLValueD(SYNTAX_TREE* node)
     SYNTAX_TREE* expr1 = node->children[2];
 
     int error = 0;
-    error = error || InterpretNode(reference1);
+    error = InterpretNode(reference1);
     VALUE reference = gLastExpression;
-    error = error || InterpretNode(expr1);
+    if (error) return error;
+    error = InterpretNode(expr1);
     VALUE index = gLastExpression;
+    if (error) return error;
     
     if (reference.type == VAL_REFERENCE &&
         (index.type == VAL_STRING || index.type == VAL_PRIMITIVE))
@@ -735,6 +755,7 @@ int ReduceLValueD(SYNTAX_TREE* node)
     }
     else
     {
+        error = 32;
         gLValueIdentifier = NULL;
         gLValueContext = NULL;
         gLValueIndex.type = VAL_NIL;
@@ -752,7 +773,7 @@ int ReduceExpr(SYNTAX_TREE* node)
     SYNTAX_TREE* condition1 = node->children[0];
 
     int error = 0;
-    error = error || InterpretNode(condition1);
+    error = InterpretNode(condition1);
 
     return error;
 }
@@ -764,10 +785,12 @@ int ReduceConditionA(SYNTAX_TREE* node)
     SYNTAX_TREE* logic1 = node->children[2];
 
     int error = 0;
-    error = error || InterpretNode(condition1);
+    error = InterpretNode(condition1);
     VALUE condition = gLastExpression;
-    error = error || InterpretNode(logic1);
+    if (error) return error;
+    error = InterpretNode(logic1);
     VALUE logic = gLastExpression;
+    if (error) return error;
 
     int truths = 0;
     if (condition.type == VAL_PRIMITIVE)
@@ -803,10 +826,12 @@ int ReduceConditionB(SYNTAX_TREE* node)
     SYNTAX_TREE* logic1 = node->children[2];
 
     int error = 0;
-    error = error || InterpretNode(condition1);
+    error = InterpretNode(condition1);
     VALUE condition = gLastExpression;
-    error = error || InterpretNode(logic1);
+    if (error) return error;
+    error = InterpretNode(logic1);
     VALUE logic = gLastExpression;
+    if (error) return error;
 
     int truths = 0;
     if (condition.type == VAL_PRIMITIVE)
@@ -842,10 +867,12 @@ int ReduceConditionC(SYNTAX_TREE* node)
     SYNTAX_TREE* logic1 = node->children[2];
 
     int error = 0;
-    error = error || InterpretNode(condition1);
+    error = InterpretNode(condition1);
     VALUE condition = gLastExpression;
-    error = error || InterpretNode(logic1);
+    if (error) return error;
+    error = InterpretNode(logic1);
     VALUE logic = gLastExpression;
+    if (error) return error;
 
     int truths = 0;
     if (condition.type == VAL_PRIMITIVE)
@@ -881,10 +908,12 @@ int ReduceConditionD(SYNTAX_TREE* node)
     SYNTAX_TREE* logic1 = node->children[2];
 
     int error = 0;
-    error = error || InterpretNode(condition1);
+    error = InterpretNode(condition1);
     VALUE condition = gLastExpression;
-    error = error || InterpretNode(logic1);
+    if (error) return error;
+    error = InterpretNode(logic1);
     VALUE logic = gLastExpression;
+    if (error) return error;
     
     int truths = 0;
     if (condition.type == VAL_PRIMITIVE)
@@ -919,7 +948,7 @@ int ReduceConditionE(SYNTAX_TREE* node)
     SYNTAX_TREE* logic1 = node->children[0];
 
     int error = 0;
-    error = error || InterpretNode(logic1);
+    error = InterpretNode(logic1);
 
     return error;
 }
@@ -930,7 +959,7 @@ int ReduceLogicA(SYNTAX_TREE* node)
     SYNTAX_TREE* comparison1 = node->children[1];
 
     int error = 0;
-    error = error || InterpretNode(comparison1);
+    error = InterpretNode(comparison1);
     
     if (gLastExpression.type == VAL_PRIMITIVE)
     {
@@ -956,7 +985,7 @@ int ReduceLogicB(SYNTAX_TREE* node)
     SYNTAX_TREE* comparison1 = node->children[0];
 
     int error = 0;
-    error = error || InterpretNode(comparison1);
+    error = InterpretNode(comparison1);
 
     return error;
 }
@@ -968,10 +997,12 @@ int ReduceComparisonA(SYNTAX_TREE* node)
     SYNTAX_TREE* arithmetic1 = node->children[2];
 
     int error = 0;
-    error = error || InterpretNode(comparison1);
+    error = InterpretNode(comparison1);
     VALUE comparison = gLastExpression;
-    error = error || InterpretNode(arithmetic1);
+    if (error) return error;
+    error = InterpretNode(arithmetic1);
     VALUE arithmetic = gLastExpression;
+    if (error) return error;
 
     if (comparison.type == arithmetic.type)
     {
@@ -1029,10 +1060,12 @@ int ReduceComparisonB(SYNTAX_TREE* node)
     SYNTAX_TREE* arithmetic1 = node->children[2];
 
     int error = 0;
-    error = error || InterpretNode(comparison1);
+    error = InterpretNode(comparison1);
     VALUE comparison = gLastExpression;
-    error = error || InterpretNode(arithmetic1);
+    if (error) return error;
+    error = InterpretNode(arithmetic1);
     VALUE arithmetic = gLastExpression;
+    if (error) return error;
     
     if (comparison.type == arithmetic.type)
     {
@@ -1083,10 +1116,12 @@ int ReduceComparisonC(SYNTAX_TREE* node)
     SYNTAX_TREE* arithmetic1 = node->children[2];
 
     int error = 0;
-    error = error || InterpretNode(comparison1);
+    error = InterpretNode(comparison1);
     VALUE comparison = gLastExpression;
-    error = error || InterpretNode(arithmetic1);
+    if (error) return error;
+    error = InterpretNode(arithmetic1);
     VALUE arithmetic = gLastExpression;
+    if (error) return error;
 
     if (comparison.type == VAL_PRIMITIVE && arithmetic.type == VAL_PRIMITIVE)
     {
@@ -1095,8 +1130,8 @@ int ReduceComparisonC(SYNTAX_TREE* node)
     }
     else if (comparison.type == VAL_FLOATING_POINT || arithmetic.type == VAL_FLOATING_POINT)
     {
-        float a = TypeFloat(comparison);
-        float b = TypeFloat(arithmetic);
+        double a = TypeFloat(comparison);
+        double b = TypeFloat(arithmetic);
         gLastExpression.type = VAL_PRIMITIVE;
         gLastExpression.data.primitive = a < b;
     }
@@ -1118,20 +1153,23 @@ int ReduceComparisonD(SYNTAX_TREE* node)
     SYNTAX_TREE* arithmetic1 = node->children[2];
 
     int error = 0;
-    error = error || InterpretNode(comparison1);
+    error = InterpretNode(comparison1);
     VALUE comparison = gLastExpression;
-    error = error || InterpretNode(arithmetic1);
+    if (error) return error;
+    error = InterpretNode(arithmetic1);
     VALUE arithmetic = gLastExpression;
+    if (error) return error;
 
     if (comparison.type == VAL_PRIMITIVE && arithmetic.type == VAL_PRIMITIVE)
     {
         gLastExpression.type = VAL_PRIMITIVE;
-        gLastExpression.data.primitive = comparison.data.primitive > arithmetic.data.primitive;
+        gLastExpression.data.primitive = 
+            (comparison.data.primitive > arithmetic.data.primitive);
     }
     else if (comparison.type == VAL_FLOATING_POINT || arithmetic.type == VAL_FLOATING_POINT)
     {
-        float a = TypeFloat(comparison);
-        float b = TypeFloat(arithmetic);
+        double a = TypeFloat(comparison);
+        double b = TypeFloat(arithmetic);
         gLastExpression.type = VAL_PRIMITIVE;
         gLastExpression.data.primitive = a > b;
     }
@@ -1153,20 +1191,23 @@ int ReduceComparisonE(SYNTAX_TREE* node)
     SYNTAX_TREE* arithmetic1 = node->children[2];
 
     int error = 0;
-    error = error || InterpretNode(comparison1);
+    error = InterpretNode(comparison1);
     VALUE comparison = gLastExpression;
-    error = error || InterpretNode(arithmetic1);
+    if (error) return error;
+    error = InterpretNode(arithmetic1);
     VALUE arithmetic = gLastExpression;
+    if (error) return error;
 
     if (comparison.type == VAL_PRIMITIVE && arithmetic.type == VAL_PRIMITIVE)
     {
         gLastExpression.type = VAL_PRIMITIVE;
-        gLastExpression.data.primitive = comparison.data.primitive <= arithmetic.data.primitive;
+        gLastExpression.data.primitive = 
+            (comparison.data.primitive <= arithmetic.data.primitive);
     }
     else if (comparison.type == VAL_FLOATING_POINT || arithmetic.type == VAL_FLOATING_POINT)
     {
-        float a = TypeFloat(comparison);
-        float b = TypeFloat(arithmetic);
+        double a = TypeFloat(comparison);
+        double b = TypeFloat(arithmetic);
         gLastExpression.type = VAL_PRIMITIVE;
         gLastExpression.data.primitive = a <= b;
     }
@@ -1188,10 +1229,12 @@ int ReduceComparisonF(SYNTAX_TREE* node)
     SYNTAX_TREE* arithmetic1 = node->children[2];
 
     int error = 0;
-    error = error || InterpretNode(comparison1);
+    error = InterpretNode(comparison1);
     VALUE comparison = gLastExpression;
-    error = error || InterpretNode(arithmetic1);
+    if (error) return error;
+    error = InterpretNode(arithmetic1);
     VALUE arithmetic = gLastExpression;
+    if (error) return error;
     
     if (comparison.type == VAL_PRIMITIVE && arithmetic.type == VAL_PRIMITIVE)
     {
@@ -1200,10 +1243,10 @@ int ReduceComparisonF(SYNTAX_TREE* node)
     }
     else if (comparison.type == VAL_FLOATING_POINT || arithmetic.type == VAL_FLOATING_POINT)
     {
-        float a = TypeFloat(comparison);
-        float b = TypeFloat(arithmetic);
+        double a = TypeFloat(comparison);
+        double b = TypeFloat(arithmetic);
         gLastExpression.type = VAL_PRIMITIVE;
-        gLastExpression.data.primitive = a >= b;
+        gLastExpression.data.primitive = (a >= b);
     }
     else
     {
@@ -1222,7 +1265,7 @@ int ReduceComparisonG(SYNTAX_TREE* node)
     SYNTAX_TREE* arithmetic1 = node->children[0];
 
     int error = 0;
-    error = error || InterpretNode(arithmetic1);
+    error = InterpretNode(arithmetic1);
 
     return error;
 }
@@ -1234,10 +1277,12 @@ int ReduceArithmeticA(SYNTAX_TREE* node)
     SYNTAX_TREE* term1 = node->children[2];
 
     int error = 0;
-    error = error || InterpretNode(arithmetic1);
+    error = InterpretNode(arithmetic1);
     VALUE arithmetic = gLastExpression;
-    error = error || InterpretNode(term1);
+    if (error) return error;
+    error = InterpretNode(term1);
     VALUE term = gLastExpression;
+    if (error) return error;
 
     if (arithmetic.type == VAL_PRIMITIVE && term.type == VAL_PRIMITIVE)
     {
@@ -1248,12 +1293,12 @@ int ReduceArithmeticA(SYNTAX_TREE* node)
     {
 
         gLastExpression.type = VAL_FLOATING_POINT;
-        gLastExpression.data.floatp = (float)arithmetic.data.primitive + term.data.floatp;
+        gLastExpression.data.floatp = (double)arithmetic.data.primitive + term.data.floatp;
     }
     else if (arithmetic.type == VAL_FLOATING_POINT && term.type == VAL_PRIMITIVE)
     {
         gLastExpression.type = VAL_FLOATING_POINT;
-        gLastExpression.data.floatp = arithmetic.data.floatp + (float)term.data.primitive;
+        gLastExpression.data.floatp = arithmetic.data.floatp + (double)term.data.primitive;
     }
     else if (arithmetic.type == VAL_FLOATING_POINT && term.type == VAL_FLOATING_POINT)
     {
@@ -1369,10 +1414,12 @@ int ReduceArithmeticB(SYNTAX_TREE* node)
     SYNTAX_TREE* term1 = node->children[2];
 
     int error = 0;
-    error = error || InterpretNode(arithmetic1);
+    error = InterpretNode(arithmetic1);
     VALUE arithmetic = gLastExpression;
-    error = error || InterpretNode(term1);
+    if (error) return error;
+    error = InterpretNode(term1);
     VALUE term = gLastExpression;
+    if (error) return error;
 
     if (arithmetic.type == VAL_PRIMITIVE && term.type == VAL_PRIMITIVE)
     {
@@ -1389,12 +1436,12 @@ int ReduceArithmeticB(SYNTAX_TREE* node)
         else if (arithmetic.type == VAL_FLOATING_POINT && term.type == VAL_PRIMITIVE)
         {
             gLastExpression.type = VAL_FLOATING_POINT;
-            gLastExpression.data.floatp = arithmetic.data.floatp - (float)term.data.primitive;
+            gLastExpression.data.floatp = arithmetic.data.floatp - (double)term.data.primitive;
         }
         else if (arithmetic.type == VAL_PRIMITIVE && term.type == VAL_FLOATING_POINT)
         {
             gLastExpression.type = VAL_FLOATING_POINT;
-            gLastExpression.data.floatp = (float)arithmetic.data.primitive - term.data.floatp;
+            gLastExpression.data.floatp = (double)arithmetic.data.primitive - term.data.floatp;
         }
         else
         {
@@ -1416,15 +1463,18 @@ int ReduceArithmeticC(SYNTAX_TREE* node)
     SYNTAX_TREE* term1 = node->children[2];
 
     int error = 0;
-    error = error || InterpretNode(arithmetic1);
+    error = InterpretNode(arithmetic1);
     VALUE arithmetic = gLastExpression;
-    error = error || InterpretNode(term1);
+    if (error) return error;
+    error = InterpretNode(term1);
     VALUE term = gLastExpression;
+    if (error) return error;
 
     if (arithmetic.type == VAL_PRIMITIVE && term.type == VAL_PRIMITIVE)
     {
         gLastExpression.type = VAL_PRIMITIVE;
-        gLastExpression.data.primitive = arithmetic.data.primitive & term.data.primitive;
+        gLastExpression.data.primitive = 
+            (arithmetic.data.primitive & term.data.primitive);
     }
     else
     {
@@ -1441,15 +1491,18 @@ int ReduceArithmeticD(SYNTAX_TREE* node)
     SYNTAX_TREE* term1 = node->children[2];
 
     int error = 0;
-    error = error || InterpretNode(arithmetic1);
+    error = InterpretNode(arithmetic1);
     VALUE arithmetic = gLastExpression;
-    error = error || InterpretNode(term1);
+    if (error) return error;
+    error = InterpretNode(term1);
     VALUE term = gLastExpression;
+    if (error) return error;
     
     if (arithmetic.type == VAL_PRIMITIVE && term.type == VAL_PRIMITIVE)
     {
         gLastExpression.type = VAL_PRIMITIVE;
-        gLastExpression.data.primitive = arithmetic.data.primitive | term.data.primitive;
+        gLastExpression.data.primitive = 
+            (arithmetic.data.primitive | term.data.primitive);
     }
     else
     {
@@ -1465,7 +1518,7 @@ int ReduceArithmeticE(SYNTAX_TREE* node)
     SYNTAX_TREE* term1 = node->children[0];
 
     int error = 0;
-    error = error || InterpretNode(term1);
+    error = InterpretNode(term1);
 
     return error;
 }
@@ -1477,20 +1530,23 @@ int ReduceTermA(SYNTAX_TREE* node)
     SYNTAX_TREE* factor1 = node->children[2];
 
     int error = 0;
-    error = error || InterpretNode(term1);
+    error = InterpretNode(term1);
     VALUE term = gLastExpression;
-    error = error || InterpretNode(factor1);
+    if (error) return error;
+    error = InterpretNode(factor1);
     VALUE factor = gLastExpression;
+    if (error) return error;
 
     if (term.type == VAL_PRIMITIVE && factor.type == VAL_PRIMITIVE)
     {
         gLastExpression.type = VAL_PRIMITIVE;
-        gLastExpression.data.primitive = term.data.primitive * factor.data.primitive;
+        gLastExpression.data.primitive = 
+            (term.data.primitive * factor.data.primitive);
     }
     else if (term.type == VAL_FLOATING_POINT || factor.type == VAL_FLOATING_POINT)
     {
-        float a = TypeFloat(term);
-        float b = TypeFloat(factor);
+        double a = TypeFloat(term);
+        double b = TypeFloat(factor);
         gLastExpression.type = VAL_FLOATING_POINT;
         gLastExpression.data.floatp = (a * b);
     }
@@ -1509,10 +1565,12 @@ int ReduceTermB(SYNTAX_TREE* node)
     SYNTAX_TREE* factor1 = node->children[2];
 
     int error = 0;
-    error = error || InterpretNode(term1);
+    error = InterpretNode(term1);
     VALUE term = gLastExpression;
-    error = error || InterpretNode(factor1);
+    if (error) return error;
+    error = InterpretNode(factor1);
     VALUE factor = gLastExpression;
+    if (error) return error;
     
     if (term.type == VAL_PRIMITIVE && factor.type == VAL_PRIMITIVE)
     {
@@ -1527,12 +1585,12 @@ int ReduceTermB(SYNTAX_TREE* node)
     else if (term.type == VAL_FLOATING_POINT && factor.type == VAL_PRIMITIVE)
     {
         gLastExpression.type = VAL_FLOATING_POINT;
-        gLastExpression.data.floatp = term.data.floatp / (float)factor.data.primitive;
+        gLastExpression.data.floatp = term.data.floatp / (double)factor.data.primitive;
     }
     else if (term.type == VAL_PRIMITIVE && factor.type == VAL_FLOATING_POINT)
     {
         gLastExpression.type = VAL_FLOATING_POINT;
-        gLastExpression.data.floatp = (float)term.data.primitive / factor.data.floatp;
+        gLastExpression.data.floatp = (double)term.data.primitive / factor.data.floatp;
     }
     else
     {
@@ -1548,7 +1606,7 @@ int ReduceTermC(SYNTAX_TREE* node)
     SYNTAX_TREE* factor1 = node->children[0];
 
     int error = 0;
-    error = error || InterpretNode(factor1);
+    error = InterpretNode(factor1);
 
     return error;
 }
@@ -1559,7 +1617,7 @@ int ReduceFactorA(SYNTAX_TREE* node)
     SYNTAX_TREE* factor1 = node->children[1];
 
     int error = 0;
-    error = error || InterpretNode(factor1);
+    error = InterpretNode(factor1);
     
     if (gLastExpression.type == VAL_PRIMITIVE)
     {
@@ -1584,7 +1642,7 @@ int ReduceFactorB(SYNTAX_TREE* node)
     SYNTAX_TREE* factor1 = node->children[1];
 
     int error = 0;
-    error = error || InterpretNode(factor1);
+    error = InterpretNode(factor1);
     
     if (gLastExpression.type == VAL_PRIMITIVE)
     {
@@ -1605,7 +1663,7 @@ int ReduceFactorC(SYNTAX_TREE* node)
     SYNTAX_TREE* final1 = node->children[0];
 
     int error = 0;
-    error = error || InterpretNode(final1);
+    error = InterpretNode(final1);
 
     return error;
 }
@@ -1616,7 +1674,7 @@ int ReduceFinalA(SYNTAX_TREE* node)
     SYNTAX_TREE* expr1 = node->children[1];
 
     int error = 0;
-    error = error || InterpretNode(expr1);
+    error = InterpretNode(expr1);
 
     return error;
 }
@@ -1627,7 +1685,7 @@ int ReduceFinalB(SYNTAX_TREE* node)
     SYNTAX_TREE* boolean1 = node->children[0];
 
     int error = 0;
-    error = error || InterpretNode(boolean1);
+    error = InterpretNode(boolean1);
 
     return error;
 }
@@ -1677,7 +1735,7 @@ int ReduceFinalF(SYNTAX_TREE* node)
     SYNTAX_TREE* object1 = node->children[0];
 
     int error = 0;
-    error = error || InterpretNode(object1);
+    error = InterpretNode(object1);
 
     return error;
 }
@@ -1688,7 +1746,7 @@ int ReduceFinalG(SYNTAX_TREE* node)
     SYNTAX_TREE* reference1 = node->children[0];
 
     int error = 0;
-    error = error || InterpretNode(reference1);
+    error = InterpretNode(reference1);
 
     return error;
 }
@@ -1699,7 +1757,7 @@ int ReduceReferenceA(SYNTAX_TREE* node)
     SYNTAX_TREE* l_value1 = node->children[0];
 
     int error = 0;
-    error = error || InterpretNode(l_value1);
+    error = InterpretNode(l_value1);
     
     if (array_indexing)
     {
@@ -1724,8 +1782,9 @@ int ReduceReferenceB(SYNTAX_TREE* node)
 
     int error = 0;
     
-    error = error || InterpretNode(reference1);
+    error = InterpretNode(reference1);
 	VALUE function = gLastExpression;
+    if (error) return error;
     
     if (function.type == VAL_FUNCTION)
     {
@@ -1738,9 +1797,9 @@ int ReduceReferenceB(SYNTAX_TREE* node)
         CONTEXT* func_context = gCurrentContext;
         
         if (function.data.function->built_in) {
-            error = error || function.data.function->functor(0);
+            error = function.data.function->functor(0);
         } else {
-            error = error || InterpretNode(function.data.function->body);
+            error = InterpretNode(function.data.function->body);
         }
 
       // remove calling context
@@ -1771,13 +1830,14 @@ int ReduceReferenceC(SYNTAX_TREE* node)
 
     int error = 0;
     int argument_count = 0;
-    error = error || InterpretNode(reference1);
+    error = InterpretNode(reference1);
 	VALUE function = gLastExpression;
+    if (error) return error;
 
     if (function.type == VAL_FUNCTION)
     {
         // evaluate arguments
-        error = error || InterpretNode(arguments1);
+        error = InterpretNode(arguments1);
         PAIR* param = function.data.function->parameters;
         PAIR* arg = gArgumentEvaluation;
 
@@ -1819,11 +1879,14 @@ int ReduceReferenceC(SYNTAX_TREE* node)
         arg = gArgumentEvaluation;
 
         //return_value_exists = 0;
-        if (function.data.function->built_in)
+        if (error == 0) 
         {
-            error = error || function.data.function->functor(argument_count);
-        } else {        
-            error = error || InterpretNode(function.data.function->body);
+            if (function.data.function->built_in)
+            {
+                error = function.data.function->functor(argument_count);
+            } else {        
+                error = InterpretNode(function.data.function->body);
+            }
         }
 
       // remove calling context
@@ -1860,11 +1923,11 @@ int ReduceArgumentsA(SYNTAX_TREE* node)
     SYNTAX_TREE* expr1 = node->children[2];
 
     int error = 0;
-    error = error || InterpretNode(arguments1);
+    error = InterpretNode(arguments1);
     
     PAIR* arguments = gArgumentEvaluation;
     
-    error = error || InterpretNode(expr1);
+    error = error ? error : InterpretNode(expr1);
     
     PAIR* list = arguments;
     while (list->next)
@@ -1886,7 +1949,7 @@ int ReduceArgumentsB(SYNTAX_TREE* node)
     SYNTAX_TREE* expr1 = node->children[0];
 
     int error = 0;
-    error = error || InterpretNode(expr1);
+    error = InterpretNode(expr1);
     
     gArgumentEvaluation = (PAIR*)ALLOC(sizeof(PAIR));
     gArgumentEvaluation->identifier = NULL;
@@ -1919,7 +1982,7 @@ int ReduceObjectB(SYNTAX_TREE* node)
     SYNTAX_TREE* array_init1 = node->children[1];
 
     int error = 0;
-    error = error || InterpretNode(array_init1);
+    error = InterpretNode(array_init1);
     
 //    gLastExpression.type = VAL_REFERENCE;
 //    gLastExpression.data.reference = gDictionaryInit;
@@ -1935,7 +1998,7 @@ int ReduceObjectC(SYNTAX_TREE* node)
     SYNTAX_TREE* dictionary_init1 = node->children[1];
 
     int error = 0;
-    error = error || InterpretNode(dictionary_init1);
+    error = InterpretNode(dictionary_init1);
     
 //    gLastExpression.type = VAL_REFERENCE;
 //    gLastExpression.data.reference = gDictionaryInit;
@@ -1952,13 +2015,13 @@ int ReduceArrayInitA(SYNTAX_TREE* node)
     SYNTAX_TREE* expr1 = node->children[2];
 
     int error = 0;
-    error = error || InterpretNode(array_init1);
+    error = InterpretNode(array_init1);
     
     //CONTEXT* dictionary = gDictionaryInit;
     HASH_TABLE* dictionary = gDictionaryInit;
     int index = gArrayIndex;
     
-    error = error || InterpretNode(expr1);
+    error = error ? error : InterpretNode(expr1);
     VALUE expr = gLastExpression;
     
     // push array gLastExpr
@@ -1989,7 +2052,7 @@ int ReduceArrayInitB(SYNTAX_TREE* node)
     SYNTAX_TREE* expr1 = node->children[0];
 
     int error = 0;
-    error = error || InterpretNode(expr1);
+    error = InterpretNode(expr1);
     VALUE expr = gLastExpression;
     
     // push array gLastExpr
@@ -2025,12 +2088,12 @@ int ReduceDictionaryInitA(SYNTAX_TREE* node)
     SYNTAX_TREE* expr1 = node->children[4];
 
     int error = 0;
-    error = error || InterpretNode(dictionary_init1);
+    error = InterpretNode(dictionary_init1);
 
     //CONTEXT* dictionary = gDictionaryInit;
     HASH_TABLE* dictionary = gDictionaryInit;
 
-    error = error || InterpretNode(expr1);
+    error = error ? error : InterpretNode(expr1);
     VALUE expr = gLastExpression;
     
     // push dict[identifier] gLastExpr
@@ -2059,7 +2122,7 @@ int ReduceDictionaryInitB(SYNTAX_TREE* node)
     SYNTAX_TREE* expr1 = node->children[2];
 
     int error = 0;
-    error = error || InterpretNode(expr1);
+    error = InterpretNode(expr1);
     VALUE expr = gLastExpression;
     
     // push dict[identifier] gLastExpr
@@ -2103,9 +2166,6 @@ int ReduceBooleanB(SYNTAX_TREE* node)
 
     return error;
 }
-
-
-
 
 
 /* reduce one node */

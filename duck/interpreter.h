@@ -35,7 +35,7 @@ typedef struct VALUE
     int         type;
     union {
         int         primitive;
-        float       floatp;
+        double      floatp;
         const char* string;
         FUNCTION*   function;
         struct CONTEXT* reference;
@@ -77,7 +77,7 @@ void  LinkConstPrimitive(VALUE ref_namespace,
                          int value);
 void  LinkConstFloatp(VALUE ref_namespace,
                       const char* identifier,
-                      float value);
+                      double value);
 void  LinkConstString(VALUE ref_namespace,
                       const char* identifier,
                       const char* string);
@@ -115,7 +115,7 @@ VALUE GetRecord(const char* identifier, CONTEXT* context);
 void  StoreRecord(const char* identifier, VALUE value, CONTEXT* context);
 
 /* type-casting */
-float TypeFloat(VALUE value);
+double TypeFloat(VALUE value);
 int TypeInt(VALUE value);
 
 /* interpreter */

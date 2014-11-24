@@ -150,7 +150,7 @@ void  LinkConstPrimitive(VALUE ref_namespace, const char* identifier, int value)
     StoreRecord(identifier, constant, ref_namespace.data.reference);
 }
 
-void  LinkConstFloatp(VALUE ref_namespace, const char* identifier, float value)
+void  LinkConstFloatp(VALUE ref_namespace, const char* identifier, double value)
 {
     VALUE constant;
     constant.type = VAL_FLOATING_POINT;
@@ -260,55 +260,57 @@ int Interpret(SYNTAX_TREE* tree)
     return error;
 }
 
-/* remove redundant abstract syntax tree branches */
+/* reduce or remove trivial abstract syntax tree productions */
 void ReduceProgramAST(SYNTAX_TREE** program)
-{/*
-    // empty
-    3, 6, 18, 19
-    // ->children[0]
-    1, 7, 8, 9, 33, 38, 40, 47, 52, 55, 58, 60, 64, 65
-    // ->children[1]
-    20, 30, 59
-
-    if (*program->production == 7,     
-
-*/
+{
     const int empty_production = 0xFF;
     int empty_productions[] = {3, 6, 18, 19};
     int child0_productions[] = {1, 7, 8, 9, 33, 38, 40, 47, 52, 55, 58, 60, 64, 65};
     int child1_productions[] = {20, 30, 59};
 
-    int i;
-    for (i = 0; i < sizeof(empty_productions)/sizeof(int); i++)
+    int i; int reducible = 1;
+    // continue while reducible
+    while (reducible)
     {
-        if ((*program)->production == empty_productions[i]) 
+        reducible = 0;
+        /* empty productions: 3, 6, 18, 19 */
+        for (i = 0; i < sizeof(empty_productions)/sizeof(int); i++)
         {
-            (*program)->production = empty_production;
+            if ((*program)->production == empty_productions[i]) 
+            {
+                (*program)->production = empty_production;
+                reducible = 1;
+            }
+        }
+
+        /* productions that reduce to node->children[0] */
+        /* 1, 7, 8, 9, 33, 38, 40, 47, 52, 55, 58, 60, 64, 65 */
+        for (i = 0; i < sizeof(child0_productions)/sizeof(int); i++)
+        {
+            if ((*program)->production == child0_productions[i])
+            {
+                SYNTAX_TREE* cur = *program;
+                *program = (*program)->children[0];
+                free(cur);
+                reducible = 1;
+            }
+        }
+
+        /* productions that reduce to node->children[1] */
+        /* 20, 30, 59 */
+        for (i = 0; i < sizeof(child1_productions)/sizeof(int); i++)
+        {
+            if ((*program)->production == child1_productions[i])
+            {
+                SYNTAX_TREE* cur = *program;
+                *program = (*program)->children[1];
+                free(cur);
+                reducible = 1;
+            }
         }
     }
 
-    for (i = 0; i < sizeof(child0_productions)/sizeof(int); i++)
-    {
-        if ((*program)->production == child0_productions[i])
-        {
-            SYNTAX_TREE* cur = *program;
-            *program = (*program)->children[0];
-            //program = &(*program)->children[0];
-            free(cur);
-        }
-    }
-
-    for (i = 0; i < sizeof(child1_productions)/sizeof(int); i++)
-    {
-        if ((*program)->production == child1_productions[i])
-        {
-            SYNTAX_TREE* cur = *program;
-            *program = (*program)->children[1];
-            //program = &(*program)->children[1];
-            free(cur);
-        }
-    }
-
+    // apply for all sub-trees
     for (i = 0; i < (*program)->numChildren; i++)
     {
         ReduceProgramAST(&(*program)->children[i]);
