@@ -7,6 +7,10 @@ compiler:
   - gcc
 
 before_install:
+  # set environment variables for cpp
+  - if [[ ${CC} = gcc ]]; then export CXX=g++; fi
+  - if [[ ${CC} = clang ]]; then export CXX=clang++; fi
+
   # build deps
   - sudo apt-get install libsdl1.2-dev
 
