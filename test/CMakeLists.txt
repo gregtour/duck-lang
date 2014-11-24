@@ -4,6 +4,14 @@ cmake_minimum_required(VERSION 2.8)
 find_package(GTest)
 include_directories(${GTEST_INCLUDE_DIRS})
 
+# gcov
+if(CMAKE_COMPILER_IS_GNUCXX)
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fprofile-arcs")
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -ftest-coverage")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fprofile-arcs")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ftest-coverage")
+endif()
+
 # duck
 include_directories(../duck)
 
@@ -17,3 +25,7 @@ target_link_libraries(run_memory_tests
   -pthread
 )
 
+# gcov
+if(CMAKE_COMPILER_IS_GNUCXX)
+  add_library(gcov SHARED IMPORTED)
+endif()

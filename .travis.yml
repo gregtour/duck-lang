@@ -7,6 +7,10 @@ compiler:
   - gcc
 
 before_install:
+  # set environment variables for cpp
+  - if [[ ${CC} = gcc ]]; then export CXX=g++; fi
+  - if [[ ${CC} = clang ]]; then export CXX=clang++; fi
+
   # build deps
   - sudo apt-get install libsdl1.2-dev
 
@@ -17,16 +21,19 @@ before_install:
     sudo make &&
     sudo cp libg* /usr/local/lib/ &&
     popd
+  - if [[ ${CC} = gcc ]]; then 
+      sudo pip install cpp-coveralls;
+    fi
 
 install:
   # build duck lang
-  - cmake ./
+  - cmake -DCMAKE_C_COMPILER=$CC -DCMAKE_CXX_COMPILER=$CXX ./
   - make
   - sudo make install
 
   # build tests
   - pushd test/
-  - cmake .
+  - cmake -DCMAKE_C_COMPILER=$CC -DCMAKE_CXX_COMPILER=$CXX ./
   - make
   - popd
 
@@ -35,3 +42,16 @@ script:
   - echo hello-gduck | gduck bin/examples/echo.txt
   - test/run_memory_tests
 
+after_success:
+  - if [[ ${CC} = gcc ]]; then 
+      coveralls 
+        --extension .c 
+        --exclude parser-generator/output/ 
+        --exclude-pattern '.*/CMakeFiles/CompilerIdC.*' 
+        --exclude-pattern '.*/test/.*_test\..*' 
+        --gcov-options '\-lp';
+    fi
+
+env:
+  global:
+    - COVERALLS_SERVICE_NAME=travis-ci
