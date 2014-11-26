@@ -31,6 +31,11 @@ int breaking;
 int continuing;
 int halting;
 
+CALLSTACK gStackTrace;
+
+int line_error;
+SYNTAX_TREE* failed_production;
+
 int greatest_stack_depth;
 int stack_depth;
 
@@ -139,7 +144,10 @@ VALUE LinkNamespace(const char* identifier)
 
 void  LinkFunction(VALUE ref_namespace, const char* identifier, VALUE function)
 {
-    StoreRecord(identifier, function, ref_namespace.data.reference);
+    if (function.type == VAL_FUNCTION) {
+        function.data.function->fn_name = identifier;
+        StoreRecord(identifier, function, ref_namespace.data.reference);
+    }
 }
 
 void  LinkConstPrimitive(VALUE ref_namespace, const char* identifier, int value)
@@ -177,6 +185,7 @@ VALUE CreateFunction(int (*function)(int))
     record.data.function->built_in = 1;
     record.data.function->functor = function;
     record.data.function->ref_count = -1;
+    record.data.function->fn_name = "[built-in]";
     return record;
 }
 
@@ -198,6 +207,49 @@ void  AddParameter(VALUE functor, const char* argument_name)
         return;
     }
     functor.data.function->parameters = parameter;
+}
+
+/* function call stack */
+void ClearCallStack(CALLSTACK* stack)
+{
+    stack->next = 0l;
+    stack->fn_name = NULL;
+}
+
+void PushCallStack(CALLSTACK* stack, const char* identifier)
+{
+    if (stack->fn_name == NULL) {
+        (*stack).fn_name = identifier;
+        (*stack).next = 0l;
+    } else {
+        CALLSTACK* next;
+        next = (CALLSTACK*)malloc(sizeof(CALLSTACK));
+        next->fn_name = stack->fn_name;
+        next->next = stack->next;
+        (*stack).fn_name = identifier;
+        stack->next = next;
+    }
+}
+
+void PrintStackTrace()
+{
+    CALLSTACK* stack = &gStackTrace;
+    printf("Program halted on line %i.\n", (line_error+1));
+    if (failed_production) {
+        printf("Failed production: ");
+        PrintParseTree(failed_production, CONTEXT_FREE_GRAMMAR);
+    }
+
+    if (stack->fn_name) {
+        printf("Printing stack trace:\n\n");
+        int depth = 0; int i;
+        while (stack) {
+            for (i = 0; i < depth; i++) printf("  ");
+            printf("%i. %s:\n", depth, stack->fn_name);
+            stack = stack->next;
+            depth++;
+        }
+    }
 }
 
 /*
@@ -253,6 +305,11 @@ int Interpret(SYNTAX_TREE* tree)
     /* profiling */
     greatest_stack_depth;
     stack_depth;
+
+    /* clear call stack */
+    ClearCallStack(&gStackTrace);
+    line_error = 0;
+    failed_production = NULL;
     
     /* run */
     int error = InterpretNode(tree);

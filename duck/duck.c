@@ -140,6 +140,10 @@ int ReduceStmtB(SYNTAX_TREE* node)
             error = InterpretNode(function.data.function->body);
         }
 
+        if (error) {
+            PushCallStack(&gStackTrace, function.data.function->fn_name);
+        }
+
         // free calling context
         func_context->ref_count--;
         if (func_context->ref_count == 0)
@@ -152,6 +156,7 @@ int ReduceStmtB(SYNTAX_TREE* node)
     else
     {
         error = 12345;
+        failed_production = node;
     }
 
     return error;
@@ -332,6 +337,7 @@ int ReduceFunctionDef(SYNTAX_TREE* node)
         record.data.function->ref_count = 1;
         record.data.function->built_in = 0;
         record.data.function->functor = NULL;
+        record.data.function->fn_name = identifier1->string;
         StoreRecord(identifier1->string, record, gCurrentContext);
 
         gLastExpression = record;
@@ -701,6 +707,7 @@ int ReduceLValueC(SYNTAX_TREE* node)
         gLValueIndex.data.primitive = 0;
         gLValueDictionary = NULL;
         array_indexing = 0;
+        failed_production = node;
     }
 
     return error;
@@ -762,6 +769,7 @@ int ReduceLValueD(SYNTAX_TREE* node)
         gLValueIndex.data.primitive = 0;
         gLValueDictionary = NULL;
         array_indexing = 0;
+        failed_production = node;
     }
 
     return error;
@@ -1802,6 +1810,10 @@ int ReduceReferenceB(SYNTAX_TREE* node)
             error = InterpretNode(function.data.function->body);
         }
 
+        if (error) {
+            PushCallStack(&gStackTrace, function.data.function->fn_name);
+        }
+
       // remove calling context
         func_context->ref_count--;
         if (func_context->ref_count == 0)
@@ -1816,6 +1828,7 @@ int ReduceReferenceB(SYNTAX_TREE* node)
     else
     {
         error = 12345;
+        failed_production = node;
     }
 
     return error;
@@ -1889,6 +1902,10 @@ int ReduceReferenceC(SYNTAX_TREE* node)
             }
         }
 
+        if (error) {
+            PushCallStack(&gStackTrace, function.data.function->fn_name);
+        }
+
       // remove calling context
         // remove evaluated arguments
 /*      while (arg) {
@@ -1911,6 +1928,7 @@ int ReduceReferenceC(SYNTAX_TREE* node)
     else
     {
         error = 12345;
+        failed_production = node;
     }
 
     return error;
@@ -2173,6 +2191,9 @@ int InterpretNode(SYNTAX_TREE* node)
 {
     if (node == NULL || node->production == 0)
         return 1;
+
+    line_error = node->line;
+    failed_production = node;
 
     switch (node->production)
     {

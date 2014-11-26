@@ -27,6 +27,7 @@ typedef struct FUNCTION
     int (*functor)(int);
 	struct CONTEXT* closure;
     int ref_count;
+    const char* fn_name;
 } FUNCTION;
 
 struct HASH_TABLE;
@@ -41,7 +42,7 @@ typedef struct VALUE
         struct CONTEXT* reference;
         struct HASH_TABLE* dictionary;
     } data;
-//  int         const_string;
+//  int const_string;
 } VALUE;
 
 typedef struct PAIR
@@ -57,6 +58,12 @@ typedef struct CONTEXT
     int         ref_count;
     struct CONTEXT* parent;
 } CONTEXT;
+
+typedef struct CALLSTACK
+{
+    const char* fn_name;
+    struct CALLSTACK* next;
+} CALLSTACK;
 
 /* memory allocation */
 void* ALLOCATE(size_t amount);
@@ -91,6 +98,7 @@ extern PAIR*    gParameterListing;
 extern struct HASH_TABLE* gDictionaryInit;
 extern int      gArrayIndex;
 extern PAIR*    gArgumentEvaluation;
+extern CALLSTACK gStackTrace;
 
 extern const char* gLValueIdentifier;
 extern CONTEXT*    gLValueContext;
@@ -107,6 +115,9 @@ extern int halting;
 extern int stack_depth;
 extern int greatest_stack_depth;
 
+extern int line_error;
+extern SYNTAX_TREE* failed_production;
+
 //extern int return_value_exists;
 
 /* functions */
@@ -122,6 +133,11 @@ int TypeInt(VALUE value);
 int Interpret(SYNTAX_TREE*);
 /* remove redundant abstract syntax tree branches */
 void ReduceProgramAST(SYNTAX_TREE**);
+
+/* stack trace */
+void ClearCallStack(CALLSTACK*);
+void PushCallStack(CALLSTACK*, const char*);
+void PrintStackTrace();
 
 #endif // _INTERPRETER_H
 

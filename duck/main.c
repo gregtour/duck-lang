@@ -7,6 +7,18 @@
 #include <stdlib.h>
 #include <time.h>
 
+const char* ErrorMessage(int error)
+{
+    if (error == 12345)
+        return "Error with function call.";
+    else if (error == 31)
+        return "Error using variable as a reference.";
+    else if (error == 32)
+        return "Error using variable as an array.";
+    else
+        return "Unspecified error.";
+}
+
 /* main(args) accepts program file to run */
 int main(int argc, char* argv[])
 {
@@ -65,7 +77,9 @@ int main(int argc, char* argv[])
     error = Interpret(ast);
     if (error)
     {
-        printf("Error %i.\n", error);
+        printf("%s\n", ErrorMessage(error));
+        //printf("Error %i.\n", ErrorMessage(error));
+        PrintStackTrace();
         FreeLexing(lexing, buffer);
         FreeParseTree(ast);
         getchar();
