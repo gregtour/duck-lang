@@ -40,7 +40,7 @@ install:
 script:
   - echo hello-duck | duck bin/examples/echo.txt
   - echo hello-gduck | gduck bin/examples/echo.txt
-  - test/run_memory_tests
+  - test/run_test
 
 after_success:
   - if [[ ${CC} = gcc ]]; then 
