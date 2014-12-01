@@ -21,11 +21,11 @@ TEST(StdDuck, print_value_string)
 }
 
 namespace TestStdDuck {
-  int DummyFunc(int num_args) {
-      int error = 0;
-      VALUE argument = GetRecord("arg0", gCurrentContext);
-      return error;
-  }
+    int DummyFunc(int num_args) {
+        int error = 0;
+        VALUE argument = GetRecord("arg0", gCurrentContext);
+        return error;
+    }
 }
 
 TEST(StdDuck, print_value_function)
