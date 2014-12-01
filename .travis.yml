@@ -7,6 +7,8 @@ compiler:
   - gcc
 
 before_install:
+  - sudo apt-get update
+
   # set environment variables for cpp
   - if [[ ${CC} = gcc ]]; then export CXX=g++; fi
   - if [[ ${CC} = clang ]]; then export CXX=clang++; fi
