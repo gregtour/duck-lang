@@ -4,6 +4,10 @@ cmake_minimum_required(VERSION 2.8)
 find_package(GTest)
 include_directories(${GTEST_INCLUDE_DIRS})
 
+# gduck deps
+include(FindSDL)
+include(FindOpenGL)
+
 # gcov
 if(CMAKE_COMPILER_IS_GNUCXX)
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fprofile-arcs")
@@ -12,17 +16,30 @@ if(CMAKE_COMPILER_IS_GNUCXX)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ftest-coverage")
 endif()
 
-# duck
+# duck headers
 include_directories(../duck)
 
-add_executable(run_memory_tests
-  ../duck/memory.c
-  duck/memory_test.cpp
+# libduck_core.so
+FILE(GLOB DUCK_CORE ../duck/*.c)
+add_library(duck_core SHARED ${DUCK_CORE})
+
+# libduck.so
+FILE(GLOB LIB_DUCK ../duck/lib/*.c)
+add_library(duck SHARED ${LIB_DUCK})
+target_link_libraries(duck
+  ${SDL_LIBRARY}
+  ${OPENGL_LIBRARY}
+  -lm
 )
 
-target_link_libraries(run_memory_tests
+# run_test
+FILE(GLOB TEST_ALL ./**/*_test.cpp)
+add_executable(run_test ${TEST_ALL})
+target_link_libraries(run_test
   ${GTEST_BOTH_LIBRARIES}
   -pthread
+  duck_core
+  duck
 )
 
 # gcov
