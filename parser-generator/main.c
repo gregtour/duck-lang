@@ -180,6 +180,99 @@ int TestParser(const char* language,
     return 0;
 }
 
+int GenerateParserAndTest(const char* language, 
+                          const char* program, 
+                          const char* output)
+{
+    GRAMMAR_TABLE grammar;
+    LR_TABLE      parser;
+    L_TOKEN*      lexing;
+    SYNTAX_TREE*  ast;
+    char*         buffer;
+    int           error;
+
+    printf("\n");
+
+    // load grammar
+    error = LoadGrammar(language, &grammar);
+    if (error)
+    {
+        printf("Error loading context free grammar file\n");
+        FreeGrammarTable(&grammar);
+        PrintMemoryUsage();
+        return 1;
+    }
+    PrintGrammar(grammar);
+
+    // build parse tables
+    error = BuildLRParser(grammar, &parser);
+    if (error)
+    {
+        printf("Error building canonical LR parse tables.\n");
+        FreeGrammarTable(&grammar);
+        FreeLRParser(&parser);
+        PrintMemoryUsage();
+        return 2;
+    }
+    PrintLRParser(parser, grammar);
+    
+    error = SaveLRParser(output, parser, grammar);
+    if (error)
+    {
+        printf("Failed to generate parser.\n");
+        FreeGrammarTable(&grammar);
+        FreeLRParser(&parser);
+        return 3;
+    }
+
+// ////////////////////////////////
+
+    // lex source
+    buffer = 0;
+    lexing = LexSource(program, &buffer, grammar);
+    if (lexing == NULL)
+    {
+        printf("Error lexing source or empty source file.\n");
+        FreeGrammarTable(&grammar);
+        FreeLRParser(&parser);
+        FreeLexing(lexing, buffer);
+        PrintMemoryUsage();
+        return 3;
+    }
+    PrintLexing(lexing);
+
+    // parse source
+    ast = ParseSource(lexing, parser, grammar);
+    if (ast == NULL)
+    {
+        printf("Error parsing source.\n");
+        FreeGrammarTable(&grammar);
+        FreeLRParser(&parser);
+        FreeLexing(lexing, buffer);
+        //FreeParseTree(parseTree);
+        PrintMemoryUsage();
+        return 4;
+    }
+    PrintParseTree(ast, grammar);
+
+    printf("Success.\n");
+    FreeGrammarTable(&grammar);
+    FreeLRParser(&parser);
+    FreeLexing(lexing, buffer);
+    FreeParseTree(ast);
+    PrintMemoryUsage();
+    getchar();
+    return 0;
+
+// ////////////////////////////////
+    
+    printf("Successfully generated parser!\n");
+    FreeGrammarTable(&grammar);
+    FreeLRParser(&parser);
+    PrintMemoryUsage();
+    return 0;
+}
+
 // compiler frontend
 int main(int argc, char** argv)
 {
@@ -189,8 +282,9 @@ int main(int argc, char** argv)
     //    printf("./lrparser grammar [-o output] [-t test]");
     //}
     
-    //TestParser("grammar.txt", "output/duck_syntax");
-    ParserGenerator("grammar.txt", "output/duck");
+    //TestParser("grammar.txt", "test.duck");
+    //ParserGenerator("grammar.txt", "output/duck");
+    GenerateParserAndTest("grammar.txt", "test.duck", "output/duck");
     getchar();
     return 0;
 }

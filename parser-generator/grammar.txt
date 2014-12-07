@@ -9,7 +9,6 @@
 <stmt> ::= <assignment> <endl>
 <stmt> ::= <function def> <endl>
 <stmt> ::= <if> <endl>
-<stmt> ::= <if else> <endl>
 <stmt> ::= <for loop> <endl>
 <stmt> ::= <while loop> <endl>
 <stmt> ::= return <expr> <endl>
@@ -21,8 +20,9 @@
 <parameters> ::= (<param decl>)
 <param decl> ::= <identifier>
 <param decl> ::= <param decl>, <identifier>
-<if> ::= if <condition> then <endl> <stmt list> end
-<if else> ::= if <condition> then <endl> <stmt list> else <endl> <stmt list> end
+<if> ::= if <condition> then <endl> <stmt list> <else if>
+<else if> ::= else <endl> <stmt list> end
+<else if> ::= else <if>
 <for loop> ::= for <identifier> = <arithmetic> to <arithmetic> do <endl> <stmt list> loop
 <while loop> ::= while <condition> do <endl> <stmt list> loop
 <assignment> ::= <l-value> = <assignment>
@@ -76,5 +76,6 @@
 <array init> ::= <expr>
 <dictionary init> ::= <dictionary init>, <identifier> : <expr>
 <dictionary init> ::= <identifier> : <expr>
+<else if> ::= end
 <boolean> ::= true
 <boolean> ::= false

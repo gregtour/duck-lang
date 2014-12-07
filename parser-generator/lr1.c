@@ -752,6 +752,7 @@ LR_TABLE ConstructTable(LR_ITEM_COLLECTION* C, GRAMMAR_TABLE* G)
     for (itr = C; itr; itr = itr->next)
         numStates++;
 
+    printf("\n");
     printf("Building LR table with %i states.\n", numStates);
 
     // allocate the action and goto tables
@@ -811,14 +812,22 @@ LR_TABLE ConstructTable(LR_ITEM_COLLECTION* C, GRAMMAR_TABLE* G)
                 index = state * table.numTokens
                     + (production.rhs[item.dot] ^ K_TOKEN) - 1;
 
-                if (table.actionTable[index].type != ACTION_ERROR)
+                if (table.actionTable[index].type != ACTION_ERROR
+                    && (table.actionTable[index].type != action.type ||
+                        table.actionTable[index].value != action.value))
                 {
-                    //printf("Action table conflict: ");
-                    //PrintItem(item, G);
+                    printf("Action table conflict: (is (%i,%i) should be (%i,%i)) ", 
+                        table.actionTable[index].type, 
+                        table.actionTable[index].value,
+                        action.type,
+                        action.value);
+                    PrintItem(item, G); 
                     conflicts++;
                 }
-                //else
+                else
                 {
+//                    printf("%i, 
+//                    PrintItem(item, G);
                     table.actionTable[index] = action;
                 }
             }
@@ -835,10 +844,18 @@ LR_TABLE ConstructTable(LR_ITEM_COLLECTION* C, GRAMMAR_TABLE* G)
 
                 index = state * table.numTokens +
                             (item.lookahead ^ K_TOKEN) - 1;
-                if (table.actionTable[index].type != ACTION_ERROR)
+
+                if (table.actionTable[index].type != ACTION_ERROR &&
+                    (table.actionTable[index].type != action.type ||
+                     table.actionTable[index].value != action.value))
                 {
                     //printf("Action table conflict: ");
-                    //PrintItem(item, G);
+                    printf("Action table conflict: (is (%i,%i) should be (%i,%i)) ", 
+                        table.actionTable[index].type, 
+                        table.actionTable[index].value,
+                        action.type,
+                        action.value);
+                    PrintItem(item, G);
                     conflicts++;
                     if (table.actionTable[index].type == ACTION_REDUCE
                         && action.value < table.actionTable[index].value)
@@ -875,8 +892,9 @@ LR_TABLE ConstructTable(LR_ITEM_COLLECTION* C, GRAMMAR_TABLE* G)
         }
     }
 
-    if (conflicts)
+    if (conflicts) {
         printf("%i conflicts in the action table.\n", conflicts);
+    }
 
     return table;
 }

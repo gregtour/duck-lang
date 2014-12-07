@@ -1,0 +1,39 @@
+if true then
+    x = 1
+end
+
+if false then
+    x = 1
+else
+    x = 2
+end
+
+if x == 1 then
+    do_something()
+    // ...
+else if x == 2 then
+    do_something_else()
+end
+
+if x == 2 then
+    do_something()
+    // ...
+else if x == 2 then
+    do_something_else()
+else if x == 3 then
+    do_another_thing()
+end
+
+if x == 5 then
+    done
+else if x == 4 then
+    doless()
+else if x == 3 then
+    x = 1
+    x = 2
+else if x == 2 then
+    x = []
+else
+    none
+end
+
