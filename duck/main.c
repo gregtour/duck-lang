@@ -67,7 +67,7 @@ int main(int argc, char* argv[])
         return 1;
     }
 
-    ReduceProgramAST(&ast);
+/*  ReduceProgramAST(&ast); */
 
 #ifdef _PROFILING
     clock_gettime(CLOCK_MONOTONIC, &start);

@@ -220,25 +220,8 @@ int ReduceStmtG(SYNTAX_TREE* node)
     return error;
 }
 
-/* 11. <stmt> -> <if else> <endl> */
+/* 11. <stmt> -> <for loop> <endl> */
 int ReduceStmtH(SYNTAX_TREE* node)
-{
-    SYNTAX_TREE* if_else1 = node->children[0];
-
-    int error = 0;
-    error = InterpretNode(if_else1);
-
-    if (returning == 0) 
-    {
-        gLastExpression.type = VAL_NIL;
-        gLastExpression.data.primitive = 0;
-    }
-
-    return error;
-}
-
-/* 12. <stmt> -> <for loop> <endl> */
-int ReduceStmtI(SYNTAX_TREE* node)
 {
     SYNTAX_TREE* for_loop1 = node->children[0];
 
@@ -254,8 +237,8 @@ int ReduceStmtI(SYNTAX_TREE* node)
     return error;
 }
 
-/* 13. <stmt> -> <while loop> <endl> */
-int ReduceStmtJ(SYNTAX_TREE* node)
+/* 12. <stmt> -> <while loop> <endl> */
+int ReduceStmtI(SYNTAX_TREE* node)
 {
     SYNTAX_TREE* while_loop1 = node->children[0];
 
@@ -271,8 +254,8 @@ int ReduceStmtJ(SYNTAX_TREE* node)
     return error;
 }
 
-/* 14. <stmt> -> return <expr> <endl> */
-int ReduceStmtK(SYNTAX_TREE* node)
+/* 13. <stmt> -> return <expr> <endl> */
+int ReduceStmtJ(SYNTAX_TREE* node)
 {
     SYNTAX_TREE* expr1 = node->children[1];
 
@@ -284,8 +267,8 @@ int ReduceStmtK(SYNTAX_TREE* node)
     return error;
 }
 
-/* 15. <stmt> -> break <endl> */
-int ReduceStmtL(SYNTAX_TREE* node)
+/* 14. <stmt> -> break <endl> */
+int ReduceStmtK(SYNTAX_TREE* node)
 {
     int error = 0;
 
@@ -297,8 +280,8 @@ int ReduceStmtL(SYNTAX_TREE* node)
     return error;
 }
 
-/* 16. <stmt> -> continue <endl> */
-int ReduceStmtM(SYNTAX_TREE* node)
+/* 15. <stmt> -> continue <endl> */
+int ReduceStmtL(SYNTAX_TREE* node)
 {
     int error = 0;
     
@@ -310,7 +293,7 @@ int ReduceStmtM(SYNTAX_TREE* node)
     return error;
 }
 
-/* 17. <function def> -> function <identifier> <parameters> <endl> <stmt list> end */
+/* 16. <function def> -> function <identifier> <parameters> <endl> <stmt list> end */
 int ReduceFunctionDef(SYNTAX_TREE* node)
 {
     SYNTAX_TREE* identifier1 = node->children[1];
@@ -345,19 +328,19 @@ int ReduceFunctionDef(SYNTAX_TREE* node)
     return error;
 }
 
-/* 18. <parameters> -> */
+/* 17. <parameters> -> */
 int ReduceParametersA(SYNTAX_TREE* node)
 {
     return 0;
 }
 
-/* 19. <parameters> -> ( ) */
+/* 18. <parameters> -> ( ) */
 int ReduceParametersB(SYNTAX_TREE* node)
 {
     return 0;
 }
 
-/* 20. <parameters> -> ( <param decl> ) */
+/* 19. <parameters> -> ( <param decl> ) */
 int ReduceParametersC(SYNTAX_TREE* node)
 {
     SYNTAX_TREE* param_decl1 = node->children[1];
@@ -368,7 +351,7 @@ int ReduceParametersC(SYNTAX_TREE* node)
     return error;
 }
 
-/* 21. <param decl> -> <identifier> */
+/* 20. <param decl> -> <identifier> */
 int ReduceParamDeclA(SYNTAX_TREE* node)
 {
     SYNTAX_TREE* identifier1 = node->children[0];
@@ -383,7 +366,7 @@ int ReduceParamDeclA(SYNTAX_TREE* node)
     return error;
 }
 
-/* 22. <param decl> -> <param decl> , <identifier> */
+/* 21. <param decl> -> <param decl> , <identifier> */
 int ReduceParamDeclB(SYNTAX_TREE* node)
 {
     SYNTAX_TREE* param_decl1 = node->children[0];
@@ -406,11 +389,12 @@ int ReduceParamDeclB(SYNTAX_TREE* node)
     return error;
 }
 
-/* 23. <if> -> if <condition> then <endl> <stmt list> end */
+/* 22. <if> -> if <condition> then <endl> <stmt list> <else if> */
 int ReduceIf(SYNTAX_TREE* node)
 {
     SYNTAX_TREE* condition1 = node->children[1];
     SYNTAX_TREE* stmt_list1 = node->children[4];
+    SYNTAX_TREE* else_if1 = node->children[5];
 
     int error = 0;
     error = InterpretNode(condition1);
@@ -421,34 +405,33 @@ int ReduceIf(SYNTAX_TREE* node)
                 && gLastExpression.type != VAL_NIL))
         {
             error = InterpretNode(stmt_list1);
+        } else {
+            error = InterpretNode(else_if1);
         }
     }
 
     return error;
 }
 
-/* 24. <if else> -> if <condition> then <endl> <stmt list> else <endl> <stmt list> end */
-int ReduceIfElse(SYNTAX_TREE* node)
+/* 23. <else if> -> else <endl> <stmt list> end */
+int ReduceElseIfA(SYNTAX_TREE* node)
 {
-    SYNTAX_TREE* condition1 = node->children[1];
-    SYNTAX_TREE* stmt_list1 = node->children[4];
-    SYNTAX_TREE* stmt_list2 = node->children[7];
+    SYNTAX_TREE* stmt_list1 = node->children[2];
 
     int error = 0;
-    error = InterpretNode(condition1);
-    if (error == 0) {
-        if ((gLastExpression.type == VAL_PRIMITIVE
-                && gLastExpression.data.primitive)
-            || (gLastExpression.type != VAL_PRIMITIVE
-                && gLastExpression.type != VAL_NIL))
-        {
-            error = InterpretNode(stmt_list1);
-        }
-        else
-        {
-            error = InterpretNode(stmt_list2);
-        }
-    }
+    error = InterpretNode(stmt_list1);
+
+    return error;
+}
+
+/* 24. <else if> -> else <if> */
+int ReduceElseIfB(SYNTAX_TREE* node)
+{
+    SYNTAX_TREE* if1 = node->children[1];
+
+    int error = 0;
+    // ReduceIF(if1);
+    error = InterpretNode(if1);
 
     return error;
 }
@@ -2163,7 +2146,14 @@ int ReduceDictionaryInitB(SYNTAX_TREE* node)
     return error;
 }
 
-/* 78. <boolean> -> true */
+/* 78. <else if> -> end */
+int ReduceElseIfC(SYNTAX_TREE* node)
+{
+    int error = 0;
+    return error;
+}
+
+/* 79. <boolean> -> true */
 int ReduceBooleanA(SYNTAX_TREE* node)
 {
     int error = 0;
@@ -2174,7 +2164,7 @@ int ReduceBooleanA(SYNTAX_TREE* node)
     return error;
 }
 
-/* 79. <boolean> -> false */
+/* 80. <boolean> -> false */
 int ReduceBooleanB(SYNTAX_TREE* node)
 {
     int error = 0;
@@ -2212,15 +2202,15 @@ int InterpretNode(SYNTAX_TREE* node)
         case 0x0D: return ReduceStmtJ(node);
         case 0x0E: return ReduceStmtK(node);
         case 0x0F: return ReduceStmtL(node);
-        case 0x10: return ReduceStmtM(node);
-        case 0x11: return ReduceFunctionDef(node);
-        case 0x12: return ReduceParametersA(node);
-        case 0x13: return ReduceParametersB(node);
-        case 0x14: return ReduceParametersC(node);
-        case 0x15: return ReduceParamDeclA(node);
-        case 0x16: return ReduceParamDeclB(node);
-        case 0x17: return ReduceIf(node);
-        case 0x18: return ReduceIfElse(node);
+        case 0x10: return ReduceFunctionDef(node);
+        case 0x11: return ReduceParametersA(node);
+        case 0x12: return ReduceParametersB(node);
+        case 0x13: return ReduceParametersC(node);
+        case 0x14: return ReduceParamDeclA(node);
+        case 0x15: return ReduceParamDeclB(node);
+        case 0x16: return ReduceIf(node);
+        case 0x17: return ReduceElseIfA(node);
+        case 0x18: return ReduceElseIfB(node);
         case 0x19: return ReduceForLoop(node);
         case 0x1A: return ReduceWhileLoop(node);
         case 0x1B: return ReduceAssignmentA(node);
@@ -2274,8 +2264,9 @@ int InterpretNode(SYNTAX_TREE* node)
         case 0x4B: return ReduceArrayInitB(node);
         case 0x4C: return ReduceDictionaryInitA(node);
         case 0x4D: return ReduceDictionaryInitB(node);
-        case 0x4E: return ReduceBooleanA(node);
-        case 0x4F: return ReduceBooleanB(node);
+        case 0x4E: return ReduceElseIfC(node);
+        case 0x4F: return ReduceBooleanA(node);
+        case 0x50: return ReduceBooleanB(node);
         // empty production
         case 0xFF: return 0;
     default:

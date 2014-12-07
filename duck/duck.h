@@ -18,12 +18,12 @@ void PrintNode(SYNTAX_TREE* node);
 #define SYMBOL_ASSIGNMENT               0x1006
 #define SYMBOL_FUNCTION_DEF             0x1007
 #define SYMBOL_IF                       0x1008
-#define SYMBOL_IF_ELSE                  0x1009
-#define SYMBOL_FOR_LOOP                 0x100A
-#define SYMBOL_WHILE_LOOP               0x100B
-#define SYMBOL_PARAMETERS               0x100C
-#define SYMBOL_PARAM_DECL               0x100D
-#define SYMBOL_CONDITION                0x100E
+#define SYMBOL_FOR_LOOP                 0x1009
+#define SYMBOL_WHILE_LOOP               0x100A
+#define SYMBOL_PARAMETERS               0x100B
+#define SYMBOL_PARAM_DECL               0x100C
+#define SYMBOL_CONDITION                0x100D
+#define SYMBOL_ELSE_IF                  0x100E
 #define SYMBOL_ARITHMETIC               0x100F
 #define SYMBOL_L_VALUE                  0x1010
 #define SYMBOL_LOGIC                    0x1011
@@ -45,7 +45,7 @@ extern char GRAMMAR_SYMBOLS[283];
 extern char GRAMMAR_TOKENS[218];
 
 /* CFG Productions */
-extern RULE GRAMMAR_RULES[80];
+extern RULE GRAMMAR_RULES[81];
 
 /* Context Free Grammar */
 extern GRAMMAR_TABLE CONTEXT_FREE_GRAMMAR;
