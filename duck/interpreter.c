@@ -185,7 +185,8 @@ VALUE CreateFunction(int (*function)(int))
     record.data.function->built_in = 1;
     record.data.function->functor = function;
     record.data.function->ref_count = -1;
-    record.data.function->fn_name = "[built-in]";
+  //record.data.function->fn_name = "[built-in]";
+    record.data.function->fn_name = "function";
     return record;
 }
 
