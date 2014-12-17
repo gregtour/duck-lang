@@ -3,6 +3,6 @@ my_type["name"] = "hello"
 my_type[2] = 0
 my_type.zigzag = 32
 
-duck.print(my_type)
-duck.print("name: " + my_type.name)
+duck.println(my_type)
+duck.println("name: " + my_type.name)
 

@@ -2,6 +2,7 @@
     Duck Programming Language - main.c
     Thursday November 20th, 2014
 */
+#include "main.h"
 #include "interpreter.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -11,10 +12,16 @@ const char* ErrorMessage(int error)
 {
     if (error == 12345)
         return "Error with function call.";
+    else if (error == 25)
+        return "Illegal for loop operands.";
     else if (error == 31)
         return "Error using variable as a reference.";
     else if (error == 32)
         return "Error using variable as an array.";
+    else if (error == 0)
+        return "No error.";
+    else if (error == 1)
+        return "Error 1.";
     else
         return "Unspecified error.";
 }
@@ -31,14 +38,18 @@ int main(int argc, char* argv[])
     // choose program source
     if (argc > 1) {
         program = argv[1];
-    } else {
+        if (strcmp(argv[1], "-h") == 0 ||
+            strcmp(argv[1], "-help") == 0 ||
+            strcmp(argv[1], "--help") == 0)
+        {
 #ifdef _GDUCK
         printf("Usage: gduck program.src\n");
 #else
         printf("Usage: duck program.src\n");
 #endif
         return 1;
-    }
+        }
+    } 
 
 #ifdef _PROFILING
     // time execution
@@ -47,14 +58,26 @@ int main(int argc, char* argv[])
 #endif
 
     // lex source
-    buffer = 0;
-    lexing = LexSource(program, &buffer, CONTEXT_FREE_GRAMMAR);
-    if (lexing == NULL)
-    {
-        printf("Error lexing source or empty source file.\n");
-        FreeLexing(lexing, buffer);
-        getchar();
-        return 1;
+    if (argc > 1) {
+        buffer = 0;
+        lexing = LexSource(program, &buffer, CONTEXT_FREE_GRAMMAR);
+        if (lexing == NULL)
+        {
+            printf("Error lexing source or empty source file.\n");
+            FreeLexing(lexing, buffer);
+            getchar();
+            return 1;
+        }
+    } else {
+        buffer = 0;
+        // built-in read--evaluate--print--loop demo //
+        lexing = LexSourceBuffer(demo, &buffer, CONTEXT_FREE_GRAMMAR);
+        if (lexing == NULL) {
+            printf("Error 1.\n");
+            FreeLexing(lexing,buffer);
+            getchar();
+            return 1;
+        }
     }
 
     // parse source
@@ -67,7 +90,7 @@ int main(int argc, char* argv[])
         return 1;
     }
 
-/*  ReduceProgramAST(&ast); */
+    ReduceProgramAST(&ast); 
 
 #ifdef _PROFILING
     clock_gettime(CLOCK_MONOTONIC, &start);

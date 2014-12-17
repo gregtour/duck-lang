@@ -29,7 +29,7 @@ end
 
 
 function main(limit)
-	duck.print("Palindrome primes less than " + limit + ":")
+	duck.println("Palindrome primes less than " + limit + ":")
 	count = 0
 	numbers = []
 	for i = 2 to limit do
@@ -43,7 +43,7 @@ function main(limit)
 			loop
             if is_palindrome(i) then
                 count = count + 1
-    			duck.print(count + ". " + i)
+    			duck.println(count + ". " + i)
             end
 		end
 	loop

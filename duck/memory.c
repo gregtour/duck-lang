@@ -74,6 +74,7 @@ void FreeFunction(FUNCTION* func)
     DEALLOC(func);
 }
 
+/*
 void InvalidateExpr(VALUE expression)
 {
     return;
@@ -100,6 +101,7 @@ void InvalidateExpr(VALUE expression)
         }
     }
 }
+*/
 
 /* temporary values */
 void* ALLOC(size_t amount)

@@ -31,7 +31,7 @@ void  DEALLOC(void* addr);
 /* */
 void FreeContext(CONTEXT* context);
 void FreeFunction(FUNCTION* func);
-void InvalidateExpr(VALUE expression);
+//void InvalidateExpr(VALUE expression);
 void ForceFreeContext(CONTEXT* context);
 
 /* accessor functions */

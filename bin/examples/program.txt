@@ -96,5 +96,5 @@ end
 
 fibonacci = fixed_point(fib_prime)
 for i = 1 to 20 do
-  duck.print(fibonacci(i))
+  duck.println(fibonacci(i))
 loop

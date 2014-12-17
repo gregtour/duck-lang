@@ -274,9 +274,14 @@ void PrintLRParser(LR_TABLE      parser,
 SYNTAX_TREE* ParseSource(L_TOKEN*      input,
                          LR_TABLE      parser,
                          GRAMMAR_TABLE grammar);
+int  ParseSucceeds(L_TOKEN* input, 
+                   LR_TABLE parser, 
+                   GRAMMAR_TABLE grammar);
 void FreeParseTree(SYNTAX_TREE* syntaxTree);
 void PrintParseTree(SYNTAX_TREE*  ast,
                     GRAMMAR_TABLE grammar);
+void PrintParseTreeFormat(SYNTAX_TREE*  ast,
+                          GRAMMAR_TABLE grammar);
                     
 /* GENERATOR.C */
 

@@ -4,6 +4,6 @@ for i = 1 to 10 do
 		for j = 1 to i do
 			stars = stars + "*"
 		loop
-		duck.print(stars)
+		duck.println(stars)
 	end
 loop

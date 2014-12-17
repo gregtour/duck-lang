@@ -1,28 +1,34 @@
 /* Duck REPL * * Enter two blank lines to evaluate. */
-duck.print("Duck Language REPL - type quit() to exit")
+duck.println("Duck Language REPL - type quit() to exit")
+running = true
 
-while expr != -1 do
+while running do
     program = ""
     typing = true
-    blank_lines = 0
     expr = 0
 
-    duck.print("Enter source code:")
+    duck.println("Type expression or statements:")
 
     while typing do
         line = duck.prompt(" > ")
-        if line == "" then
-            blank_lines = blank_lines + 1
-            if blank_lines > 0 then
-                typing = false
-            end
-        end
         program = program + line + duck.newline
+
+        parsable = duck.parses(program)
+        if parsable == 1 then
+            typing = false
+        else if parsable == -1 then
+            duck.println("Syntax error.")
+            duck.print(duck.newline)
+            program = ""
+        end
     loop
-    
+
+    ; duck.print(duck.newline)
     expr = eval(program)
-    if expr then
-        duck.print(">> " + expr)
+    if expr or Type(expr) == "INT" then
+        duck.print(">> ")
+        duck.println(expr)
     end
+    duck.print(duck.newline)
 loop
 

@@ -31,6 +31,36 @@ int TypeInt(VALUE value)
     }
 }
 
+void InvalidateExpr(VALUE* expr)
+{
+    if (expr) 
+    {
+/*      if (expr->type == VAL_STRING) 
+        {
+            free(expr->data.string);
+            expr->data.string = NULL;
+        } 
+        else if (expr->type == VAL_FUNCTION) 
+        {
+            free(expr->data.function);
+            expr->data.function = NULL;
+        } 
+        else if (expr->type == VAL_REFERENCE) 
+        {
+            free(expr->data.reference);
+            expr->data.reference = NULL;
+        }
+        else if (expr->type == VAL_DICTIONARY) 
+        {
+            FreeHashTable(expr->data.dictionary);
+            expr->data.dictionary = NULL;
+        }   */
+
+        expr->type = VAL_NIL;
+        expr->data.primitive = 0;
+    }
+}
+
 
 /* production stubs */
 
@@ -41,6 +71,11 @@ int ReduceProgram(SYNTAX_TREE* node)
 
     int error = 0;
     error = InterpretNode(stmt_list1);
+
+    if (error == 0) 
+    {
+     //   InvalidateExpr(&gLastExpression);
+    }
 
     return error;
 }
@@ -53,7 +88,8 @@ int ReduceStmtListA(SYNTAX_TREE* node)
 
     int error = 0;
     if (halting == 0) {
-        while (node->numChildren) {
+        while (node->numChildren) 
+        {
             if (returning == 0 &&
                 breaking == 0 &&
                 continuing == 0 &&
@@ -68,11 +104,14 @@ int ReduceStmtListA(SYNTAX_TREE* node)
                 }
                 return error;
             }
-
+            
+            if (error == 0 && returning == 0)
+            {
+             //   InvalidateExpr(&gLastExpression);
+            }
+            
             node = node->children[1];
         }
-
-        //error = error || InterpretNode(stmt_list1);
     } else {
         returning = 1;
         breaking = 1;
@@ -108,8 +147,9 @@ int ReduceStmtA(SYNTAX_TREE* node)
         }
     }
 
-    gLastExpression.type = VAL_NIL;
-    gLastExpression.data.primitive = 0;
+    //gLastExpression.type = VAL_NIL;
+    //gLastExpression.data.primitive = 0;
+    InvalidateExpr(&gLastExpression);
 
     return error;
 }
@@ -120,44 +160,6 @@ int ReduceStmtB(SYNTAX_TREE* node)
     SYNTAX_TREE* reference1 = node->children[1];
 
     int error = 0;
-    error = InterpretNode(reference1);
-	VALUE function = gLastExpression;
-    
-    if (function.type == VAL_FUNCTION
-        && error == 0)
-    {
-        // create new context
-        CONTEXT* current = gCurrentContext;
-        gCurrentContext = (CONTEXT*)ALLOC(sizeof(CONTEXT));
-        gCurrentContext->list = NULL;
-        gCurrentContext->ref_count = 1;
-        gCurrentContext->parent = function.data.function->closure;
-        CONTEXT* func_context = gCurrentContext;
-        
-        if (function.data.function->built_in) {
-            error = function.data.function->functor(0);
-        } else {
-            error = InterpretNode(function.data.function->body);
-        }
-
-        if (error) {
-            PushCallStack(&gStackTrace, function.data.function->fn_name);
-        }
-
-        // free calling context
-        func_context->ref_count--;
-        if (func_context->ref_count == 0)
-            FreeContext(func_context);
-        
-        // return with same context
-        gCurrentContext = current;
-        returning = 0;
-    }
-    else
-    {
-        error = 12345;
-        failed_production = node;
-    }
 
     return error;
 }
@@ -207,16 +209,10 @@ int ReduceStmtF(SYNTAX_TREE* node)
 int ReduceStmtG(SYNTAX_TREE* node)
 {
     SYNTAX_TREE* if1 = node->children[0];
-
+    
     int error = 0;
     error = InterpretNode(if1);
-
-    if (returning == 0) 
-    {
-        gLastExpression.type = VAL_NIL;
-        gLastExpression.data.primitive = 0;
-    }
-
+    
     return error;
 }
 
@@ -224,16 +220,10 @@ int ReduceStmtG(SYNTAX_TREE* node)
 int ReduceStmtH(SYNTAX_TREE* node)
 {
     SYNTAX_TREE* for_loop1 = node->children[0];
-
+    
     int error = 0;
     error = InterpretNode(for_loop1);
-
-    if (returning == 0) 
-    {
-        gLastExpression.type = VAL_NIL;
-        gLastExpression.data.primitive = 0;
-    }
-
+    
     return error;
 }
 
@@ -241,16 +231,10 @@ int ReduceStmtH(SYNTAX_TREE* node)
 int ReduceStmtI(SYNTAX_TREE* node)
 {
     SYNTAX_TREE* while_loop1 = node->children[0];
-
+    
     int error = 0;
     error = InterpretNode(while_loop1);
-
-    if (returning == 0) 
-    {
-        gLastExpression.type = VAL_NIL;
-        gLastExpression.data.primitive = 0;
-    }
-
+    
     return error;
 }
 
@@ -271,12 +255,9 @@ int ReduceStmtJ(SYNTAX_TREE* node)
 int ReduceStmtK(SYNTAX_TREE* node)
 {
     int error = 0;
-
+    
     breaking = 1;
-
-    gLastExpression.type = VAL_NIL;
-    gLastExpression.data.primitive = 0;
-
+    
     return error;
 }
 
@@ -286,10 +267,7 @@ int ReduceStmtL(SYNTAX_TREE* node)
     int error = 0;
     
     continuing = 1;
-
-    gLastExpression.type = VAL_NIL;
-    gLastExpression.data.primitive = 0;
-
+    
     return error;
 }
 
@@ -313,17 +291,22 @@ int ReduceFunctionDef(SYNTAX_TREE* node)
         record.data.function = (FUNCTION*)ALLOC(sizeof(FUNCTION));
         record.data.function->parameters = gParameterListing; // ??
         record.data.function->body = stmt_list1;
-	    record.data.function->closure = gCurrentContext;
-        if (gCurrentContext->ref_count > 0) {
+
+	    /* record.data.function->closure = gCurrentContext; */
+        /* if (gCurrentContext->ref_count > 0) {
             gCurrentContext->ref_count++;
-        }
-        record.data.function->ref_count = 1;
+        } */
+
+        record.data.function->closure = gCurrentContext;
+        //record.data.function->ref_count = 1;
         record.data.function->built_in = 0;
         record.data.function->functor = NULL;
         record.data.function->fn_name = identifier1->string;
+        
+        //printf("storing: %s in %p\n", identifier1->string, gCurrentContext);
         StoreRecord(identifier1->string, record, gCurrentContext);
 
-        gLastExpression = record;
+        //gLastExpression = record;
     }
     return error;
 }
@@ -404,8 +387,10 @@ int ReduceIf(SYNTAX_TREE* node)
             || (gLastExpression.type != VAL_PRIMITIVE
                 && gLastExpression.type != VAL_NIL))
         {
+            InvalidateExpr(&gLastExpression);
             error = InterpretNode(stmt_list1);
         } else {
+            InvalidateExpr(&gLastExpression);
             error = InterpretNode(else_if1);
         }
     }
@@ -430,7 +415,7 @@ int ReduceElseIfB(SYNTAX_TREE* node)
     SYNTAX_TREE* if1 = node->children[1];
 
     int error = 0;
-    // ReduceIF(if1);
+    
     error = InterpretNode(if1);
 
     return error;
@@ -496,8 +481,13 @@ int ReduceForLoop(SYNTAX_TREE* node)
     }
     else
     {
-        printf("Error: Illegal for loop operands.\n");
+        error = 25;
+        breaking = 0;
+        return error;
     }
+
+    InvalidateExpr(&start);
+    InvalidateExpr(&end);
     breaking = 0;
 
     return error;
@@ -512,17 +502,21 @@ int ReduceWhileLoop(SYNTAX_TREE* node)
     int error = 0;
     error = InterpretNode(condition1);
     while (gLastExpression.type != VAL_NIL
-           && (gLastExpression.data.primitive ||
-               gLastExpression.type != VAL_PRIMITIVE)
+           && (gLastExpression.type != VAL_PRIMITIVE ||
+               gLastExpression.data.primitive)
            && error == 0
            && breaking == 0)
     {
+        InvalidateExpr(&gLastExpression);
+
         error = InterpretNode(stmt_list1);
         if (error == 0) {
             error = InterpretNode(condition1);
         }
         continuing = 0;
     }
+
+    InvalidateExpr(&gLastExpression);
     breaking = 0;
 
     return error;
@@ -544,30 +538,17 @@ int ReduceAssignmentA(SYNTAX_TREE* node)
     //VALUE oldval = GetRecord(gLValueIdentifier, gLValueContext);
     if (array_indexing)
     {
+        VALUE previous = HashGet(gLValueIndex, gLValueDictionary);
+        InvalidateExpr(&previous);
         HashStore(gLValueIndex, expr, gLValueDictionary);
         array_indexing = 0;
     }
     else
     {
+        VALUE previous = GetRecord(gLValueIdentifier, gLValueContext);
+        InvalidateExpr(&previous);
         StoreRecord(gLValueIdentifier, expr, gLValueContext);
     }
-/*  if (expr.type == VAL_REFERENCE)
-    {
-        if (expr.data.reference->ref_count >= 0) {
-            expr.data.reference->ref_count++;
-        }
-    }
-    else if (expr.type == VAL_FUNCTION)
-    {
-        if (expr.data.function->ref_count >= 0) {
-            expr.data.function->ref_count++;
-            if (expr.data.function->closure &&
-                expr.data.function->closure->ref_count >= 0)
-            {
-                expr.data.function->closure->ref_count++;
-            }
-        }
-    }*/
 
     //InvalidateExpr(oldval);
     gLastExpression = expr;
@@ -591,31 +572,17 @@ int ReduceAssignmentB(SYNTAX_TREE* node)
     //VALUE oldval = GetRecord(gLValueIdentifier, gLValueContext);
     if (array_indexing)
     {
+        VALUE previous = HashGet(gLValueIndex, gLValueDictionary);
+        InvalidateExpr(&previous);
         HashStore(gLValueIndex, expr, gLValueDictionary);
-//        printf("Storing (%i,%i) @ (%i,%i)\n", expr.type, expr.data.primitive, gLValueIndex.type, gLValueIndex.data.primitive);
         array_indexing = 0;
     }
     else
     {
+        VALUE previous = GetRecord(gLValueIdentifier, gLValueContext);
+        InvalidateExpr(&previous);
         StoreRecord(gLValueIdentifier, expr, gLValueContext);
     }
-/*  if (expr.type == VAL_REFERENCE)
-    {
-        if (expr.data.reference->ref_count >= 0) {
-            expr.data.reference->ref_count++;
-        }
-    }
-    else if (expr.type == VAL_FUNCTION)
-    {
-        if (expr.data.function->ref_count > 0) {
-            expr.data.function->ref_count++;
-            if (expr.data.function->closure &&
-                expr.data.function->closure->ref_count >= 0)
-            {
-                expr.data.function->closure->ref_count++;
-            }
-        }
-    }*/
 
     //InvalidateExpr(oldval);
     gLastExpression = expr;
@@ -1752,8 +1719,6 @@ int ReduceReferenceA(SYNTAX_TREE* node)
     
     if (array_indexing)
     {
-        //gLastExpression = GetRecord(gLValueIdentifier, gLValueContext);
-        //printf("Retrieving (%i,%i) from (%i,%i)\n", gLastExpression.type, gLastExpression.data.primitive, gLValueIndex.type, gLValueIndex.data.primitive);
         gLastExpression = HashGet(gLValueIndex, gLValueDictionary);
         array_indexing = 0;
     }
@@ -1783,7 +1748,7 @@ int ReduceReferenceB(SYNTAX_TREE* node)
         CONTEXT* current = gCurrentContext;
         gCurrentContext = (CONTEXT*)ALLOC(sizeof(CONTEXT));
         gCurrentContext->list = NULL;
-        gCurrentContext->ref_count = 1;
+        //gCurrentContext->ref_count = 1;
         gCurrentContext->parent = function.data.function->closure;
         CONTEXT* func_context = gCurrentContext;
         
@@ -1794,14 +1759,7 @@ int ReduceReferenceB(SYNTAX_TREE* node)
         }
 
         if (error) {
-            PushCallStack(&gStackTrace, function.data.function->fn_name);
-        }
-
-      // remove calling context
-        func_context->ref_count--;
-        if (func_context->ref_count == 0)
-        {
-            //FreeContext(func_context);
+            PushCallStack(&gStackTrace, function.data.function/*->fn_name*/);
         }
 
         // return with same context
@@ -1842,7 +1800,7 @@ int ReduceReferenceC(SYNTAX_TREE* node)
         //gCurrentContext = (CONTEXT*)ALLOCATE(sizeof(CONTEXT));
         gCurrentContext = (CONTEXT*)ALLOC(sizeof(CONTEXT));
         gCurrentContext->list = NULL;
-        gCurrentContext->ref_count = 1;
+        //gCurrentContext->ref_count = 1;
         gCurrentContext->parent = function.data.function->closure;
         CONTEXT* func_context = gCurrentContext;
         
@@ -1886,22 +1844,7 @@ int ReduceReferenceC(SYNTAX_TREE* node)
         }
 
         if (error) {
-            PushCallStack(&gStackTrace, function.data.function->fn_name);
-        }
-
-      // remove calling context
-        // remove evaluated arguments
-/*      while (arg) {
-            PAIR* next;
-            next = arg->next;
-            DEALLOC((void*)arg);
-            arg = next;
-        }*/
-        // remove function closure
-        func_context->ref_count--;
-        if (func_context->ref_count == 0)
-        {
-            //FreeContext(func_context);
+            PushCallStack(&gStackTrace, function.data.function/*->fn_name*/);
         }
 
         // return with same context
@@ -1964,12 +1907,6 @@ int ReduceArgumentsB(SYNTAX_TREE* node)
 int ReduceObjectA(SYNTAX_TREE* node)
 {
     int error = 0;
-    
-/*   gLastExpression.type = VAL_REFERENCE;
-    gLastExpression.data.reference = (CONTEXT*)ALLOC(sizeof(CONTEXT));
-    gLastExpression.data.reference->parent = NULL;
-    gLastExpression.data.reference->list = NULL;
-    gLastExpression.data.reference->ref_count = 0; */
 
     gLastExpression.type = VAL_DICTIONARY;
     gLastExpression.data.dictionary = CreateHashTable();
@@ -1985,8 +1922,6 @@ int ReduceObjectB(SYNTAX_TREE* node)
     int error = 0;
     error = InterpretNode(array_init1);
     
-//    gLastExpression.type = VAL_REFERENCE;
-//    gLastExpression.data.reference = gDictionaryInit;
     gLastExpression.type = VAL_DICTIONARY;
     gLastExpression.data.dictionary = gDictionaryInit;
 
@@ -2001,8 +1936,6 @@ int ReduceObjectC(SYNTAX_TREE* node)
     int error = 0;
     error = InterpretNode(dictionary_init1);
     
-//    gLastExpression.type = VAL_REFERENCE;
-//    gLastExpression.data.reference = gDictionaryInit;
     gLastExpression.type = VAL_DICTIONARY;
     gLastExpression.data.dictionary = gDictionaryInit;
 
@@ -2025,17 +1958,6 @@ int ReduceArrayInitA(SYNTAX_TREE* node)
     error = error ? error : InterpretNode(expr1);
     VALUE expr = gLastExpression;
     
-    // push array gLastExpr
-/*   PAIR* list = dictionary->list;
-    while (list->next)
-        list = list->next;
-    list->next = (PAIR*)ALLOC(sizeof(PAIR));
-    char* string = (char*)ALLOCATE(sizeof(char)*16);
-    sprintf(string, "%i", index++);
-    list->next->identifier = string;
-    list->next->value = gLastExpression;
-    list->next->next = NULL; */
-
     VALUE key;
     key.type = VAL_PRIMITIVE;
     key.data.primitive = index;
@@ -2055,18 +1977,6 @@ int ReduceArrayInitB(SYNTAX_TREE* node)
     int error = 0;
     error = InterpretNode(expr1);
     VALUE expr = gLastExpression;
-    
-    // push array gLastExpr
-/*    gDictionaryInit = (CONTEXT*)ALLOC(sizeof(CONTEXT));
-    gArrayIndex = 0;
-    gDictionaryInit->parent = NULL;
-    gDictionaryInit->ref_count = 0;
-    gDictionaryInit->list = (PAIR*)ALLOC(sizeof(PAIR));
-    char* string = (char*)ALLOCATE(sizeof(char)*16);
-    sprintf(string, "%i", gArrayIndex++);
-    gDictionaryInit->list->identifier = string;
-    gDictionaryInit->list->value = gLastExpression;
-    gDictionaryInit->list->next = NULL; */
     
     gDictionaryInit = CreateHashTable();
     gArrayIndex = 0;
@@ -2096,15 +2006,6 @@ int ReduceDictionaryInitA(SYNTAX_TREE* node)
 
     error = error ? error : InterpretNode(expr1);
     VALUE expr = gLastExpression;
-    
-    // push dict[identifier] gLastExpr
-/*    PAIR* list = dictionary->list;
-    while (list->next)
-        list = list->next;
-    list->next = (PAIR*)ALLOC(sizeof(PAIR));
-    list->next->identifier = identifier1->string;
-    list->next->value = gLastExpression;
-    list->next->next = NULL; */
 
     VALUE key;
     key.type = VAL_STRING;
@@ -2125,15 +2026,6 @@ int ReduceDictionaryInitB(SYNTAX_TREE* node)
     int error = 0;
     error = InterpretNode(expr1);
     VALUE expr = gLastExpression;
-    
-    // push dict[identifier] gLastExpr
-/*    gDictionaryInit = (CONTEXT*)ALLOC(sizeof(CONTEXT));
-    gDictionaryInit->parent = NULL;
-    gDictionaryInit->ref_count = 0;
-    gDictionaryInit->list = (PAIR*)ALLOC(sizeof(PAIR));
-    gDictionaryInit->list->identifier = identifier1->string;
-    gDictionaryInit->list->value = gLastExpression;
-    gDictionaryInit->list->next = NULL; */
 
     gDictionaryInit = CreateHashTable();
 
@@ -2179,8 +2071,10 @@ int ReduceBooleanB(SYNTAX_TREE* node)
 /* reduce one node */
 int InterpretNode(SYNTAX_TREE* node)
 {
-    if (node == NULL || node->production == 0)
+    if (node == NULL || node->production == 0) {
+        printf("Null production.\n");
         return 1;
+    }
 
     line_error = node->line;
     failed_production = node;

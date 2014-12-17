@@ -34,21 +34,23 @@ struct HASH_TABLE;
 typedef struct VALUE
 {
     int         type;
-    union {
-        int         primitive;
-        double      floatp;
-        const char* string;
-        FUNCTION*   function;
+    union 
+    {
+        int             primitive;
+        double          floatp;
+        const char*     string;
+        FUNCTION*       function;
         struct CONTEXT* reference;
-        struct HASH_TABLE* dictionary;
+        struct HASH_TABLE* 
+                        dictionary;
     } data;
 //  int const_string;
 } VALUE;
 
 typedef struct PAIR
 {
-    const char* identifier;
-    VALUE       value;
+    const char*  identifier;
+    VALUE        value;
     struct PAIR* next;
 } PAIR;
 
@@ -62,6 +64,7 @@ typedef struct CONTEXT
 typedef struct CALLSTACK
 {
     const char* fn_name;
+    FUNCTION* function;
     struct CALLSTACK* next;
 } CALLSTACK;
 
@@ -136,8 +139,12 @@ void ReduceProgramAST(SYNTAX_TREE**);
 
 /* stack trace */
 void ClearCallStack(CALLSTACK*);
-void PushCallStack(CALLSTACK*, const char*);
+void PushCallStack(CALLSTACK*, FUNCTION*);
+//void PushCallStack(CALLSTACK*, const char*);
 void PrintStackTrace();
+
+/* error */
+extern const char* ErrorMessage(int error);
 
 #endif // _INTERPRETER_H
 

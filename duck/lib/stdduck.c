@@ -22,16 +22,22 @@ void PrintValue(VALUE value)
 
 void PrintFunction(FUNCTION* function)
 {
-    printf("function(");
-    PAIR* itr = function->parameters;
-    while (itr)
-    {
-        printf("%s", itr->identifier);
-        if (itr->next)
-            printf(", ");
-        itr = itr->next;
+    if (function) {
+        if (function->fn_name) {
+            printf("%s(", function->fn_name);
+        } else {
+            printf("function(");
+        }
+        PAIR* itr = function->parameters;
+        while (itr)
+        {
+            printf("%s", itr->identifier);
+            if (itr->next)
+                printf(", ");
+            itr = itr->next;
+        }
+        printf(")");
     }
-    printf(")");
 }
 
 void PrintObject(CONTEXT* context)
@@ -104,6 +110,41 @@ VALUE ReallocStrings(VALUE value)
     return value;
 }
 
+/* parses(source) -> boolean */
+int DuckParses(int argument_count)
+{
+    L_TOKEN*      lexing;
+    char*         buffer;
+    int           error = 0;
+
+    VALUE argument = GetRecord("source", gCurrentContext);
+
+    gLastExpression.type = VAL_PRIMITIVE;
+    gLastExpression.data.primitive = 0;
+
+    if (argument.type == VAL_STRING) 
+    {
+        lexing = LexSourceBuffer(argument.data.string, &buffer, CONTEXT_FREE_GRAMMAR);
+        if (lexing == NULL) 
+        {
+            gLastExpression.data.primitive = -1;
+            FreeLexing(lexing, buffer);
+            //return 1;
+            return 0;
+        }
+        gLastExpression.data.primitive = ParseSucceeds(lexing, PARSE_TABLE, CONTEXT_FREE_GRAMMAR);
+        if (gLastExpression.data.primitive == 0) {
+            FreeLexing(lexing, buffer);
+            return 0;
+        }
+
+        /* free lexing */
+        FreeLexing(lexing, buffer);
+    }
+
+    return error;
+}
+
 /* eval(source) */
 int DuckEval(int argument_count)
 {
@@ -119,6 +160,9 @@ int DuckEval(int argument_count)
 
     CONTEXT* currentContext;
     currentContext = gCurrentContext;
+
+    int prev_line_error = line_error;
+    SYNTAX_TREE* prev_failed_production = failed_production;
 
 //  if (gCurrentContext->parent) gCurrentContext = gCurrentContext->parent;
     gCurrentContext = gGlobalContext;
@@ -137,38 +181,62 @@ int DuckEval(int argument_count)
             FreeLexing(lexing, buffer);
             return 1;
         }
+
+        ReduceProgramAST(&ast);
         error = InterpretNode(ast);
+
         if (error)
         {
-            printf("Error %i.\n", error);
+            printf("%s\n", ErrorMessage(error));
+            PrintStackTrace();
             FreeLexing(lexing, buffer);
             FreeParseTree(ast);
+
+            ClearCallStack(&gStackTrace);
+            line_error = prev_line_error;
+            failed_production = prev_failed_production;
+
             return 1;
         }
 
-        /* sanitize gLastExpression for use in program */
-        gLastExpression = ReallocStrings(gLastExpression);
+        /* sanitize last expression for use in program */
+        //gLastExpression = ReallocStrings(gLastExpression);
 
         /* free lexing and parse tree */
-        FreeLexing(lexing, buffer);
-        FreeParseTree(ast);
+        //FreeLexing(lexing, buffer);
+        //FreeParseTree(ast);
     }
 
     gCurrentContext = currentContext;
     return error;
 }
 
-/* duck.print(arg1), duck.println(arg1) */
+/* duck.print(output) */
 int DuckPrint(int argument_count)
 {
     int error = 0;
     VALUE argument = GetRecord("output", gCurrentContext);
     
     PrintValue(argument);
+
+    gLastExpression.type = VAL_NIL;
+    gLastExpression.data.primitive = 0;
+
+    return error;
+}
+
+/* duck.println(output) */
+int DuckPrintLn(int argument_count)
+{
+    int error = 0;
+    VALUE argument = GetRecord("output", gCurrentContext);
+    
+    PrintValue(argument);
+
     gLastExpression.type = VAL_NIL;
     gLastExpression.data.primitive = 0;
     printf("\n");
-
+    
     return error;
 }
 
@@ -230,6 +298,19 @@ int DuckInt(int argument_count)
 
     gLastExpression.type = VAL_PRIMITIVE;
     gLastExpression.data.primitive = TypeInt(argument);
+    
+    return error;
+}
+
+/* float(value) */
+int DuckFloat(int argument_count)
+{
+    int error = 0;
+
+    VALUE argument = GetRecord("value", gCurrentContext);
+
+    gLastExpression.type = VAL_FLOATING_POINT;
+    gLastExpression.data.floatp = TypeFloat(argument);
     
     return error;
 }
@@ -297,9 +378,11 @@ void BindStandardLibrary()
 
     VALUE print = CreateFunction(DuckPrint);
     AddParameter(print, "output");
-    
     LinkFunction(duckStdLib, "print", print);
-    LinkFunction(duckStdLib, "println", print);
+
+    VALUE println = CreateFunction(DuckPrintLn);
+    AddParameter(println, "output");
+    LinkFunction(duckStdLib, "println", println);
 
     VALUE prompt = CreateFunction(DuckPrompt);
     AddParameter(prompt, "message");
@@ -315,6 +398,10 @@ void BindStandardLibrary()
     AddParameter(int_c, "value");
     LinkFunction(root, "int", int_c);
 
+    VALUE float_c = CreateFunction(DuckFloat);
+    AddParameter(float_c, "value");
+    LinkFunction(root, "float", float_c);
+
     VALUE length = CreateFunction(DuckLength);
     AddParameter(length, "array");
     LinkFunction(root, "len", length);
@@ -323,11 +410,66 @@ void BindStandardLibrary()
     AddParameter(type, "object");
     LinkFunction(root, "Type", type);
 
-    VALUE evalFun = CreateFunction(DuckEval);
-    AddParameter(evalFun, "source");
-    LinkFunction(root, "eval", evalFun);
+    VALUE evalFunc = CreateFunction(DuckEval);
+    AddParameter(evalFunc, "source");
+    LinkFunction(root, "eval", evalFunc);
+
+    VALUE parsesFunc = CreateFunction(DuckParses);
+    AddParameter(parsesFunc, "source");
+    LinkFunction(duckStdLib, "parses", parsesFunc);
 
     VALUE duckQuit = CreateFunction(DuckQuit);
     LinkFunction(root, "quit", duckQuit);
+    BindStringLibrary();
+}
+
+int StringSplit(int argument_count)
+{
+    int error = 0;
+
+    VALUE argument = GetRecord("string", gCurrentContext);
+
+    if (argument.type == VAL_STRING) 
+    {
+        const char* data = argument.data.string;
+        int length = strlen(data);
+        unsigned int index;
+
+        HASH_TABLE* dictionary = CreateHashTable();
+
+        for (index = 0; index < length; index++)
+        {
+            VALUE key;
+            VALUE expr;
+
+            key.type = VAL_PRIMITIVE;
+            key.data.primitive = index;
+            
+            expr.type = VAL_STRING;
+            char* char_string = (char*)ALLOCATE(sizeof(char) * 2);
+            char_string[0] = data[index];
+            char_string[1] = '\0';
+            expr.data.string = char_string;
+
+            HashStore(key, expr, dictionary);
+        }
+
+        gLastExpression.type = VAL_DICTIONARY;
+        gLastExpression.data.dictionary = dictionary;
+    } else {
+        gLastExpression.type = VAL_NIL;
+        gLastExpression.data.primitive = 0;
+    }
+
+    return error;
+}
+
+void BindStringLibrary()
+{
+    VALUE stringLib = LinkNamespace("string");
+    
+    VALUE split = CreateFunction(StringSplit);
+    AddParameter(split, "string");
+    LinkFunction(stringLib, "split", split);
 }
 

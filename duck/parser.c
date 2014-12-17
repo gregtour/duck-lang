@@ -154,6 +154,108 @@ void PrintErrorInput(L_TOKEN* input, GRAMMAR_TABLE g)
     }
 }
 
+/* check if a source is parsable */
+int ParseSucceeds(L_TOKEN* input, 
+                  LR_TABLE parser, 
+                  GRAMMAR_TABLE grammar)
+{
+    // set ip and init stack
+    L_TOKEN* ip = input;
+    StackPushState(0);
+    
+    // the program's syntax tree
+	SYNTAX_TREE* ast = NULL;
+
+    int successful = 0;
+
+    // loop forever
+    for (;;)
+    {
+        // get the state off the top of the stack
+        PARSE_STACK s = StackPeek();
+        if (s.token || s.state == -1
+                || s.state >= parser.numStates)
+        {
+            // error
+            successful = -1;
+            break;
+        }
+
+        if (ip == NULL) {
+            successful = 0;
+            break;
+        }
+        
+        // find the action table entry for the state and input
+        ACTION action = ActionTable(parser, s.state, ip->token);
+
+        // perform the parse action
+        if (action.type == ACTION_SHIFT)
+        {
+            // push a then s' on top of the stack;
+            StackPushToken(ip);
+            StackPushState(action.value);
+            // advance ip to the next input symbol
+            ip = ip->next;
+        }
+        else if (action.type == ACTION_REDUCE)
+        {
+            SYNTAX_TREE* node;
+            RULE r;
+            int rhs;
+            
+            // output the production A -> B
+            if (action.value < 0 || action.value >= grammar.numRules) 
+            {
+                // error, free
+                successful = -1;
+                break;
+            }
+            r = grammar.rules[action.value];
+
+            // pop 2*|B| symbols off the stack;
+            for (rhs = 0; rhs < r.rhsLength; rhs++)
+            {
+                StackPop();
+                StackPop();
+            }
+                
+            // let s' be the state now on top of the stack;
+            s = StackPeek();
+            if (s.token || s.state == -1 || s.state >= parser.numStates)
+            {
+                successful = -1;
+                break;
+            }
+            
+            // push A then goto[s', A] on top of the stack;
+            StackPushTree(NULL);
+            StackPushState(GotoTable(parser, s.state, r.lhs));
+        }
+        else if (action.type == ACTION_ACCEPT)
+        {
+            // accept
+            successful = 1;
+            break;
+        }
+        else
+        {
+            // error
+            if (ip->token == gSymbolEOF)
+                successful = 0;
+            else
+                successful = -1;
+            break;
+        }
+    }
+    
+    // free the stack
+    while (gParseStack)
+        StackPop();
+
+    // no errors
+    return successful;
+}
 
 /* parse a lexed source file */
 /*
@@ -390,5 +492,27 @@ void PrintParseTree(SYNTAX_TREE*  ast,
     printf("\n\nAbstract Syntax Tree\n");
     printf("====================\n\n");
     PrintParseTreeRecurse(ast, 0, grammar);
+}
+
+
+void PrintParseTreeFormat(SYNTAX_TREE*  ast,
+                          GRAMMAR_TABLE grammar)
+{
+    if (ast->numChildren > 0) {
+        int i;
+        for (i = 0; i < ast->numChildren; i++)
+            PrintParseTreeFormat(ast->children[i], grammar);
+    } else {
+        if (ast->string && ast->token != gSymbolEndLine)
+        {
+            int i;
+            for (i = 0; i < ast->length; i++)
+                printf("%c", ast->string[i]);
+        }
+        else
+        {
+            printf("%s", GetElement(ast->token, grammar));
+        }
+    }
 }
 
