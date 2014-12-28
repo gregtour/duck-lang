@@ -7,6 +7,7 @@
 #include "interpreter.h"
 #include "arithmetic.h"
 #include "memory.h"
+#include "garbage.h"
 
 /* production stubs */
 
@@ -18,7 +19,7 @@
 
 void PushReturnStack(VALUE* return_value)
 {
-    IncrementReferences(return_value);
+//    IncrementReferences(return_value);
 }
 
 /* 1. <program> -> <stmt list> */
@@ -60,6 +61,11 @@ int ReduceStmtListA(SYNTAX_TREE* node)
             if (error == 0 && returning == 0)
             {
              //   InvalidateExpr(&gLastExpression);
+                if ((++gc_collect_count) == GC_COLLECT_LIMIT)
+                {
+                    gc_collect_count = 0;
+                    CallGCTraceRoot(gGlobalContext, gLastExpression);
+                }
             }
             
             node = node->children[1];
@@ -177,6 +183,7 @@ int ReduceFunctionDef(SYNTAX_TREE* node)
         
         //printf("storing: %s in %p\n", identifier1->string, gCurrentContext);
         StoreRecord(identifier1->string, record, gCurrentContext);
+        GCAddFunction(record.data.function, &gGCManager);
         //AddObjectPool(record);
 
         //gLastExpression = record;
@@ -237,10 +244,10 @@ int ReduceIf(SYNTAX_TREE* node)
     if (error == 0) {
         if (EvaluatesTrue(gLastExpression))
         {
-            InvalidateExpr(&gLastExpression);
+            //InvalidateExpr(&gLastExpression);
             error = InterpretNode(stmt_list1);
         } else {
-            InvalidateExpr(&gLastExpression);
+            //InvalidateExpr(&gLastExpression);
             error = InterpretNode(else_if1);
         }
     }
@@ -267,11 +274,11 @@ int ReduceForLoop(SYNTAX_TREE* node)
 
     error = InterpretNode(arithmetic1);
     start = gLastExpression;
-    IncrementReferences(&start);
+    //IncrementReferences(&start);
     if (error == 0) {
         error = InterpretNode(arithmetic2);
         end = gLastExpression;
-        IncrementReferences(&end);
+        //IncrementReferences(&end);
     }
 
     if (start.type == VAL_FLOATING_POINT
@@ -317,8 +324,8 @@ int ReduceForLoop(SYNTAX_TREE* node)
         return error;
     }
 
-    InvalidateExpr(&start);
-    InvalidateExpr(&end);
+    //InvalidateExpr(&start);
+    //InvalidateExpr(&end);
     breaking = 0;
 
     return error;
@@ -365,20 +372,20 @@ int ReduceAssignmentA(SYNTAX_TREE* node)
     error = InterpretNode(l_value1);
     if (error) return error;
 
-    IncrementReferences(&expr);
+    //IncrementReferences(&expr);
     
     //VALUE oldval = GetRecord(gLValueIdentifier, gLValueContext);
     if (array_indexing)
     {
         VALUE previous = HashGet(gLValueIndex, gLValueDictionary);
-        InvalidateExpr(&previous);
+        //InvalidateExpr(&previous);
         HashStore(gLValueIndex, expr, gLValueDictionary);
         array_indexing = 0;
     }
     else
     {
         VALUE previous = GetRecord(gLValueIdentifier, gLValueContext);
-        InvalidateExpr(&previous);
+        //InvalidateExpr(&previous);
 
         if (gLValueIndex.type == VAL_STRING &&
             gLValueIndex.const_string == 0)
@@ -408,13 +415,13 @@ int ReduceAssignmentB(SYNTAX_TREE* node)
     error = InterpretNode(l_value1);
     if (error) return error;
 
-    IncrementReferences(&expr);
+    //IncrementReferences(&expr);
     
     //VALUE oldval = GetRecord(gLValueIdentifier, gLValueContext);
     if (array_indexing)
     {
         VALUE previous = HashGet(gLValueIndex, gLValueDictionary);
-        InvalidateExpr(&previous);
+        //InvalidateExpr(&previous);
         
         if (gLValueIndex.type == VAL_STRING &&
             gLValueIndex.const_string == 0)
@@ -428,7 +435,7 @@ int ReduceAssignmentB(SYNTAX_TREE* node)
     else
     {
         VALUE previous = GetRecord(gLValueIdentifier, gLValueContext);
-        InvalidateExpr(&previous);
+        //InvalidateExpr(&previous);
         StoreRecord(gLValueIdentifier, expr, gLValueContext);
     }
 
@@ -572,14 +579,14 @@ int ReduceConditionA(SYNTAX_TREE* node)
 
     /* AND */
     if (EvaluatesTrue(condition)) {
-        InvalidateExpr(&gLastExpression);
+        //InvalidateExpr(&gLastExpression);
 
         error = InterpretNode(logic1);
         /* fall-through */
 
         if (error) return error;
     } else {
-        InvalidateExpr(&gLastExpression);
+        //InvalidateExpr(&gLastExpression);
         gLastExpression.type = VAL_PRIMITIVE;
         gLastExpression.data.primitive = 0;
     }
@@ -603,7 +610,7 @@ int ReduceConditionB(SYNTAX_TREE* node)
         return error;
     }
 
-    InvalidateExpr(&gLastExpression);
+    //InvalidateExpr(&gLastExpression);
     error = InterpretNode(logic1);
     VALUE logic = gLastExpression;
     if (error) return error;
@@ -626,7 +633,7 @@ int ReduceConditionC(SYNTAX_TREE* node)
     if (error) return error;
 
     if (EvaluatesTrue(condition)) {
-        InvalidateExpr(&gLastExpression);
+        //InvalidateExpr(&gLastExpression);
         gLastExpression.type = VAL_PRIMITIVE;
         gLastExpression.data.primitive = 0;
         return error;
@@ -638,14 +645,14 @@ int ReduceConditionC(SYNTAX_TREE* node)
 
     /* NOR */
     if (EvaluatesTrue(logic)) {
-        InvalidateExpr(&gLastExpression);
+        //InvalidateExpr(&gLastExpression);
         gLastExpression.type = VAL_PRIMITIVE;
         gLastExpression.data.primitive = 0;
         return error;
     }
     else
     {
-        InvalidateExpr(&gLastExpression);
+        //InvalidateExpr(&gLastExpression);
         gLastExpression.type = VAL_PRIMITIVE;
         gLastExpression.data.primitive = 1;
         return error;
@@ -698,7 +705,7 @@ int ReduceLogicA(SYNTAX_TREE* node)
     else
     {
         // opposite of string, function, reference or nil is nil
-        InvalidateExpr(&gLastExpression);
+        //InvalidateExpr(&gLastExpression);
         gLastExpression.type = VAL_NIL;
         gLastExpression.data.primitive = 0;
     }
@@ -723,8 +730,8 @@ int ReduceComparisonA(SYNTAX_TREE* node)
 
     /* EQUAL */
     gLastExpression = CompareEquality(comparison, arithmetic);
-    InvalidateExpr(&comparison);
-    InvalidateExpr(&arithmetic);
+    //InvalidateExpr(&comparison);
+    //InvalidateExpr(&arithmetic);
 
     return error;
 }
@@ -745,8 +752,8 @@ int ReduceComparisonB(SYNTAX_TREE* node)
     
     /* NOT EQUAL */
     gLastExpression = CompareInequality(comparison, arithmetic);
-    InvalidateExpr(&comparison);
-    InvalidateExpr(&arithmetic);
+    //InvalidateExpr(&comparison);
+    //InvalidateExpr(&arithmetic);
 
     return error;
 }
@@ -767,8 +774,8 @@ int ReduceComparisonC(SYNTAX_TREE* node)
 
     /* LESS THAN */
     gLastExpression = CompareLessThan(comparison, arithmetic);
-    InvalidateExpr(&comparison);
-    InvalidateExpr(&arithmetic);
+    //InvalidateExpr(&comparison);
+    //InvalidateExpr(&arithmetic);
 
     return error;
 }
@@ -789,8 +796,8 @@ int ReduceComparisonD(SYNTAX_TREE* node)
 
     /* GREATER THAN */
     gLastExpression = CompareGreaterThan(comparison, arithmetic);
-    InvalidateExpr(&comparison);
-    InvalidateExpr(&arithmetic);
+    //InvalidateExpr(&comparison);
+    //InvalidateExpr(&arithmetic);
 
     return error;
 }
@@ -811,8 +818,8 @@ int ReduceComparisonE(SYNTAX_TREE* node)
 
     /* LESS-THAN-OR-EQUAL */
     gLastExpression = CompareLessThanOrEqual(comparison, arithmetic);
-    InvalidateExpr(&comparison);
-    InvalidateExpr(&arithmetic);
+    //InvalidateExpr(&comparison);
+    //InvalidateExpr(&arithmetic);
 
     return error;
 }
@@ -833,8 +840,8 @@ int ReduceComparisonF(SYNTAX_TREE* node)
     
     /* GREATER-THAN-OR-EQUAL */
     gLastExpression = CompareGreaterThanOrEqual(comparison, arithmetic);
-    InvalidateExpr(&comparison);
-    InvalidateExpr(&arithmetic);
+    //InvalidateExpr(&comparison);
+    //InvalidateExpr(&arithmetic);
 
     return error;
 }
@@ -865,8 +872,8 @@ int ReduceArithmeticA(SYNTAX_TREE* node)
         gLastExpression = Add(arithmetic, term);
     }
 
-    InvalidateExpr(&arithmetic);
-    InvalidateExpr(&term);
+    //InvalidateExpr(&arithmetic);
+    //InvalidateExpr(&term);
 
     return error;
 }
@@ -888,8 +895,8 @@ int ReduceArithmeticB(SYNTAX_TREE* node)
     /* subtract */
     gLastExpression = Subtract(arithmetic, term);
 
-    InvalidateExpr(&arithmetic);
-    InvalidateExpr(&term);
+    //InvalidateExpr(&arithmetic);
+    //InvalidateExpr(&term);
 
     return error;
 }
@@ -920,8 +927,8 @@ int ReduceArithmeticC(SYNTAX_TREE* node)
         gLastExpression.type = VAL_NIL;
     }
 
-    InvalidateExpr(&arithmetic);
-    InvalidateExpr(&term);
+    //InvalidateExpr(&arithmetic);
+    //InvalidateExpr(&term);
 
     return error;
 }
@@ -952,8 +959,8 @@ int ReduceArithmeticD(SYNTAX_TREE* node)
         gLastExpression.type = VAL_NIL;
     }
 
-    InvalidateExpr(&arithmetic);
-    InvalidateExpr(&term);
+    //InvalidateExpr(&arithmetic);
+    //InvalidateExpr(&term);
 
     return error;
 }
@@ -976,8 +983,8 @@ int ReduceTermA(SYNTAX_TREE* node)
     /* multiplication */
     gLastExpression = Multiply(term, factor);
 
-    InvalidateExpr(&term);
-    InvalidateExpr(&factor);
+    //InvalidateExpr(&term);
+    //InvalidateExpr(&factor);
 
     return error;
 }
@@ -999,8 +1006,8 @@ int ReduceTermB(SYNTAX_TREE* node)
     /* division */
     gLastExpression = Divide(term, factor);
 
-    InvalidateExpr(&term);
-    InvalidateExpr(&factor);
+    //InvalidateExpr(&term);
+    //InvalidateExpr(&factor);
 
     return error;
 }
@@ -1026,7 +1033,7 @@ int ReduceFactorA(SYNTAX_TREE* node)
     else
     {
         // opposite of string, function, reference or nil is nil
-        InvalidateExpr(&gLastExpression);
+        //InvalidateExpr(&gLastExpression);
         gLastExpression.type = VAL_NIL;
     }
 
@@ -1054,7 +1061,7 @@ int ReduceFactorB(SYNTAX_TREE* node)
     else
     {
         // opposite of string, function, reference or nil is nil
-        InvalidateExpr(&gLastExpression);
+        //InvalidateExpr(&gLastExpression);
         gLastExpression.type = VAL_NIL;
     }
 
@@ -1071,7 +1078,7 @@ int ReduceFinalC(SYNTAX_TREE* node)
 
     int error = 0;
 
-    InvalidateExpr(&gLastExpression);    
+    //InvalidateExpr(&gLastExpression);    
 
     gLastExpression.type = VAL_PRIMITIVE;
     gLastExpression.data.primitive = atoi(integer1->string);
@@ -1086,7 +1093,7 @@ int ReduceFinalD(SYNTAX_TREE* node)
     
     int error = 0;
 
-    InvalidateExpr(&gLastExpression);    
+    //InvalidateExpr(&gLastExpression);    
 
     gLastExpression.type = VAL_FLOATING_POINT;
     gLastExpression.data.floatp = atof(float1->string);
@@ -1101,7 +1108,7 @@ int ReduceFinalE(SYNTAX_TREE* node)
     
     int error = 0;
 
-    InvalidateExpr(&gLastExpression);
+    //InvalidateExpr(&gLastExpression);
     
     /*char* working_string;
     // realloc strings
@@ -1170,6 +1177,8 @@ int ReduceReferenceB(SYNTAX_TREE* node)
         CONTEXT* current = gCurrentContext;
         gCurrentContext = func_context;
 
+        GCAddContext(func_context, &gGCManager);
+
         // store params
         
         // call function
@@ -1185,7 +1194,7 @@ int ReduceReferenceB(SYNTAX_TREE* node)
         if (error) {
             PushCallStack(&gStackTrace, function.data.function/*->fn_name*/);
         } else {
-            // clear function closure
+/*            // clear function closure
             PAIR *itr, *itr_next;
             itr = func_context->list;
             while (itr) {
@@ -1194,7 +1203,7 @@ int ReduceReferenceB(SYNTAX_TREE* node)
                 DEALLOC(itr);
                 itr = itr_next;
             }
-            DEALLOC(func_context);
+            DEALLOC(func_context); */
         }
 
         // return with same context
@@ -1237,6 +1246,8 @@ int ReduceReferenceC(SYNTAX_TREE* node)
         func_context->parent = function.data.function->closure;
         CONTEXT* current = gCurrentContext;
         gCurrentContext = func_context;
+
+        GCAddContext(func_context, &gGCManager);
 
         // store params
         // store arguments in the function's closure
@@ -1281,6 +1292,7 @@ int ReduceReferenceC(SYNTAX_TREE* node)
         if (error) {
             PushCallStack(&gStackTrace, function.data.function/*->fn_name*/);
         } else {
+        /*
             // clear function closure
             PAIR *itr, *itr_next;
             itr = func_context->list;
@@ -1290,7 +1302,7 @@ int ReduceReferenceC(SYNTAX_TREE* node)
                 DEALLOC(itr);
                 itr = itr_next;
             }
-            DEALLOC(func_context);
+            DEALLOC(func_context);*/
         }
 
         // return with same context
@@ -1520,10 +1532,11 @@ int ReduceObjectA(SYNTAX_TREE* node)
 {
     int error = 0;
 
-    InvalidateExpr(&gLastExpression);
+    //InvalidateExpr(&gLastExpression);
 
     gLastExpression.type = VAL_DICTIONARY;
     gLastExpression.data.dictionary = CreateHashTable();
+    GCAddDictionary(gLastExpression.data.dictionary, &gGCManager);
     gLastExpression.data.dictionary->ref_count = 1;
 
     return error;
@@ -1537,10 +1550,11 @@ int ReduceObjectB(SYNTAX_TREE* node)
     int error = 0;
     error = InterpretNode(array_init1);
 
-    InvalidateExpr(&gLastExpression);
+    //InvalidateExpr(&gLastExpression);
     
     gLastExpression.type = VAL_DICTIONARY;
     gLastExpression.data.dictionary = gDictionaryInit;
+    GCAddDictionary(gDictionaryInit, &gGCManager);
     gLastExpression.data.dictionary->ref_count = 1;
 
     return error;
@@ -1554,10 +1568,11 @@ int ReduceObjectC(SYNTAX_TREE* node)
     int error = 0;
     error = InterpretNode(dictionary_init1);
     
-    InvalidateExpr(&gLastExpression);
+    //InvalidateExpr(&gLastExpression);
 
     gLastExpression.type = VAL_DICTIONARY;
     gLastExpression.data.dictionary = gDictionaryInit;
+    GCAddDictionary(gDictionaryInit, &gGCManager);
     gLastExpression.data.dictionary->ref_count = 1;
 
 
@@ -1581,7 +1596,7 @@ int ReduceArrayInitA(SYNTAX_TREE* node)
     error = error ? error : InterpretNode(expr1);
     VALUE expr = gLastExpression;
 
-    IncrementReferences(&expr);
+    //IncrementReferences(&expr);
     
     VALUE key;
     key.type = VAL_PRIMITIVE;
@@ -1603,7 +1618,7 @@ int ReduceArrayInitB(SYNTAX_TREE* node)
     error = InterpretNode(expr1);
     VALUE expr = gLastExpression;
 
-    IncrementReferences(&expr);
+    //IncrementReferences(&expr);
     
     gDictionaryInit = CreateHashTable();
     gArrayIndex = 0;
@@ -1634,7 +1649,7 @@ int ReduceDictionaryInitA(SYNTAX_TREE* node)
     error = error ? error : InterpretNode(expr1);
     VALUE expr = gLastExpression;
 
-    IncrementReferences(&expr);
+    //IncrementReferences(&expr);
 
     VALUE key;
     key.type = VAL_STRING;
@@ -1664,7 +1679,7 @@ int ReduceDictionaryInitB(SYNTAX_TREE* node)
     error = InterpretNode(expr1);
     VALUE expr = gLastExpression;
 
-    IncrementReferences(&expr);
+    //IncrementReferences(&expr);
 
     gDictionaryInit = CreateHashTable();
 
@@ -1684,7 +1699,7 @@ int ReduceBooleanA(SYNTAX_TREE* node)
 {
     int error = 0;
     
-    InvalidateExpr(&gLastExpression);
+    //InvalidateExpr(&gLastExpression);
 
     gLastExpression.type = VAL_PRIMITIVE;
     gLastExpression.data.primitive = 1;
@@ -1697,7 +1712,7 @@ int ReduceBooleanB(SYNTAX_TREE* node)
 {
     int error = 0;
 
-    InvalidateExpr(&gLastExpression);
+    //InvalidateExpr(&gLastExpression);
     
     gLastExpression.type = VAL_PRIMITIVE;
     gLastExpression.data.primitive = 0;
@@ -1716,12 +1731,6 @@ int InterpretNode(SYNTAX_TREE* node)
 
     line_error = node->line;
     failed_production = node;
-
-    if ((++instructions) == GC_INST_COUNT)
-    {
-        instructions = 0;
-        CallGCTraceFunc();
-    }
 
     switch (node->production)
     {

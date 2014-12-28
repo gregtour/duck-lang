@@ -67,9 +67,9 @@ InitGC(GC_DATA_MANAGEMENT gcStore)
     gcStore.str_capacity = 128;
     gcStore.strings = (char**)malloc(sizeof(char*) * gcStore.str_capacity);
 
-    gcStore.tables_size = 0;
-    gcStore.tables_capacity = 128;
-    gcStore.tables = (HASH_TABLE**)malloc(sizeof(HASH_TABLE*) * gcStore.tables_capacity);
+    gcStore.table_size = 0;
+    gcStore.table_capacity = 128;
+    gcStore.tables = (HASH_TABLE**)malloc(sizeof(HASH_TABLE*) * gcStore.table_capacity);
     return gcStore;
 }
 
@@ -105,7 +105,7 @@ int CallGCRecurseContext(CONTEXT* context,
                                             managed);
                 } else if (itr->value.type == VAL_STRING &&
                            itr->value.const_string == 0) {
-                    GCAddString(itr->value.string, managed);
+                    GCAddString((char*)itr->value.data.string, managed);
                 }
                 itr = itr->next;
             }
@@ -145,7 +145,7 @@ int CallGCRecurseDictionary(HASH_TABLE* table,
                                             managed);
                 } else if (value.type == VAL_STRING &&
                            value.const_string == 0) {
-                    GCAddString(value.data.string, managed);
+                    GCAddString((char*)value.data.string, managed);
                 }
             }
         }
@@ -233,7 +233,7 @@ void CallGCTraceRoot(CONTEXT* root,
     {
         char* string = gGCManager.strings[index];
         if (!CONTAINS_POINTER_ARRAY((void**)managed.strings,
-                                    managed.string_size,
+                                    managed.str_size,
                                     (void*)string))
         {
             ClearString(string);
@@ -301,7 +301,7 @@ int GCAddValue(VALUE value,
         value.const_string == 0 &&
         value.data.string)
     {
-        return GCAddString(value.string, gc);
+        return GCAddString((char*)value.data.string, gc);
     }
     else if (value.type == VAL_REFERENCE &&
              value.data.reference)
@@ -324,7 +324,7 @@ int GCAddValue(VALUE value,
 int GCAddString(char* string, GC_DATA_MANAGEMENT* gc) 
 { 
     return
-    ADD_POINTER_ARRAY(&(void**)gc->strings,
+    ADD_POINTER_ARRAY((void***)&gc->strings,
                       &(gc->str_capacity),
                       &(gc->str_size),
                       (void*)string);
@@ -333,7 +333,7 @@ int GCAddString(char* string, GC_DATA_MANAGEMENT* gc)
 int GCAddContext(CONTEXT* context, GC_DATA_MANAGEMENT* gc)
 { 
     return
-    ADD_POINTER_ARRAY(&(void**)gc->contexts,
+    ADD_POINTER_ARRAY((void***)&gc->contexts,
                       &(gc->ctx_capacity),
                       &(gc->ctx_size),
                       (void*)context);
@@ -342,7 +342,7 @@ int GCAddContext(CONTEXT* context, GC_DATA_MANAGEMENT* gc)
 int GCAddFunction(FUNCTION* function, GC_DATA_MANAGEMENT* gc) 
 { 
     return
-    ADD_POINTER_ARRAY(&(void**)gc->functions,
+    ADD_POINTER_ARRAY((void***)&gc->functions,
                       &(gc->func_capacity),
                       &(gc->func_size),
                       (void*)function);
@@ -350,7 +350,7 @@ int GCAddFunction(FUNCTION* function, GC_DATA_MANAGEMENT* gc)
 int GCAddDictionary(HASH_TABLE* table, GC_DATA_MANAGEMENT* gc)
 { 
     return 
-    ADD_POINTER_ARRAY(&(void**)gc->tables,
+    ADD_POINTER_ARRAY((void***)&gc->tables,
                       &(gc->table_capacity),
                       &(gc->table_size),
                       (void*)table);
@@ -397,7 +397,7 @@ void GCAddParseTree(SYNTAX_TREE* syntax)
 
 // aux type clearing functions
 void ClearFunction(FUNCTION* function)
-{
+{   return;
     if (function) {
         PAIR *itr, *itr_next;
         itr = function->parameters;
@@ -412,12 +412,12 @@ void ClearFunction(FUNCTION* function)
 }
 
 void ClearString(char* string)
-{
+{   return;
     free(string);
 }
 
 void ClearContext(CONTEXT* context)
-{
+{   return;
     if (context) {
         PAIR *itr, *itr_next;
         itr = context->list;
@@ -431,7 +431,7 @@ void ClearContext(CONTEXT* context)
 }
 
 void ClearDictionary(HASH_TABLE* table)
-{
+{   return;
     FreeHashTable(table);
 }
 

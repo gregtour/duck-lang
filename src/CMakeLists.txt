@@ -15,6 +15,7 @@ add_executable(duck
   ../duck/tables.c
   ../duck/types.c
   ../duck/memory.c
+  ../duck/garbage.c
   ../duck/lib/library.c
   ../duck/lib/stdduck.c
   ../duck/lib/dmath.c
@@ -33,6 +34,7 @@ add_executable(gduck
   ../duck/tables.c
   ../duck/types.c
   ../duck/memory.c
+  ../duck/garbage.c
   ../duck/lib/library.c
   ../duck/lib/stdduck.c
   ../duck/lib/SDLlib.c

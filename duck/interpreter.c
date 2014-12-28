@@ -7,6 +7,7 @@
 #include "lib/stdduck.h"
 #include "lib/dmath.h"
 #include "lib/drand.h"
+#include "garbage.h"
 
 // global data
 CONTEXT* gGlobalContext;
@@ -38,6 +39,8 @@ SYNTAX_TREE* failed_production;
 
 int greatest_stack_depth;
 int stack_depth;
+
+int gc_collect_count;
 
 // memory tracker
 #ifdef _MEM_TRACKING
@@ -140,6 +143,9 @@ VALUE LinkNamespace(const char* identifier)
     ref_namespace.data.reference->list = NULL;
     ref_namespace.data.reference->ref_count = -1;
     StoreRecord(identifier, ref_namespace, gGlobalContext);
+
+    GCAddContext(ref_namespace.data.reference, &gGCManager);
+
     return ref_namespace;
 }
 
@@ -189,6 +195,9 @@ VALUE CreateFunction(int (*function)(int))
     record.data.function->ref_count = -1;
   //record.data.function->fn_name = "[built-in]";
     record.data.function->fn_name = "function";
+
+    GCAddFunction(record.data.function, &gGCManager);
+
     return record;
 }
 
@@ -278,11 +287,14 @@ int Interpret(SYNTAX_TREE* tree)
 {
     CreateEnvironment();
 
+    gc_collect_count = 0;
+
     /* global namespace */
     gCurrentContext = gGlobalContext = (CONTEXT*)ALLOC(sizeof(CONTEXT));
     gCurrentContext->parent = NULL;
     gCurrentContext->list = NULL;
     gCurrentContext->ref_count = -1;
+    GCAddContext(gGlobalContext, &gGCManager);
 
     /* current expression */
     gLastExpression.type = VAL_NIL;
@@ -328,7 +340,7 @@ int Interpret(SYNTAX_TREE* tree)
     
     /* run */
     int error = InterpretNode(tree);
-    ForceFreeContext(gGlobalContext);
+    //ForceFreeContext(gGlobalContext);
     return error;
 }
 

@@ -4,20 +4,23 @@
 #include "memory.h"
 #include "interpreter.h"
 
-typedef struct 
+#define GC_COLLECT_LIMIT        1000
+
+typedef struct LEXING_STORE
 {
     L_TOKEN* tokens;
     char*    buffer;
     struct LEXING_STORE* next;
 } LEXING_STORE;
 
-typedef struct 
+typedef struct AST_STORE
 {
     SYNTAX_TREE* parseTree;
     struct AST_STORE* next;
 } AST_STORE;
 
-typedef struct 
+typedef struct
+GC_DATA_MANAGEMENT
 {
     // eval environment
     LEXING_STORE*   lexings;
