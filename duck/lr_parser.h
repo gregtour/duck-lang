@@ -177,7 +177,9 @@ typedef struct SYNTAX_TREE
 #ifdef _MEM_TRACKING
 void* MallocTrackMemory(size_t);
 void  FreeTrackMemory(void*);
-void PrintMemoryUsage();
+//void* MallocTrackMemory(size_t, const char*, int);
+//void FreeTrackMemory(void*, const char*, int);
+//void PrintMemoryUsage();
 #endif
 
 /* GRAMMAR.C */

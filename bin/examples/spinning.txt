@@ -10,18 +10,18 @@ MakeWindow(SCR_WIDTH, SCR_HEIGHT, APP_TITLE)
 
 frame = 0.0
 
-while SDL.running() do
-    SDL.event()
+while running() do
+    event()
     frame = frame + 1.0
 
-    SDL.clearScreen()
+    clearScreen()
 
     glLoadIdentity();
     glTranslatef(SCR_WIDTH/2.0, SCR_HEIGHT/2.0, 0.0)
     glRotatef(frame, 0.0, 0.0, 1.0)
     glScalef(3.0, 3.0, 3.0)
 
-    glBegin(SDL.GL_TRIANGLES)
+    glBegin(GL_TRIANGLES)
         glColor3f(1.0, 0.0, 0.0)
         glVertex3f(-87.0, -50.0, 0.0)
         glColor3f(0.0, 1.0, 0.0)
@@ -35,5 +35,5 @@ while SDL.running() do
 loop
 
 duck.println("Done.")
-SDL.quit()
+quit()
 

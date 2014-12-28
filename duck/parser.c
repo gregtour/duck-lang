@@ -426,7 +426,7 @@ void FreeParseTree(SYNTAX_TREE* ast)
         int i;
 
         for (i = 0; i < ast->numChildren; i++)
-{
+        {
             FreeParseTree(ast->children[i]);
         }
         

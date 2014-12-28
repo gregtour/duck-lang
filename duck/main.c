@@ -18,6 +18,8 @@ const char* ErrorMessage(int error)
         return "Error using variable as a reference.";
     else if (error == 32)
         return "Error using variable as an array.";
+    else if (error == 76)
+        return "Error, duplicate object initializer.";
     else if (error == 0)
         return "No error.";
     else if (error == 1)
@@ -25,6 +27,7 @@ const char* ErrorMessage(int error)
     else
         return "Unspecified error.";
 }
+
 
 /* main(args) accepts program file to run */
 int main(int argc, char* argv[])
@@ -90,7 +93,7 @@ int main(int argc, char* argv[])
         return 1;
     }
 
-    ReduceProgramAST(&ast); 
+    ReduceProgramAST(&ast);
 
 #ifdef _PROFILING
     clock_gettime(CLOCK_MONOTONIC, &start);

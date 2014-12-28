@@ -252,16 +252,30 @@ int DuckPrompt(int argument_count)
     }
 
     // get string
-    char* buffer = (char*)ALLOCATE(sizeof(char)*128);
-    fgets(buffer, 127, stdin);
-    buffer[127] = '\0';
+    char* buffer = (char*)ALLOCATE(sizeof(char)*256);
+    char* result = fgets(buffer, 255, stdin);
 
-    // remove trailing newline
-    int len = strlen(buffer);
-    if (len && buffer[len-1] == '\n') buffer[len-1] = '\0';
+    // check for result
+    if (result)
+    {
+        buffer[255] = '\0';
 
-    gLastExpression.type = VAL_STRING;
-    gLastExpression.data.string = buffer;
+        // remove trailing newline
+        int len = strlen(buffer);
+        if (len && buffer[len-1] == '\n') buffer[len-1] = '\0';
+
+        gLastExpression.type = VAL_STRING;
+        gLastExpression.data.string = buffer;
+        gLastExpression.const_string = 1;
+    }
+    else
+    {
+        // null result
+        gLastExpression.type = VAL_NIL;
+        gLastExpression.data.primitive = 0;
+
+        error = 1;
+    }
 
     return error;
 }
@@ -446,7 +460,8 @@ int StringSplit(int argument_count)
             key.data.primitive = index;
             
             expr.type = VAL_STRING;
-            char* char_string = (char*)ALLOCATE(sizeof(char) * 2);
+            expr.const_string = 0;
+            char* char_string = (char*)ALLOC(sizeof(char) * 2);
             char_string[0] = data[index];
             char_string[1] = '\0';
             expr.data.string = char_string;

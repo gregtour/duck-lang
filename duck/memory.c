@@ -2,77 +2,340 @@
 
 #include "memory.h"
 #include "interpreter.h"
+#include "garbage.h"
 
 MEM_PAGE* gBaseMemory;
 MEM_PAGE* gWorkingMemory;
 
+/* managed objects */
+
+/*
+HASH_TABLE* gObjectPool;
+void InitObjectPool()
+{
+    gObjectPool = CreateHashTable();
+}
+int  AddObjectPool(VALUE object)
+{
+    int count;
+    count = 0;
+    if (IsDynamic(object))
+    {
+        VALUE entry = HashGet(object, gObjectPool);
+        if (entry.type == VAL_PRIMITIVE)
+        {
+            count = ++(entry.data.primitive);
+            HashStore(object, entry, gObjectPool);
+        } else {
+            entry.type = VAL_PRIMITIVE;
+            entry.data.primitive = 1;
+            HashStore(object, entry, gObjectPool);
+            count = 1;
+        }
+    }
+    return count;
+}
+int  RemoveObjectPool(VALUE object)
+{
+    if (IsDynamic(object)) 
+    {
+        VALUE entry = HashGet(object, gObjectPool)
+        if (entry.type == VAL_PRIMITIVE)
+        {
+            int count = entry.data.primitive;
+            entry.data.primitive = 0;
+            if (count) {
+                HashStore(object, entry, gObjectPool);
+            }
+            return count;
+        } else {
+            return 0;
+        }
+    }
+
+    return 0;
+}
+void ClearObjectPool()
+{
+    int itr = 0;
+    while (itr < gObjectPool->capacity)
+    {
+        KEY_VALUE_PAIR pair = gObjectPool->table[itr];
+        int count;
+        VALUE key;
+        VALUE value;
+
+        key = pair.key;
+        value = pair.value;
+
+        count = (value.type == VAL_PRIMITIVE ? value.data.primitive : 0);
+        if (count) 
+        {
+            // FreeObject(&key);
+        }
+
+        itr++;
+    }
+
+    FreeHashTable(gObjectPool);
+    gObjectPool = NULL;
+}
+*/
+
+
+// ***************************************************************************
+//
+//
+
+
+/* ************************************************************************* */
+
+#if 0
 void ForceFreeFunction(FUNCTION* func)
 {
     return;
-    {
-        if (func->closure->ref_count >= 0)
-        {
-            FreeContext(func->closure);
-        }
-    }
-    if (!func->built_in)
-        DEALLOC(func);
 }
 
-void ForceFreeContext(CONTEXT* context)
+void ADD_POINTER_ARRAY(void*** array,
+                       unsigned int* capacity, 
+                       unsigned int* size, 
+                       void* entry)
 {
-    return;
-    PAIR *itr, *next;
-    itr = context->list;
-    context->ref_count = -1;
-    while (itr)
-    {
-        next = itr->next;
-        if (itr->value.type == VAL_REFERENCE
-            && itr->value.data.reference
-            /*&& itr->value.reference->ref_count != -1*/)
+    if (entry) {
+        int i;
+        for (i = 0; i < *size; i++)
+            if ((*array)[i] == entry)
+                break;
+        if (i == *size)
         {
-            ForceFreeContext(itr->value.data.reference);
+            (*array)[*size] = entry;
+            (*size)++;
+            
+            if (*size == *capacity) {
+                *capacity = *capacity * 2;
+                *array = realloc((void*)(*array), sizeof(void*) * *capacity);
+                /* assert(*array); */
+                if (array == 0) printf("Error: Out of memory.\n");
+            }
         }
-        else if (itr->value.type == VAL_FUNCTION)
-        {
-            ForceFreeFunction(itr->value.data.function);
-        }
-        DEALLOC(itr);
-        itr = next;
     }
-    DEALLOC(context);
+}
+
+void ForceFreeContext(CONTEXT* gContext)
+{
+    CONTEXT** contexts;
+    unsigned int ctx_capacity = 128;
+    unsigned int ctx_size = 0;
+    contexts = (CONTEXT**)malloc(sizeof(CONTEXT*) * ctx_capacity);
+
+    FUNCTION** functions;
+    unsigned int func_capacity = 128;
+    unsigned int func_size = 0;
+    functions = (FUNCTION**)malloc(sizeof(FUNCTION*) * func_capacity);
+
+    char** strings;
+    unsigned int strs_capacity = 128;
+    unsigned int strs_size = 0;
+    strings = (char**)malloc(sizeof(char*) * strs_capacity);
+
+    HASH_TABLE** tables;
+    unsigned int tables_capacity = 128;
+    unsigned int tables_size = 0;
+    tables = (HASH_TABLE**)malloc(sizeof(HASH_TABLE) * tables_capacity);
+
+    contexts[ctx_size++] = gContext;
+
+    unsigned int cur_context = 0;
+    /* traverse every context / closure */
+    while (cur_context < ctx_size)
+    {
+        //printf("%i / %i\n", cur_context, ctx_size);
+        CONTEXT* context = contexts[cur_context];
+        PAIR *itr, *itr_next;
+
+        context = context->parent;
+        while (context) {
+            //printf("adding parent\n");
+            ADD_POINTER_ARRAY(&contexts, &ctx_capacity, &ctx_size,
+                              context);
+            context = context->parent;
+        }
+
+        context = contexts[cur_context];
+        itr = context->list;
+        while (itr) {
+            itr_next = itr->next;
+
+            printf("%s\n", itr->identifier);
+
+            if (itr->value.type == VAL_REFERENCE) 
+            {
+                //printf("ref - ");
+                ADD_POINTER_ARRAY(&contexts, &ctx_capacity, &ctx_size,
+                                  itr->value.data.reference);
+            }
+            else if (itr->value.type == VAL_FUNCTION)
+            {
+                ADD_POINTER_ARRAY(&functions, &func_capacity, &func_size,
+                                  itr->value.data.function);
+                ADD_POINTER_ARRAY(&contexts, &ctx_capacity, &ctx_size,
+                                  itr->value.data.function->closure);
+            }
+            else if (itr->value.type == VAL_DICTIONARY)
+            {
+                ADD_POINTER_ARRAY(&tables, &tables_capacity, &tables_size,
+                                  itr->value.data.dictionary);
+            }
+            else if (itr->value.type == VAL_STRING)
+            {
+                if (itr->value.const_string == 0)
+                {
+                    ADD_POINTER_ARRAY(&strings, &strs_capacity, &strs_size,
+                                      itr->value.data.string);
+                }
+            }
+
+            // free pairs
+            DEALLOC(itr);
+            itr = itr_next;
+        }
+        //printf("\nnext context\n\n");
+        printf("\n");
+        cur_context++;
+        /* DEALLOC(context); */
+    }
+
+    unsigned int iterator;
+    printf("clearing functions\n");
+    /* free all functions */
+    for (iterator = 0; iterator < func_size; iterator++) 
+    {
+        PAIR *itr, *itr_next;
+        itr = functions[iterator]->parameters;
+        while (itr) {
+            itr_next = itr->next;
+            DEALLOC(itr);
+            itr = itr_next;
+        }
+        DEALLOC(functions[iterator]);
+    }
+
+    printf("clearing dictionaries\n");
+    /* free all dictionaries */
+    for (iterator = 0; iterator < tables_size; iterator++)
+    {
+        FreeHashTable(tables[iterator]);
+    }
+
+    printf("clearing strings\n");
+    /* free all strings */
+    for (iterator = 0; iterator < strs_size; iterator++)
+    {
+        DEALLOC(strings[iterator]);
+    }
+
+    printf("clearing closures\n");
+    /* free all closures */
+    for (iterator = 0; iterator < ctx_size; iterator++)
+    {
+        DEALLOC(contexts[iterator]);
+    }
+
+    printf("removing object lists\n");
+    /* free dynamic arrays */
+    free(contexts);
+    free(functions);
+    free(tables);
+    free(strings);
+    
+    return;
 }
 
 void FreeContext(CONTEXT* context)
 {
     return;
-    PAIR *itr, *next;
-    itr = context->list;
-    while (itr)
-    {
-        next = itr->next;
-        InvalidateExpr(itr->value);
-        DEALLOC(itr);
-        itr = next;
-    }
-    DEALLOC(context);
 }
 
 void FreeFunction(FUNCTION* func)
 {
     return;
-    //PAIR *itr, *next;
-    if (func->closure->ref_count > 0)
-    {
-        func->closure->ref_count--;
-        if (func->closure->ref_count == 0)
-        {
-            FreeContext(func->closure);
+}
+
+VALUE MakeTemporary(VALUE expr)
+{
+    return;
+    if (expr.type == VAL_STRING) {
+        char* new_string = (char*)ALLOC(strlen(expr.data.string)+1);
+        sprintf(new_string, "%s", expr.data.string);
+        expr.type = VAL_STRING;
+        expr.data.string = new_string;
+    }
+    return expr;
+}
+
+void IncrementReferences(VALUE* expr)
+{
+    return;
+    if (expr) {
+        if (expr->type == VAL_FUNCTION) {
+
+        } else if (expr->type == VAL_REFERENCE) {
+
+        } else if (expr->type == VAL_DICTIONARY) {
+            expr->data.dictionary->ref_count++;
+            printf("dict ref_count: %i\n", expr->data.dictionary->ref_count);
         }
     }
-    DEALLOC(func);
 }
+
+void InvalidateExpr(VALUE* expr)
+{
+    return;
+    if (expr) 
+    {
+/*      if (expr->type == VAL_STRING) 
+        {
+            free(expr->data.string);
+            expr->data.string = NULL;
+        } 
+        else if (expr->type == VAL_FUNCTION) 
+        {
+            free(expr->data.function);
+            expr->data.function = NULL;
+        } 
+        else if (expr->type == VAL_REFERENCE) 
+        {
+            free(expr->data.reference);
+            expr->data.reference = NULL;
+        }*/
+        /*if (expr->type == VAL_DICTIONARY) 
+        {
+            FreeHashTable(expr->data.dictionary);
+            expr->data.dictionary = NULL;
+        }*/
+
+        if (expr->type == VAL_DICTIONARY) {
+            expr->data.dictionary->ref_count--;
+            printf("dict ref_count: %i\n", expr->data.dictionary->ref_count);
+            if (expr->data.dictionary->ref_count <= 0) {
+                FreeHashTable(expr->data.dictionary);
+                expr->data.dictionary = NULL;
+            }
+        }
+
+        if (expr->type == VAL_STRING &&
+            expr->const_string == 0)
+        {
+            printf("freeing: '%s'\n", expr->data.string);
+            DEALLOC((char*)expr->data.string);
+            expr->data.string = NULL;
+        }
+
+        expr->type = VAL_NIL;
+        expr->data.primitive = 0;
+    }
+}
+
 
 /*
 void InvalidateExpr(VALUE expression)
@@ -102,6 +365,7 @@ void InvalidateExpr(VALUE expression)
     }
 }
 */
+#endif
 
 /* temporary values */
 void* ALLOC(size_t amount)
@@ -169,10 +433,18 @@ void CreateEnvironment()
     gBaseMemory->page_index = 0;
     gBaseMemory->next_page = NULL;
     gWorkingMemory = gBaseMemory;
+
+    // gc
+    gGCManager = InitGC(gGCManager);
 }
 
 void FreeEnvironment()
 {
+    // gc
+    ClearAllGC();
+    FreeGCMgmtObject(gGCManager);
+
+    // sandbox
     while (gBaseMemory) {
         MEM_PAGE* cur_page;
         unsigned int index;
@@ -252,6 +524,31 @@ void StoreRecord(const char* identifier, VALUE value, CONTEXT* context)
     }
 }
 
+void RemoveRecord(const char* identifier, CONTEXT* context)
+{
+    PAIR* prev = NULL;
+    while (context)
+    {
+        PAIR* iterator = context->list;
+        while (iterator)
+        {
+            if (strcmp(identifier, iterator->identifier) == 0)
+            {
+                if (prev) {
+                    prev->next = iterator->next;
+                } else {
+                    context->list = iterator->next;
+                }
+                free (iterator);
+                return;
+            }
+            prev = iterator;
+            iterator = iterator->next;
+        }
+        context = context->parent;
+    }
+}
+
 
 /* hash function */
 unsigned int HashFunction(VALUE value)
@@ -281,12 +578,18 @@ unsigned int HashFunction(VALUE value)
 /* hash table */
 HASH_TABLE* CreateHashTable()
 {
+    return CreateHashTableN(HT_MIN_CAPACITY);
+}
+
+HASH_TABLE* CreateHashTableN(int htsize)
+{
+    if (htsize <= 2) htsize = HT_MIN_CAPACITY;
+
     HASH_TABLE* ht = (HASH_TABLE*)malloc(sizeof(HASH_TABLE));
-    ht->capacity = HT_MIN_CAPACITY;
+    ht->capacity = htsize;
     ht->size = 0;
-    ht->table = (KEY_VALUE_PAIR*)malloc(HT_MIN_CAPACITY * sizeof(KEY_VALUE_PAIR));
-    memset((void*)ht->table, 0, HT_MIN_CAPACITY * sizeof(KEY_VALUE_PAIR));
-//    printf("Creating hash table.\n");
+    ht->table = (KEY_VALUE_PAIR*)malloc(htsize * sizeof(KEY_VALUE_PAIR));
+    memset((void*)ht->table, 0, htsize * sizeof(KEY_VALUE_PAIR));
     return ht;
 }
 

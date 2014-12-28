@@ -28,15 +28,25 @@ void  FreeEnvironment();
 void* ALLOC(size_t amount);
 void  DEALLOC(void* addr);
 
+/* managaed objects */
+
+//void InitObjectPool();
+//int  AddObjectPool(VALUE object)
+//int  RemoveObjectPool(VALUE object)
+//void ClearObjectPool();
+
+
 /* */
-void FreeContext(CONTEXT* context);
-void FreeFunction(FUNCTION* func);
-//void InvalidateExpr(VALUE expression);
-void ForceFreeContext(CONTEXT* context);
+//void FreeContext(CONTEXT* context);
+//void FreeFunction(FUNCTION* func);
+//VALUE MakeTemporary(VALUE expression);
+//void InvalidateExpr(VALUE* expression);
+//void ForceFreeContext(CONTEXT* context);
 
 /* accessor functions */
 VALUE GetRecord(const char* identifier, CONTEXT* context);
 void  StoreRecord(const char* identifier, VALUE value, CONTEXT* context);
+void RemoveRecord(const char* identifier, CONTEXT* context);
 
 /* hash table */
 #define HT_MIN_CAPACITY     2048
@@ -54,6 +64,7 @@ typedef struct HASH_TABLE
     int size;
     KEY_VALUE_PAIR* table;    
     // ...
+    int ref_count;
 } HASH_TABLE;
 
 VALUE HashGet(VALUE key_identifier, HASH_TABLE* table);
@@ -61,6 +72,7 @@ void  HashStore(VALUE key_identifier, VALUE store, HASH_TABLE* table);
 
 unsigned int HashFunction(VALUE value);
 HASH_TABLE* CreateHashTable();
+HASH_TABLE* CreateHashTableN(int size);
 void FreeHashTable(HASH_TABLE* table);
 void ResizeHashTable(HASH_TABLE* table);
 

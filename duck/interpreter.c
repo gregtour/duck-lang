@@ -76,6 +76,7 @@ void FreeTrackMemory(void* data)
 #define free        FreeTrackMemory
 #endif
 
+
 void PrintMemoryUsage()
 {
     int b = gTotalMemoryUsage % 1000;
@@ -171,6 +172,7 @@ void  LinkConstString(VALUE namespace, const char* identifier, const char* strin
     VALUE constant;
     constant.type = VAL_STRING;
     constant.data.string = string;
+    constant.const_string = 1;
     StoreRecord(identifier, constant, namespace.data.reference);
 }
 
@@ -178,7 +180,7 @@ VALUE CreateFunction(int (*function)(int))
 {
     VALUE record;
     record.type = VAL_FUNCTION;
-    record.data.function = (FUNCTION*)ALLOCATE(sizeof(FUNCTION));
+    record.data.function = (FUNCTION*)ALLOC(sizeof(FUNCTION));
     record.data.function->parameters = NULL; // ??
     record.data.function->body = NULL;
 	record.data.function->closure = gCurrentContext;
@@ -192,7 +194,7 @@ VALUE CreateFunction(int (*function)(int))
 
 void  AddParameter(VALUE functor, const char* argument_name)
 {
-    PAIR* parameter = (PAIR*)ALLOCATE(sizeof(PAIR));
+    PAIR* parameter = (PAIR*)ALLOC(sizeof(PAIR));
     parameter->identifier = argument_name;
     parameter->value.type = VAL_NIL;
     parameter->value.data.primitive = 0;
@@ -266,7 +268,7 @@ void PrintStackTrace()
 }
 
 /*
-int Interpret(SYNTAX_TRE* tree)
+int Interpret(SYNTAX_TREE* tree)
     ---------------------------------------------------------
     Run a duck program from the command console by parsing it
     into a syntax tree and then interating over the program
@@ -326,7 +328,7 @@ int Interpret(SYNTAX_TREE* tree)
     
     /* run */
     int error = InterpretNode(tree);
-    //ForceFreeContext(gGlobalContext);
+    ForceFreeContext(gGlobalContext);
     return error;
 }
 
@@ -334,14 +336,20 @@ int Interpret(SYNTAX_TREE* tree)
 /* reduce or remove trivial abstract syntax tree productions */
 void ReduceProgramAST(SYNTAX_TREE** program)
 {
-    const int empty_production = 0xFF;
+    const unsigned int empty_production = 0xFF;
     
-    int empty_productions[] = {3, 5, 6, 17, 18, 78};
-    int child0_productions[] = {7, 8, 9, 10, 11, 12, 33, 38, 40, 47, 55, 58, 60, 64, 65};
-    int child1_productions[] = {19, 24, 30, 59};
-    int child2_productions[] = {23};
+    unsigned int child0_productions[] = 
+            {7, 8, 9, 10, 11, 12, 33, 38, 
+            40, 47, 52, 55, 58, 60, 64, 65};
+    unsigned int child1_productions[] = 
+            {19, 24, 30, 59};
+    unsigned int child2_productions[] = 
+            {23};
+    unsigned int empty_productions[] = 
+            {3, 5, 6, 17, 18, 78};
 
-    int i; int reducible = 1;
+    unsigned int i; 
+    unsigned int reducible = 1;
     // continue while reducible
     while (reducible)
     {
@@ -357,13 +365,21 @@ void ReduceProgramAST(SYNTAX_TREE** program)
         }
 
         /* productions that reduce to node->children[0] */
-        /* 7, 8, 9, 10, 11, 12, 33, 38, 40, 47, 55, 58, 60, 64, 65 */
+        /* 7, 8, 9, 10, 11, 12, 33, 38, 40, 47, 52, 55, 58, 60, 64, 65 */
         for (i = 0; i < sizeof(child0_productions)/sizeof(int); i++)
         {
             if ((*program)->production == child0_productions[i])
             {
                 SYNTAX_TREE* cur = *program;
+                unsigned int child;
+
+                for (child = 1; child < cur->numChildren; child++)
+                {
+                    FreeParseTree(cur->children[child]);
+                }
+
                 *program = (*program)->children[0];
+                free(cur->children);
                 free(cur);
                 reducible = 1;
             }
@@ -376,7 +392,16 @@ void ReduceProgramAST(SYNTAX_TREE** program)
             if ((*program)->production == child1_productions[i])
             {
                 SYNTAX_TREE* cur = *program;
+                unsigned int child;
+
+                for (child = 0; child < cur->numChildren; child++)
+                {
+                    if (child != 1) {
+                        FreeParseTree(cur->children[child]);
+                    }
+                }
                 *program = (*program)->children[1];
+                free(cur->children);
                 free(cur);
                 reducible = 1;
             }
@@ -389,7 +414,17 @@ void ReduceProgramAST(SYNTAX_TREE** program)
             if ((*program)->production == child2_productions[i])
             {
                 SYNTAX_TREE* cur = *program;
+                unsigned int child;
+
+                for (child = 0; child < cur->numChildren; child++)
+                {
+                    if (child != 2) {
+                        FreeParseTree(cur->children[child]);
+                    }
+                }
+
                 *program = (*program)->children[2];
+                free(cur->children);
                 free(cur);
                 reducible = 1;
             }

@@ -11,7 +11,7 @@ glTranslatef(400.0, 300.0, 0.0)
 glRotatef(90.0, 0.0, 0.0, 1.0)
 glScalef(2.5, 2.5, 2.5)
 
-glBegin(SDL.GL_TRIANGLES)
+glBegin(GL_TRIANGLES)
     glColor3f(1.0, 0.0, 0.0)
     glVertex3f(-87.0, -50.0, 0.0)
     glColor3f(0.0, 1.0, 0.0)
@@ -20,8 +20,8 @@ glBegin(SDL.GL_TRIANGLES)
     glVertex3f(87.0, -50.0, 0.0)
 glEnd();
 
-SDL.event()
-SDL.flip()
-SDL.waitkey()
-SDL.quit()
+event()
+flip()
+waitkey()
+quit()
 
