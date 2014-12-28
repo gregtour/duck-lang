@@ -113,9 +113,11 @@ int main(int argc, char* argv[])
     }
 
 #ifdef _PROFILING
+    printf("\n");
     clock_gettime(CLOCK_MONOTONIC, &finish);
     elapsed = (finish.tv_sec - start.tv_sec);
     elapsed += (finish.tv_nsec - start.tv_nsec) / 1000000000.0;
+    printf("%i call(s) to the garbage collector.\n", gc_collect_count);
     printf("Time elapsed: %g\n", elapsed);
 #endif
 

@@ -368,6 +368,7 @@ void InvalidateExpr(VALUE expression)
 #endif
 
 /* temporary values */
+/*
 void* ALLOC(size_t amount)
 {
     return malloc(amount);
@@ -377,6 +378,7 @@ void DEALLOC(void* addr)
 {
     free(addr);
 }
+*/
 
 /* immutable strings? */
 void* ALLOCATE(size_t amount)

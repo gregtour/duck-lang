@@ -504,7 +504,7 @@ void FreeLexing(L_TOKEN* lexing,
         free(block);
     }
 
-    free(buffer);
+    if (buffer) free(buffer);
 }
 
 // testing

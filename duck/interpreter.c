@@ -41,10 +41,12 @@ int greatest_stack_depth;
 int stack_depth;
 
 int gc_collect_count;
+int gc_inst_count;
 
 // memory tracker
 #ifdef _MEM_TRACKING
 int gTotalMemoryUsage = 0;
+int gPeakMemoryUsage = 0;
 int gMallocCalls = 0;
 int gFreeCalls = 0;
 
@@ -56,19 +58,69 @@ int gFreeCalls = 0;
 #undef free
 #endif
 
+#ifdef realloc
+#undef realloc
+#endif
+
 void* MallocTrackMemory(size_t size)
 {
     void* data;
     gTotalMemoryUsage += (int)size;
+
+    if (gTotalMemoryUsage > gPeakMemoryUsage) {
+        gPeakMemoryUsage = gTotalMemoryUsage;
+    }
+
+    data = malloc(size + sizeof(unsigned int));
     gMallocCalls++;
-    return malloc(size);
+    *((unsigned int*)data) = (unsigned int)size;
+    data = data + sizeof(unsigned int);
+    return data;
 }
 
 void FreeTrackMemory(void* data)
 {
-    free(data);
-    gFreeCalls++;
-    return;
+    if (data) 
+    {
+        unsigned int* data_sz = data - sizeof(unsigned int);
+        unsigned int data_size = *data_sz;
+
+        //printf("Freeing size: %i\n", (int)data_size);
+        gTotalMemoryUsage -= data_size;
+        free((void*)data_sz);
+        gFreeCalls++;
+        return;
+    }
+}
+
+void* ReallocTrackMemory(void* data, size_t size)
+{
+    if (data) {
+        unsigned int* data_sz = data - sizeof(unsigned int);
+        unsigned int data_size = *data_sz;
+
+        //printf("Realloc %i for %i\n", data_size, (unsigned int)size);
+        gTotalMemoryUsage -= data_size;
+        gTotalMemoryUsage += (int)size;
+
+        if (gTotalMemoryUsage > gPeakMemoryUsage) {
+            gPeakMemoryUsage = gTotalMemoryUsage;
+        }
+
+        void* new_data = malloc(size + sizeof(unsigned int));
+        *((unsigned int*)new_data) = (unsigned int)size;
+        new_data = new_data + sizeof(unsigned int);
+    
+        unsigned int i;
+        for (i = 0; i < data_size; i++) {
+            ((char*)new_data)[i] = ((char*)data)[i];
+        }
+
+        free((void*)data_sz);
+        return new_data;
+    } else {
+        return MallocTrackMemory(size);
+    }
 }
 
 #ifndef malloc
@@ -79,21 +131,32 @@ void FreeTrackMemory(void* data)
 #define free        FreeTrackMemory
 #endif
 
+#ifndef realloc
+#define realloc     ReallocTrackMemory
+#endif
+
 
 void PrintMemoryUsage()
 {
-    int b = gTotalMemoryUsage % 1000;
-    int kb = (gTotalMemoryUsage / 1000) % 1000;
-    int mb = (gTotalMemoryUsage / 1000000) % 1000;
+    int b = gPeakMemoryUsage % 1000;
+    int kb = (gPeakMemoryUsage / 1000) % 1000;
+    int mb = (gPeakMemoryUsage / 1000000) % 1000;
     if (mb) {
-        printf("Total memory usage: %i.%i mb\n", mb, kb);
+        float n = (float)mb + (float)kb/1000.0f;
+        printf("Peak memory usage: %g mb\n", n);
     } else {
-        printf("Total memory usage: %i.%i kb\n", kb, b);
+        float n = (float)kb + (float)b/1000.0f;
+        printf("Peak memory usage: %g kb\n", n);
     }
 
     printf("%i calls to malloc() with %i calls to free()\n",
         gMallocCalls,
         gFreeCalls);
+
+    if (gTotalMemoryUsage) {
+        printf("Error: %i bytes still in use at program exit.\n",
+                gTotalMemoryUsage);
+    }
 }
 #endif // _MEM_TRACKING
 
@@ -330,6 +393,7 @@ int Interpret(SYNTAX_TREE* tree)
 {
     CreateEnvironment();
 
+    gc_inst_count = 0;
     gc_collect_count = 0;
 
     /* global namespace */

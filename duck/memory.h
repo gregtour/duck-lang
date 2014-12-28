@@ -25,8 +25,10 @@ void  DEALLOCATE(void* memory);
 void  CreateEnvironment();
 void  FreeEnvironment();
 
-void* ALLOC(size_t amount);
-void  DEALLOC(void* addr);
+//void* ALLOC(size_t amount);
+//void  DEALLOC(void* addr);
+#define ALLOC   malloc
+#define DEALLOC free
 
 /* managaed objects */
 

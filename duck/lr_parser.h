@@ -48,6 +48,10 @@ typedef unsigned long u32;
 #ifndef free
 #define free        FreeTrackMemory
 #endif
+
+#ifndef realloc
+#define realloc     ReallocTrackMemory
+#endif
 #endif
 
 /* ************************************************************************** */
@@ -177,6 +181,8 @@ typedef struct SYNTAX_TREE
 #ifdef _MEM_TRACKING
 void* MallocTrackMemory(size_t);
 void  FreeTrackMemory(void*);
+void* ReallocTrackMemory(void*, size_t);
+//void  FreeTrackMemory(void*);
 //void* MallocTrackMemory(size_t, const char*, int);
 //void FreeTrackMemory(void*, const char*, int);
 //void PrintMemoryUsage();

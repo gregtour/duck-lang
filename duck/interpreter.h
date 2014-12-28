@@ -72,6 +72,7 @@ extern int line_error;
 extern SYNTAX_TREE* failed_production;
 
 extern int gc_collect_count;
+extern int gc_inst_count;
 
 //extern int return_value_exists;
 

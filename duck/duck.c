@@ -61,9 +61,10 @@ int ReduceStmtListA(SYNTAX_TREE* node)
             if (error == 0 && returning == 0)
             {
              //   InvalidateExpr(&gLastExpression);
-                if ((++gc_collect_count) == GC_COLLECT_LIMIT)
+                if ((++gc_inst_count) == GC_COLLECT_LIMIT)
                 {
-                    gc_collect_count = 0;
+                    gc_inst_count = 0;
+                    gc_collect_count++;
                     CallGCTraceRoot(gGlobalContext, gLastExpression);
                     //CallGCTraceRoot(gCurrentContext, gLastExpression);
                 }
@@ -399,6 +400,7 @@ int ReduceAssignmentA(SYNTAX_TREE* node)
 
     //InvalidateExpr(oldval);
     //gLastExpression = MakeTemporary(expr);
+    gLastExpression = expr;
 
     return error;
 }
@@ -442,6 +444,7 @@ int ReduceAssignmentB(SYNTAX_TREE* node)
 
     //InvalidateExpr(oldval);
     //gLastExpression = MakeTemporary(expr);
+    gLastExpression = expr;
 
     return error;
 }
@@ -1243,6 +1246,8 @@ int ReduceReferenceC(SYNTAX_TREE* node)
         error = InterpretNode(arguments1);
         PAIR* param = function.data.function->parameters;
         PAIR* arg = gArgumentEvaluation;
+
+        if (error) return error;
 
         // create new context
         CONTEXT* func_context = (CONTEXT*)ALLOC(sizeof(CONTEXT));
