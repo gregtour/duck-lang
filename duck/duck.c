@@ -1178,6 +1178,7 @@ int ReduceReferenceB(SYNTAX_TREE* node)
         CONTEXT* current = gCurrentContext;
         gCurrentContext = func_context;
 
+        PushExecutionStack(current);
         GCAddContext(func_context, &gGCManager);
 
         // store params
@@ -1208,7 +1209,9 @@ int ReduceReferenceB(SYNTAX_TREE* node)
         }
 
         // return with same context
+        PopExecutionStack();
         gCurrentContext = current;
+
         returning = 0;
     }
     else
@@ -1248,6 +1251,7 @@ int ReduceReferenceC(SYNTAX_TREE* node)
         CONTEXT* current = gCurrentContext;
         gCurrentContext = func_context;
 
+        PushExecutionStack(current);
         GCAddContext(func_context, &gGCManager);
 
         // store params
@@ -1307,6 +1311,7 @@ int ReduceReferenceC(SYNTAX_TREE* node)
         }
 
         // return with same context
+        PopExecutionStack();
         gCurrentContext = current;
         returning = 0;
     }

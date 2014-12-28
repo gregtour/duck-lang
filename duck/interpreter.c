@@ -131,6 +131,49 @@ void PrintContext(CONTEXT* context)
     }
 }
 
+/* closure stack */
+CONTEXT_STACK*   gExecutionStack = NULL;
+
+void PushExecutionStack(CONTEXT* context)
+{
+    if (gExecutionStack == NULL) {
+        gExecutionStack = (CONTEXT_STACK*)malloc(sizeof(CONTEXT_STACK));
+        gExecutionStack->context = context;
+        gExecutionStack->next = NULL;
+        gExecutionStack->prev = NULL;
+    } else {
+        CONTEXT_STACK*  tail = gExecutionStack;
+        while (tail->next) {
+            tail = tail->next;
+        }
+        tail->next = (CONTEXT_STACK*)malloc(sizeof(CONTEXT_STACK));
+        tail->next->context = context;
+        tail->next->next = NULL;
+        tail->next->prev = tail;
+    }
+}
+
+int PopExecutionStack()
+{
+    CONTEXT_STACK* tail = gExecutionStack;
+    while (tail && tail->next) {
+        tail = tail->next;
+    }
+    if (tail) {
+        gCurrentContext = tail->context;
+        tail = tail->prev;
+        if (tail) {
+            free(tail->next);
+            tail->next = NULL;
+        } else {
+            free(gExecutionStack);
+            gExecutionStack = NULL;
+        }
+        return 1;
+    }
+    return 0;
+}
+
 
 /* Standard Library Function Binding */
 
@@ -340,6 +383,7 @@ int Interpret(SYNTAX_TREE* tree)
     
     /* run */
     int error = InterpretNode(tree);
+    while (PopExecutionStack());
     //ForceFreeContext(gGlobalContext);
     return error;
 }

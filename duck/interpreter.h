@@ -41,6 +41,18 @@ extern int      gArrayIndex;
 extern PAIR*    gArgumentEvaluation;
 extern CALLSTACK gStackTrace;
 
+
+typedef struct 
+CONTEXT_STACK {
+    CONTEXT*    context;
+    struct CONTEXT_STACK* prev;
+    struct CONTEXT_STACK* next;
+} CONTEXT_STACK;
+
+extern CONTEXT_STACK*   gExecutionStack;
+void PushExecutionStack(CONTEXT* context);
+int  PopExecutionStack();
+
 extern const char* gLValueIdentifier;
 extern CONTEXT*    gLValueContext;
 extern VALUE       gLValueIndex;

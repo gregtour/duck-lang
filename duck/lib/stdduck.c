@@ -3,6 +3,7 @@
 #include "stdduck.h"
 #include "interpreter.h"
 #include "memory.h"
+#include "garbage.h"
 
 /* printing functions */
 void PrintValue(VALUE value)
@@ -193,6 +194,7 @@ int DuckEval(int argument_count)
             FreeParseTree(ast);
 
             ClearCallStack(&gStackTrace);
+
             line_error = prev_line_error;
             failed_production = prev_failed_production;
 
@@ -205,6 +207,8 @@ int DuckEval(int argument_count)
         /* free lexing and parse tree */
         //FreeLexing(lexing, buffer);
         //FreeParseTree(ast);
+        GCAddLexing(lexing, buffer);
+        GCAddParseTree(ast);
     }
 
     gCurrentContext = currentContext;

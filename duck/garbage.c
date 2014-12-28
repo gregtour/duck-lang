@@ -182,7 +182,13 @@ void CallGCTraceRoot(CONTEXT* root,
     GCAddValue(curExpr, &managed);
 //    CallGCRecurseContext(root, &managed);
     CallGCRecurseContext(gCurrentContext, &managed);
-    CallGCRecurseContext(gGlobalContext, &managed);
+
+    CONTEXT_STACK* stack = gExecutionStack;
+    while (stack) {
+        CallGCRecurseContext(stack->context, &managed);
+        stack = stack->next;
+    }
+    //CallGCRecurseContext(gGlobalContext, &managed);
 
     // find elements in gGCManager that are not
     // members of gc managed
@@ -305,10 +311,24 @@ void ClearAllGC()
     }
 
     /* parse tree */
-
+    AST_STORE *cur_ast, *next_ast;
+    cur_ast = gGCManager.parseTrees;
+    while (cur_ast) {
+        next_ast = cur_ast->next;
+        FreeParseTree(cur_ast->parseTree);
+        free(cur_ast);
+        cur_ast = next_ast;
+    }
 
     /* lexings */
-
+    LEXING_STORE *cur_lex, *next_lex;
+    cur_lex = gGCManager.lexings;
+    while (cur_lex) {
+        next_lex = cur_lex->next;
+        FreeLexing(cur_lex->tokens, cur_lex->buffer);
+        free(cur_lex);
+        cur_lex = next_lex;
+    }
 }
 
 // ***************************************************************************
