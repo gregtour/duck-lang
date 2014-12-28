@@ -1,6 +1,7 @@
 /*
     Duck Programming Language - main.c
-    Thursday November 20th, 2014
+    Thursday November 20th, 2014 to
+        Sunday December 28th, 2014
 */
 #include "main.h"
 #include "interpreter.h"
@@ -49,7 +50,7 @@ int main(int argc, char* argv[])
         printf("Usage: gduck program.src\n");
 #else
         printf("Usage: duck program.src\n");
-#endif
+#endif // _GDUCK
         return 1;
         }
     } 
@@ -58,7 +59,7 @@ int main(int argc, char* argv[])
     // time execution
     struct timespec start, finish;
     double elapsed;
-#endif
+#endif // _PROFILING
 
     // lex source
     if (argc > 1) {
@@ -97,7 +98,7 @@ int main(int argc, char* argv[])
 
 #ifdef _PROFILING
     clock_gettime(CLOCK_MONOTONIC, &start);
-#endif
+#endif // _PROFILING
 
     // interpret source and run
     error = Interpret(ast);
@@ -118,8 +119,8 @@ int main(int argc, char* argv[])
     elapsed = (finish.tv_sec - start.tv_sec);
     elapsed += (finish.tv_nsec - start.tv_nsec) / 1000000000.0;
     printf("%i call(s) to the garbage collector.\n", gc_collect_count);
-    printf("Time elapsed: %g\n", elapsed);
-#endif
+    printf("Time elapsed: %g seconds.\n", elapsed);
+#endif // _PROFILING
 
     // clean up
     FreeEnvironment();

@@ -30,21 +30,6 @@ void  FreeEnvironment();
 #define ALLOC   malloc
 #define DEALLOC free
 
-/* managaed objects */
-
-//void InitObjectPool();
-//int  AddObjectPool(VALUE object)
-//int  RemoveObjectPool(VALUE object)
-//void ClearObjectPool();
-
-
-/* */
-//void FreeContext(CONTEXT* context);
-//void FreeFunction(FUNCTION* func);
-//VALUE MakeTemporary(VALUE expression);
-//void InvalidateExpr(VALUE* expression);
-//void ForceFreeContext(CONTEXT* context);
-
 /* accessor functions */
 VALUE GetRecord(const char* identifier, CONTEXT* context);
 void  StoreRecord(const char* identifier, VALUE value, CONTEXT* context);
