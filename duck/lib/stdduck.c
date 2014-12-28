@@ -5,6 +5,8 @@
 #include "memory.h"
 #include "garbage.h"
 
+HASH_TABLE* duck_print_records = NULL;
+
 /* printing functions */
 void PrintValue(VALUE value)
 {
@@ -43,6 +45,22 @@ void PrintFunction(FUNCTION* function)
 
 void PrintObject(CONTEXT* context)
 {
+    VALUE key;
+
+    key.type = VAL_REFERENCE;
+    key.data.reference = context;
+
+    // check for recursion
+    if (HashGet(key, duck_print_records).type != VAL_NIL) {
+        printf("...");
+        return;
+    } else {
+        VALUE value;
+        value.type = VAL_PRIMITIVE;
+        value.data.primitive = 1;
+        HashStore(key, value, duck_print_records);
+    }
+
     printf("[");
     PAIR* list = context->list;
     while (list)
@@ -60,6 +78,22 @@ void PrintDictionary(HASH_TABLE* dictionary)
 {
     int i, size;
     size = dictionary->size;
+
+    VALUE key;
+    key.type = VAL_DICTIONARY;
+    key.data.dictionary = dictionary;
+
+    // check for recursion
+    if (HashGet(key, duck_print_records).type != VAL_NIL) {
+        printf("...");
+        return;
+    } else {
+        VALUE value;
+        value.type = VAL_PRIMITIVE;
+        value.data.primitive = 1;
+        HashStore(key, value, duck_print_records);
+    }
+
     printf("[");
     for (i = 0; i < dictionary->capacity; i++)
     {
@@ -221,7 +255,12 @@ int DuckPrint(int argument_count)
     int error = 0;
     VALUE argument = GetRecord("output", gCurrentContext);
     
+    duck_print_records = CreateHashTable();
+
     PrintValue(argument);
+
+    FreeHashTable(duck_print_records);
+    duck_print_records = NULL;
 
     gLastExpression.type = VAL_NIL;
     gLastExpression.data.primitive = 0;
@@ -235,7 +274,12 @@ int DuckPrintLn(int argument_count)
     int error = 0;
     VALUE argument = GetRecord("output", gCurrentContext);
     
+    duck_print_records = CreateHashTable();
+
     PrintValue(argument);
+
+    FreeHashTable(duck_print_records);
+    duck_print_records = NULL;
 
     gLastExpression.type = VAL_NIL;
     gLastExpression.data.primitive = 0;
