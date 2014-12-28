@@ -7,6 +7,7 @@
 #include "types.h"
 #include "arithmetic.h"
 #include "memory.h"
+#include "garbage.h"
 
 /* truth */
 int EvaluatesTrue(VALUE value)
@@ -91,8 +92,11 @@ VALUE Concat(VALUE a, VALUE b)
     // concat strings
     int length = strlen(string_a) + strlen(string_b) + 1;
     char* new_string = (char*)ALLOC(sizeof(char) * length);
+
+    GCAddString(new_string, &gGCManager);
+
     sprintf(new_string, "%s%s", string_a, string_b);
-    printf("concat: '%s'\n", new_string);
+    //printf("concat: '%s'\n", new_string);
     value.type = VAL_STRING;
     value.data.string = new_string;
     value.const_string = 0;

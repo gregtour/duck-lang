@@ -65,6 +65,7 @@ int ReduceStmtListA(SYNTAX_TREE* node)
                 {
                     gc_collect_count = 0;
                     CallGCTraceRoot(gGlobalContext, gLastExpression);
+                    //CallGCTraceRoot(gCurrentContext, gLastExpression);
                 }
             }
             

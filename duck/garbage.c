@@ -171,13 +171,18 @@ int CallGCRecurseFunction(FUNCTION* function,
 void CallGCTraceRoot(CONTEXT* root,
                      VALUE    curExpr)
 {
+    //printf("RUNNING GARBAGE COLLECTOR\n");
+    //printf(".");
+
     GC_DATA_MANAGEMENT  managed;
     unsigned int index;
 
     managed = InitGC(managed);
 
     GCAddValue(curExpr, &managed);
-    CallGCRecurseContext(root, &managed);
+//    CallGCRecurseContext(root, &managed);
+    CallGCRecurseContext(gCurrentContext, &managed);
+    CallGCRecurseContext(gGlobalContext, &managed);
 
     // find elements in gGCManager that are not
     // members of gc managed
@@ -195,6 +200,10 @@ void CallGCTraceRoot(CONTEXT* root,
                                     (void*)context))
         {
             ClearContext(context);
+            gGCManager.contexts[index] = NULL;
+            gGCManager.contexts[index] = gGCManager.contexts[gGCManager.ctx_size-1];
+            gGCManager.ctx_size--;
+            index--;
         }
     }
 
@@ -209,6 +218,10 @@ void CallGCTraceRoot(CONTEXT* root,
                                     (void*)function))
         {
             ClearFunction(function);
+            gGCManager.functions[index] = NULL;
+            gGCManager.functions[index] = gGCManager.functions[gGCManager.func_size-1];
+            gGCManager.func_size--;
+            index--;
         }
     }
 
@@ -223,12 +236,16 @@ void CallGCTraceRoot(CONTEXT* root,
                                     (void*)table))
         {
             ClearDictionary(table);
+            gGCManager.tables[index] = NULL;
+            gGCManager.tables[index] = gGCManager.tables[gGCManager.table_size-1];
+            gGCManager.table_size--;
+            index--;
         }
     }
 
     /* strings */
     for (index = 0;
-         index < gGCManager.table_size;
+         index < gGCManager.str_size;
          index++)
     {
         char* string = gGCManager.strings[index];
@@ -237,6 +254,10 @@ void CallGCTraceRoot(CONTEXT* root,
                                     (void*)string))
         {
             ClearString(string);
+            gGCManager.strings[index] = NULL;
+            gGCManager.strings[index] = gGCManager.strings[gGCManager.str_size-1];
+            gGCManager.str_size--;
+            index--;
         }
     }
 
@@ -276,7 +297,7 @@ void ClearAllGC()
 
     /* strings */
     for (index = 0;
-         index < gGCManager.table_size;
+         index < gGCManager.str_size;
          index++)
     {
         char* string = gGCManager.strings[index];
@@ -397,7 +418,7 @@ void GCAddParseTree(SYNTAX_TREE* syntax)
 
 // aux type clearing functions
 void ClearFunction(FUNCTION* function)
-{   return;
+{
     if (function) {
         PAIR *itr, *itr_next;
         itr = function->parameters;
@@ -406,18 +427,19 @@ void ClearFunction(FUNCTION* function)
             free(itr);
             itr = itr_next;
         }
-        ClearContext(function->closure);
+        //ClearContext(function->closure);
         free(function);
     }
 }
 
 void ClearString(char* string)
-{   return;
+{
+    //printf("freeing string '%s'\n", string);
     free(string);
 }
 
 void ClearContext(CONTEXT* context)
-{   return;
+{
     if (context) {
         PAIR *itr, *itr_next;
         itr = context->list;
@@ -431,7 +453,7 @@ void ClearContext(CONTEXT* context)
 }
 
 void ClearDictionary(HASH_TABLE* table)
-{   return;
+{
     FreeHashTable(table);
 }
 

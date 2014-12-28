@@ -4,7 +4,7 @@
 #include "memory.h"
 #include "interpreter.h"
 
-#define GC_COLLECT_LIMIT        1000
+#define GC_COLLECT_LIMIT        8192
 
 typedef struct LEXING_STORE
 {
