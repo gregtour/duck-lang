@@ -1303,6 +1303,7 @@ int ReduceArrayInitA(SYNTAX_TREE* node)
     HashStore(key, expr, dictionary);
     
     gArrayIndex = ++index;
+    gDictionaryInit = dictionary;
 
     return error;
 }
@@ -1357,6 +1358,7 @@ int ReduceDictionaryInitA(SYNTAX_TREE* node)
     }
 
     HashStore(key, expr, dictionary);
+    gDictionaryInit = dictionary;
 
     return error;
 }
