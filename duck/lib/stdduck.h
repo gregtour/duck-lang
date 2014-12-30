@@ -22,5 +22,7 @@ int DuckFloat(int argument_count);
 int DuckLength(int argument_count);
 int DuckQuit(int argument_count);
 
+int DuckTime(int argument_count);
+
 #endif // _STDDUCK_H
 

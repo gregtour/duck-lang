@@ -4,6 +4,7 @@
 #include "interpreter.h"
 #include "memory.h"
 #include "garbage.h"
+#include <time.h>
 
 HASH_TABLE* duck_print_records = NULL;
 
@@ -433,6 +434,23 @@ int DuckQuit(int argument_count)
     return error;
 }
 
+/* float time() */
+int DuckTime(int argument_count)
+{
+    int error = 0;
+
+    struct timespec ctime;
+    double time;
+
+    clock_gettime(CLOCK_MONOTONIC, &ctime);
+    time = ctime.tv_sec + ctime.tv_nsec / 1000000000.0;
+
+    gLastExpression.type = VAL_FLOATING_POINT;
+    gLastExpression.data.floatp = time;
+
+    return error;
+}
+
 /* bind the duck standard library */
 void BindStandardLibrary()
 {
@@ -483,6 +501,9 @@ void BindStandardLibrary()
     VALUE duckQuit = CreateFunction(DuckQuit);
     LinkFunction(root, "quit", duckQuit);
     BindStringLibrary();
+
+    VALUE time = CreateFunction(DuckTime);
+    LinkFunction(root, "time", time);
 }
 
 int StringSplit(int argument_count)
@@ -498,6 +519,7 @@ int StringSplit(int argument_count)
         unsigned int index;
 
         HASH_TABLE* dictionary = CreateHashTable();
+        GCAddDictionary(dictionary, &gGCManager);
 
         for (index = 0; index < length; index++)
         {
@@ -510,6 +532,7 @@ int StringSplit(int argument_count)
             expr.type = VAL_STRING;
             expr.const_string = 0;
             char* char_string = (char*)ALLOC(sizeof(char) * 2);
+            GCAddString(char_string, &gGCManager);
             char_string[0] = data[index];
             char_string[1] = '\0';
             expr.data.string = char_string;
