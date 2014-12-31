@@ -28,7 +28,7 @@ function FLOAT(text, line)
 
 function STRING(text, line)
 {
-    return {"token": gSymbolString, "string": text, "length": text.length, "line": line};
+    return {"token": gSymbolString, "string": text.substr(1, text.length-2), "length": text.length, "line": line};
 }
 
 function TOKEN(text, line, grammar)
@@ -37,8 +37,8 @@ function TOKEN(text, line, grammar)
     if (token) {
         return {"token": token, "string": text, "length": text.length, "line": line};
     } else {
-        //console.log("Syntax error.");
-        return IDENTIFIER(text, line, grammar);
+        program.output("Syntax error on line " + line + ": token '" + text + "'.");
+        return 0;
     }
 }
 
@@ -152,7 +152,7 @@ function LexSource(text, grammar)
         }
     }
 
-    console.log(format);
+    //program.output(format);
 
     var sizen = size;
     size = j;
@@ -165,6 +165,7 @@ function LexSource(text, grammar)
     var a, b;
     for (i = 0; i < size; i++) {
         line = line_number[i];
+        // check next character
         if (isAlpha(format.charAt(i))) {
             a = i;
             // alpha
@@ -203,6 +204,7 @@ function LexSource(text, grammar)
             }
         }
         else if (format.charAt(i) == '"' || format.charAt(i) == '\'') {
+            // string literal
             var delimiter = format.charAt(i);
             a = i++;
             while (i < size && format.charAt(i) != delimiter)
@@ -214,6 +216,7 @@ function LexSource(text, grammar)
             i--;
         }
         else if (isGlyph(format.charAt(i))) {
+            // token symbol or glyph
             a = i; b = 0;
             while (i < size && isGlyph(format.charAt(i))) {
                 i++;
@@ -225,18 +228,26 @@ function LexSource(text, grammar)
             i = b - 1;
         }
         else if (format.charAt(i) == '\n') {
+            // new line
             tokens.push(NEWLINE(line));
         }
         else if (format.charAt(i) == ' ') {
             // whitespace
         }
         else {
-            console.log("Syntax error on line " + line + ".");
+            // error
+            program.output("Syntax error on line " + line + ".");
             return 0;
         }
     }
 
+    // add trailing line feed
+    tokens.push(NEWLINE(line));
     tokens.push(EOFSYMBOL(line));
+    
+    // output tokenized source
+    // program.output(JSON.stringify(tokens));
+    
     return tokens;
 }
 

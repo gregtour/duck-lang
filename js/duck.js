@@ -48,7 +48,7 @@ function StoreRecord(id, value, context)
         for (var j = 0; j < context.list.length; j++)
         {
             if (context.list[j].identifier == id) {
-                contex.list[j].value = value;
+                context.list[j].value = value;
                 return;
             }
         }
@@ -889,7 +889,7 @@ function ReduceComparisonA(node)
         }
         else
         {
-            console.log("Unknown type.");
+            program.output("Unknown type.");
             return 41;
         }
     }
@@ -952,7 +952,7 @@ function ReduceComparisonB(node)
         }
         else
         {
-            console.log("Unknown type.");
+            program.output("Unknown type.");
             return 41;
         }
     }
@@ -1520,6 +1520,7 @@ function ReduceObjectA(node)
 
     var error = 0;
 
+    gLastExpression = {};
     gLastExpression.type = VAL_REFERENCE;
     gLastExpression.reference = {};
     gLastExpression.reference.parent = undefined;
@@ -1792,7 +1793,7 @@ function InterpretNode(node)
         case 0x4F: return ReduceBooleanA(node);
         case 0x50: return ReduceBooleanB(node);
     default:
-        console.log("Unknown production " + node.production);
+        program.output("Unknown production " + node.production);
 //        return -1;
         return 0;
     }
@@ -1822,7 +1823,7 @@ function InterpretProgram(syntax_tree)
     failed_production = undefined;
     line_error = -1;
 
-//    BindStandardLibrary();
+    BindStandardLibrary();
 //    BindMathLibrary();
 //    BindAdditionalLibraries();
 //    BindRandLibrary();
@@ -1833,24 +1834,24 @@ function InterpretProgram(syntax_tree)
     return gLastExpression;
 }
 
-function Interpret(program)
+function Interpret(source_code)
 {
     var grammar = LoadGrammar(DUCK_GRAMMAR);
     if (grammar) {
-        var lexing = LexSource(program, grammar);
+        var lexing = LexSource(source_code, grammar);
         if (lexing) {
             var parsing = ParseSource(lexing, PARSE_TABLE, grammar);
             if (parsing) {
 //                alert(JSON.stringify(parsing));
                 return InterpretProgram(parsing);
             } else {
-                console.log("Error, parsing source.");
+                program.output("Error, parsing source.");
             }
         } else {
-            console.log("Error, lexing source code.");
+            program.output("Error, lexing source code.");
         }
     } else {
-        console.log("Error, loading programming language grammar.");
+        program.output("Error, loading programming language grammar.");
     }
 }
 

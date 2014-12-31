@@ -98,11 +98,11 @@ function PrintErrorInput(input, grammar)
 {
     var i;
     if (input) {
-        console.log("Syntax error on line " + (input.line+1) + ":");
+        program.output("Syntax error on line " + (input.line+1) + ":");
         if (input.string) {
-            console.log(input.string);
+            program.output(input.string);
         } else {
-            console.log(grammar.GetElement(input.token));
+            program.output(grammar.GetElement(input.token));
         }
     }
 }
@@ -192,11 +192,11 @@ function ParseSource(lexing, parser, grammar)
         // get the state off of the top of the stack
         if (s.token || s.state == -1 || s.state >= parser.numStates)
         {
-            console.log("Parse error: invalid state on top of the stack.");
+            program.output("Parse error: invalid state on top of the stack.");
             return 0;
         }
         if (cur >= lexing.length) {
-            console.log("Parse error: unexpected end of input.");
+            program.output("Parse error: unexpected end of input.");
             return 0;
         }
         // find the action table entry for the state and input
@@ -215,7 +215,7 @@ function ParseSource(lexing, parser, grammar)
             var node, r, rhs;
             if (action.action < 0 || action.action >= grammar.numRules)
             {
-                console.log("Parse error: invalid production for reduce action.");
+                program.output("Parse error: invalid production for reduce action.");
                 PrintErrorInput(lexing[cur], grammar);
                 return 0;
             }
@@ -239,7 +239,7 @@ function ParseSource(lexing, parser, grammar)
                 var symbol = StackPop();
                 if (symbol.token === undefined)
                 {
-                    console.log("Parse error: expected token.");
+                    program.output("Parse error: expected token.");
                     PrintErrorInput(lexing[cur], grammar);
                     return 0;
                 }
@@ -259,7 +259,7 @@ function ParseSource(lexing, parser, grammar)
                     node.children[child] = symbol.token;
                 }
                 else {
-                    console.log("Parse error: expected token object.");
+                    program.output("Parse error: expected token object.");
                     PrintErrorInput(lexing[cur], grammar);
                 }
             }
@@ -269,7 +269,7 @@ function ParseSource(lexing, parser, grammar)
             s = StackPeek();
             if (s.token || s.state == -1 || s.state >= parser.numStates)
             {
-                console.log("Parse error: expected state on top of the stack.");
+                program.output("Parse error: expected state on top of the stack.");
                 PrintErrorInput(lexing[cur], grammar);
                 return 0;
             }
@@ -290,9 +290,9 @@ function ParseSource(lexing, parser, grammar)
         {
             if (lexing[cur].token == gSymbolEOF) {
                 successful = 0;
-                console.log("Unexpected end of input.");
+                program.output("Unexpected end of input.");
             } else {
-                console.log("Parse error: illegal action type.");
+                program.output("Parse error: illegal action type.");
                 PrintErrorInput(lexing[cur], grammar);
             }
             return 0;

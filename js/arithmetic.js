@@ -88,7 +88,7 @@ function Add(a, b)
              b.type == VAL_PRIMITIVE)
     {
         return {type: VAL_PRIMITIVE,
-           primitive: CoerceInt(a) + CoerceInt(b)};
+           primitive: Math.floor(CoerceInt(a) + CoerceInt(b))};
     }
     else
     {
@@ -108,7 +108,7 @@ function Subtract(a, b)
              b.type == VAL_PRIMITIVE)
     {
         return {type: VAL_PRIMITIVE,
-           primitive: CoerceInt(a) - CoerceInt(b)};
+           primitive: Math.floor(CoerceInt(a) - CoerceInt(b))};
     }
     else
     {
@@ -128,7 +128,7 @@ function Multiply(a, b)
              b.type == VAL_PRIMITIVE)
     {
         return {type: VAL_PRIMITIVE,
-           primitive: CoerceInt(a) * CoerceInt(b)};
+           primitive: Math.floor(CoerceInt(a) * CoerceInt(b))};
     }
     else
     {
@@ -155,7 +155,7 @@ function Divide(a, b)
         var divisor = CoerceInt(b);
         if (divisor != 0) {
             return {type: VAL_PRIMITIVE,
-               primitive: CoerceInt(a) / CoerceInt(b)};
+               primitive: Math.floor(CoerceInt(a) / CoerceInt(b))};
         } else {
             return {type: VAL_NIL};
         }

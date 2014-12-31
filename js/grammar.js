@@ -92,10 +92,25 @@ var DUCK_GRAMMAR = "<program> ::= <stmt list>\n" +
     "<boolean> ::= true\n" +
     "<boolean> ::= false\n";
 
+function Delimit(str)
+{
+    var d = "";
+    var i, n;
+    n = str.length;
+    for (i = 0; i < n; i++) {
+        if (str.charAt(i) == '\\') i++;
+        if (i < n) d += str.charAt(i);
+    }
+    return d;
+}
+
 function AddToken(string, table)
 {
     var index = 1;
     var i;
+
+    string = Delimit(string);
+
     for (i = 0; i < table.numTokens; i++, index++)
     {
         if (table.tokens[i] == string) {
@@ -112,6 +127,9 @@ function FindToken(string, table)
 {
     var index = 1;
     var i;
+
+    string = Delimit(string);
+
     for (i = 0; i < table.numTokens; i++, index++)
     {
         if (table.tokens[i] == string) {
@@ -230,7 +248,7 @@ function LoadGrammar(input)
             end++;
         symbol = AddSymbol(buffer.substr(start, end - start + 1), table);
         if (symbol == 0) {
-            console.log("Could not identify left hand symbol in rule " + (r+1) + " on line " + line + ".");
+            program.output("Could not identify left hand symbol in rule " + (r+1) + " on line " + line + ".");
             return 1;
         }
         table.rules[r].lhs = symbol;
@@ -272,7 +290,7 @@ function LoadGrammar(input)
                     symbol = AddSymbol(buffer.substr(start, end - start + 1), table);
                 if (symbol == 0)
                 {
-                    console.log("Could not identify right hand symbol in rule " + (r+1) + " on line " + line + ".");
+                    program.output("Could not identify right hand symbol in rule " + (r+1) + " on line " + line + ".");
                     return 1;
                 }
                 table.rules[r].rhs.push(symbol);
@@ -295,7 +313,7 @@ function LoadGrammar(input)
                 token = AddToken(buffer.substr(start, end - start), table);
                 if (token == 0)
                 {
-                    console.log("Could not identify right token in rule " + (r+1) + " on line " + line + ".");
+                    program.output("Could not identify right token in rule " + (r+1) + " on line " + line + ".");
                     return 1;
                 }
                 table.rules[r].rhs.push(token);
@@ -312,13 +330,13 @@ function LoadGrammar(input)
         // table.rules[r].rhs.push(0);
         table.rules[r].rhsLength = rhs;
         if (rhs == 0) {
-            console.log("Rule " + (r+1) + " on line " + line + " has no right hand side.");
+            program.output("Rule " + (r+1) + " on line " + line + " has no right hand side.");
             return 1;
         }
     }
 
     if (gSymbolGoal == 0) {
-        console.log("Grammar is missing a goal symbol.");
+        program.output("Grammar is missing a goal symbol.");
         return 1;
     }
 
@@ -330,7 +348,7 @@ function LoadGrammar(input)
             table.rules[j].rhsLength = 0;
     }
         
-    console.log("Parsed " + r + " of " + table.numRules + " rules.");
+    /*program.output("Parsed " + r + " of " + table.numRules + " rules.");*/
     table.FindToken = function (t) { return FindToken(t, table); };
     table.GetElement = function (t) { return GetElement(t, table); };
     return table;
