@@ -10,7 +10,7 @@ body {
   background: -o-linear-gradient(right, #a9c9de, white 23%, white); /* For Opera 11.1 to 12.0 */
   background: -moz-linear-gradient(right, #a9c9de, white 23%, white); /* For Firefox 3.6 to 15 */
   background: linear-gradient(to right, #a9c9de, white 23%, white); /* Standard syntax */
-  background-repeat: no-repeat;
+  background-repeat: repeat-y;
 /*    background-color: black; */
 }
 
