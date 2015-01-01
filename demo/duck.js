@@ -131,10 +131,12 @@ function ReduceStmtA(node)
 
     if (library.type == VAL_REFERENCE) {
         var namespace = library.reference;
-        var iterator = namespace.list;
-        while (iterator) {
-            StoreRecord(iterator.identifier, iterator.value, gGlobalContext);
-            iterator = iterator.next;
+        var iterator = 0;
+        while (iterator < namespace.list.length) {
+            StoreRecord(namespace.list[iterator].identifier, 
+                namespace.list[iterator].value, 
+                gGlobalContext);
+            iterator++;
         }
     }
 
