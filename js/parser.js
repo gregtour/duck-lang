@@ -18,8 +18,8 @@ function ActionTable(table, state, token)
         token >0 && token <= table.numTokens)
     {
         action = {
-            type: table.actionTable[2*(state * table.numTokens + token - 1)];
-            action: table.actionTable[2*(state * table.numTokens + token - 1)+1];
+            type: table.actionTable[2*(state * table.numTokens + token - 1)],
+            action: table.actionTable[2*(state * table.numTokens + token - 1)+1]
         };
 //        action = table.actionTable[state * table.numTokens + token - 1];
     }
