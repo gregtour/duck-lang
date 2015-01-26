@@ -37,3 +37,57 @@ else
     none
 end
 
+# new features
+for i = 1 to 10 step 2 do
+ duck.println(i)
+loop
+
+include "other.src"
+import duck
+import math
+import a, b, c
+
+try
+ x = number / 0
+ file.readln()
+ x = [a: 1, b: 2, a: 3]
+complete
+
+try
+ x = number / 0
+ file.readln()
+ x = [a: 1, b: 2, a: 3]
+
+catch e
+   duck.println(e.trace())
+complete
+
+
+for x in [1, 2, 3, 4] do
+    duck.println(x)
+loop
+
+let x = 1, b = 2 begin
+    return x + b
+end
+
+object my_type
+ static var1
+ static var2
+
+ operator + (a, b)
+    return var1
+ end
+
+ operator - (a, b)
+    if not typeof(b) is typeof(this) then
+        throw new ImproperTypeException()
+    end
+ end
+end
+
+
+function call_with_current_continuation(f)
+    call-cc(f)
+end
+
