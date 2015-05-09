@@ -218,7 +218,7 @@ int DuckEval(int argument_count)
             return 1;
         }
 
-        ReduceProgramAST(&ast);
+        /* ReduceProgramAST(&ast); */
         error = InterpretNode(ast);
 
         if (error)

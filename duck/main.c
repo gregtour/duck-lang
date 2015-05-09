@@ -13,13 +13,15 @@ const char* ErrorMessage(int error)
 {
     if (error == 12345)
         return "Error with function call.";
-    else if (error == 25)
+    else if (error == 42)
         return "Illegal for loop operands.";
-    else if (error == 31)
+    else if (error == 43)
+        return "Illegal for loop operands.";
+    else if (error == 65)
         return "Error using variable as a reference.";
-    else if (error == 32)
+    else if (error == 66)
         return "Error using variable as an array.";
-    else if (error == 76)
+    else if (error == 114)
         return "Error, duplicate object initializer.";
     else if (error == 0)
         return "No error.";
@@ -94,7 +96,7 @@ int main(int argc, char* argv[])
         return 1;
     }
 
-    ReduceProgramAST(&ast);
+    /* ReduceProgramAST(&ast); */
 
 #ifdef _PROFILING
     clock_gettime(CLOCK_MONOTONIC, &start);
