@@ -47,8 +47,8 @@ typedef struct KEY_VALUE_PAIR
 
 typedef struct HASH_TABLE
 {
-    int capacity;
-    int size;
+    unsigned int capacity;
+    unsigned int size;
     KEY_VALUE_PAIR* table;    
     // ...
     int ref_count;

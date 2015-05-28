@@ -4,6 +4,8 @@
 
 #include "interpreter.h"
 
+extern unsigned int start_t;
+
 void PrintValue(VALUE);
 void PrintFunction(FUNCTION*);
 void PrintObject(CONTEXT*);

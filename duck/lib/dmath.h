@@ -13,6 +13,7 @@ int MathTan(int arg_count);
 int MathAsin(int arg_count);
 int MathAcos(int arg_count);
 int MathAtan(int arg_count);
+int MathAtan2(int arg_count);
 //Exponents and logs.
 int MathExp(int arg_count);
 int MathLog(int arg_count);

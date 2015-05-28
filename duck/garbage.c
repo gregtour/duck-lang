@@ -11,7 +11,7 @@ int  ADD_POINTER_ARRAY(void*** array,
     int result = 0;
 
     if (entry) {
-        int i;
+        unsigned int i;
         for (i = 0; i < *size; i++)
             if ((*array)[i] == entry)
                 break;
@@ -23,7 +23,7 @@ int  ADD_POINTER_ARRAY(void*** array,
             
             if (*size == *capacity) {
                 *capacity = *capacity * 2;
-                *array = realloc((void*)(*array), sizeof(void*) * *capacity);
+                *array = (void**)realloc((void*)(*array), sizeof(void*) * *capacity);
                 /* assert(*array); */
                 if (array == 0) printf("Error: Out of memory.\n");
             }
@@ -50,8 +50,9 @@ int CONTAINS_POINTER_ARRAY(void** array,
 /* memory management */
 
 GC_DATA_MANAGEMENT 
-InitGC(GC_DATA_MANAGEMENT gcStore)
+InitGC(/*GC_DATA_MANAGEMENT gcStore*/)
 {
+    GC_DATA_MANAGEMENT gcStore;
     gcStore.lexings = NULL;
     gcStore.parseTrees = NULL;
 
@@ -177,7 +178,7 @@ void CallGCTraceRoot(CONTEXT* root,
     GC_DATA_MANAGEMENT  managed;
     unsigned int index;
 
-    managed = InitGC(managed);
+    managed = InitGC(/*managed*/);
 
     GCAddValue(curExpr, &managed);
 //    CallGCRecurseContext(root, &managed);

@@ -3,7 +3,7 @@
 #include "duck.h"
 
 /* Grammar Symbols */
-char GRAMMAR_SYMBOLS[417] =
+char GRAMMAR_SYMBOLS[418] =
     "<program>\0"
     "<stmt list>\0"
     "<stmt>\0"
@@ -42,7 +42,7 @@ char GRAMMAR_SYMBOLS[417] =
     "<dictionary init>\0";
 
 /* Grammar Tokens */
-char GRAMMAR_TOKENS[307] =
+char GRAMMAR_TOKENS[308] =
     "<epsilon>\0"
     "<$>\0"
     "<endl>\0"

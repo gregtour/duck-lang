@@ -235,7 +235,7 @@ VALUE CompareEquality(VALUE a, VALUE b)
     if ((a.type == VAL_FLOATING_POINT && b.type == VAL_PRIMITIVE) ||
         (a.type == VAL_PRIMITIVE && b.type == VAL_FLOATING_POINT))
     {
-        float a_val, b_val;
+        double a_val, b_val;
         a_val = TypeFloat(a);
         b_val = TypeFloat(b);
         a.type = b.type = 

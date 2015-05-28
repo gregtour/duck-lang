@@ -252,7 +252,6 @@ L_TOKEN* LexSourceBuffer(const char*    source_buffer,
     int*        lineNumbers;
     int         line;
     int         size;
-    int         read;
     int         i, j;
     int         a, b;
 

@@ -49,10 +49,10 @@ void PrintNode(SYNTAX_TREE* node);
 
 
 /* Grammar Symbols */
-extern char GRAMMAR_SYMBOLS[417];
+extern char GRAMMAR_SYMBOLS[418];
 
 /* Grammar Tokens */
-extern char GRAMMAR_TOKENS[307];
+extern char GRAMMAR_TOKENS[308];
 
 /* CFG Productions */
 extern RULE GRAMMAR_RULES[118];

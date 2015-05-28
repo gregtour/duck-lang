@@ -165,11 +165,11 @@ typedef struct SYNTAX_TREE
     int         production;
     const char* string;
     int         length;
-	int         line;
+    int         line;
     // compiler information
     struct AST_TAG *tag;
     // child nodes
-    int numChildren;
+    unsigned int numChildren;
     struct SYNTAX_TREE** children;
 } SYNTAX_TREE;
 

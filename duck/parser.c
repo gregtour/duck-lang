@@ -164,7 +164,7 @@ int ParseSucceeds(L_TOKEN* input,
     StackPushState(0);
     
     // the program's syntax tree
-	SYNTAX_TREE* ast = NULL;
+    SYNTAX_TREE* ast = NULL;
 
     int successful = 0;
 
@@ -200,7 +200,6 @@ int ParseSucceeds(L_TOKEN* input,
         }
         else if (action.type == ACTION_REDUCE)
         {
-            SYNTAX_TREE* node;
             RULE r;
             int rhs;
             
@@ -288,7 +287,7 @@ SYNTAX_TREE* ParseSource(L_TOKEN*      input,
     // printf("Parsing source...\n");
     
     // the program's syntax tree
-	SYNTAX_TREE* ast = NULL;
+    SYNTAX_TREE* ast = NULL;
 
     // loop forever
     for (;;)
@@ -423,7 +422,7 @@ void FreeParseTree(SYNTAX_TREE* ast)
 {
     if (ast && ast->children)
     {
-        int i;
+        unsigned int i;
 
         for (i = 0; i < ast->numChildren; i++)
         {
@@ -455,12 +454,12 @@ void PrintParseTreeNode(SYNTAX_TREE* ast, GRAMMAR_TABLE g)
 }
 
 void PrintParseTreeRecurse(SYNTAX_TREE*  ast,
-                           int           indent,
+                           unsigned int  indent,
                            GRAMMAR_TABLE g)
 {
     if (ast->children)
     {
-        int i;
+        unsigned int i;
 
         for (i = 0; i < indent*2; i++)
         {
@@ -499,7 +498,7 @@ void PrintParseTreeFormat(SYNTAX_TREE*  ast,
                           GRAMMAR_TABLE grammar)
 {
     if (ast->numChildren > 0) {
-        int i;
+        unsigned int i;
         for (i = 0; i < ast->numChildren; i++)
             PrintParseTreeFormat(ast->children[i], grammar);
     } else {

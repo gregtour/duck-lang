@@ -67,7 +67,7 @@ void CreateEnvironment()
     gWorkingMemory = gBaseMemory;
 
     // gc
-    gGCManager = InitGC(gGCManager);
+    gGCManager = InitGC(/*gGCManager*/);
 }
 
 void FreeEnvironment()

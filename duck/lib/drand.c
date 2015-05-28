@@ -28,11 +28,11 @@ See <http://creativecommons.org/publicdomain/zero/1.0/>. */
 uint64_t xorshift_seed[ 2 ] = {0x021f9c6a70ca0c24ULL, 0xbae766b26645aa22ULL};
 
 uint64_t XORShiftNext() {
-	uint64_t s1 = xorshift_seed[ 0 ];
-	const uint64_t s0 = xorshift_seed[ 1 ];
-	xorshift_seed[ 0 ] = s0;
-	s1 ^= s1 << 23; // a
-	return ( xorshift_seed[ 1 ] = ( s1 ^ s0 ^ ( s1 >> 17 ) ^ ( s0 >> 26 ) ) ) + s0; // b, c
+    uint64_t s1 = xorshift_seed[ 0 ];
+    const uint64_t s0 = xorshift_seed[ 1 ];
+    xorshift_seed[ 0 ] = s0;
+    s1 ^= s1 << 23; // a
+    return ( xorshift_seed[ 1 ] = ( s1 ^ s0 ^ ( s1 >> 17 ) ^ ( s0 >> 26 ) ) ) + s0; // b, c
 }
 
 
@@ -47,10 +47,11 @@ int SeedRand(int arg_count){
 
   //TODO: Seeding the XORSHIFT128+ with the built in generator is somewhat questionable.
   int seed = 0;
-  if(argument.type != VAL_NIL)
+  if(argument.type != VAL_NIL) {
     seed = TypeInt(argument);
-  else
-    seed = time(NULL);
+  } else {
+    seed = (int)time(NULL);
+  }
 
   srand(seed);
   //Seed the XORSHIFT128+ PRNG with whatever junky random number generator was built in.

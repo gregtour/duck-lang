@@ -1897,32 +1897,32 @@ int ReduceReferenceC(SYNTAX_TREE* node)
 
         // store params
         // store arguments in the function's closure
-		last = NULL;
+        last = NULL;
         arg_next;
         argument_count = 0;
         while (param && arg)
         {
             gLastExpression.type = VAL_NIL;
-			if (last)
-		    {
+            if (last)
+            {
                 last->next = (PAIR*)ALLOC(sizeof(PAIR));
-				last = last->next;
-			}
-			else
-			{
+                last = last->next;
+            }
+            else
+            {
                 gCurrentContext->list = last = (PAIR*)ALLOC(sizeof(PAIR));
-			}
+            }
 
-			last->identifier = param->identifier;
-			last->value = arg->value;
-			last->next = NULL;
+            last->identifier = param->identifier;
+            last->value = arg->value;
+            last->next = NULL;
 
             argument_count++;       
 
             arg_next = arg->next;
             DEALLOC(arg);
-			param = param->next;
-			arg = arg_next;
+            param = param->next;
+            arg = arg_next;
         }
         
         // call function

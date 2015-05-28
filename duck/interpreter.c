@@ -295,7 +295,7 @@ VALUE CreateFunction(int (*function)(int))
     record.data.function = (FUNCTION*)ALLOC(sizeof(FUNCTION));
     record.data.function->parameters = NULL; // ??
     record.data.function->body = NULL;
-	record.data.function->closure = gCurrentContext;
+    record.data.function->closure = gCurrentContext;
     record.data.function->built_in = 1;
     record.data.function->functor = function;
     record.data.function->ref_count = -1;

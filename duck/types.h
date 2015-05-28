@@ -3,6 +3,11 @@
 
 #include "lr_parser.h"
 
+#ifdef WIN32
+#define CONTEXT     FCONTEXT
+#define namespace   NAMESPACE
+#endif
+
 /* constants */
 #define VAL_NIL             0
 #define VAL_PRIMITIVE       1
@@ -26,7 +31,7 @@ typedef struct FUNCTION
     SYNTAX_TREE* body;
     unsigned int built_in;
     int (*functor)(int);
-	struct CONTEXT* closure;
+    struct CONTEXT* closure;
     int ref_count;
     const char* fn_name;
 } FUNCTION;

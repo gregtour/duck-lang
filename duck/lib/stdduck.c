@@ -6,7 +6,16 @@
 #include "garbage.h"
 #include <time.h>
 
+#ifdef WIN32
+#undef CONTEXT
+#define WIN32_LEAN_AND_MEAN
+#include "Windows.h"
+#define CONTEXT        FCONTEXT
+#endif
+
 HASH_TABLE* duck_print_records = NULL;
+
+unsigned int start_t = 0;
 
 /* printing functions */
 void PrintValue(VALUE value)
@@ -77,7 +86,7 @@ void PrintObject(CONTEXT* context)
 
 void PrintDictionary(HASH_TABLE* dictionary)
 {
-    int i, size;
+    unsigned int i, size;
     size = dictionary->size;
 
     VALUE key;
@@ -439,6 +448,7 @@ int DuckTime(int argument_count)
 {
     int error = 0;
 
+#ifndef WIN32
     struct timespec ctime;
     double time;
 
@@ -447,6 +457,16 @@ int DuckTime(int argument_count)
 
     gLastExpression.type = VAL_FLOATING_POINT;
     gLastExpression.data.floatp = time;
+#else
+    unsigned int cur_t;
+    double time;
+
+    cur_t = GetTickCount();
+    time = (cur_t - start_t) / 1000.0;
+
+    gLastExpression.type = VAL_FLOATING_POINT;
+    gLastExpression.data.floatp = time;
+#endif
 
     return error;
 }
@@ -504,6 +524,10 @@ void BindStandardLibrary()
 
     VALUE time = CreateFunction(DuckTime);
     LinkFunction(root, "time", time);
+
+#ifdef WIN32
+    start_t = GetTickCount();
+#endif
 }
 
 int StringSplit(int argument_count)
@@ -515,7 +539,7 @@ int StringSplit(int argument_count)
     if (argument.type == VAL_STRING) 
     {
         const char* data = argument.data.string;
-        int length = strlen(data);
+        unsigned int length = strlen(data);
         unsigned int index;
 
         HASH_TABLE* dictionary = CreateHashTable();

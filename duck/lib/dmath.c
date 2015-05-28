@@ -103,6 +103,24 @@ int MathAtan(int arg_count){
   return 0;
 }
 
+/*Math.atan2(num)*/
+int MathAtan2(int arg_count){
+  double input = 0.0;
+  double input2 = 0.0;
+  double val = 0.0;
+  VALUE argument1 = GetRecord("opp", gCurrentContext);
+  VALUE argument2 = GetRecord("adj", gCurrentContext);
+
+  input = TypeFloat(argument1);
+  input2 = TypeFloat(argument2);
+  val = atan2(input, input2);
+
+  gLastExpression.type = VAL_FLOATING_POINT;
+  gLastExpression.data.floatp = val;
+
+  return 0;
+}
+
 /*Math.exp(num)*/
 int MathExp(int arg_count){
   double input = 0.0;
@@ -261,6 +279,10 @@ void BindMathLibrary()
     AddParameter(datan, "num");
     LinkFunction(math_lib, "atan", datan);
 
+    VALUE datan2 = CreateFunction(MathAtan2);
+    AddParameter(datan2, "opp");
+    AddParameter(datan2, "adj");
+    LinkFunction(math_lib, "atan2", datan2);
 
     LinkConstFloatp(math_lib, "pi", 3.141592653589793238);
 
