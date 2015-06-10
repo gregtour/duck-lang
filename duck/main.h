@@ -24,7 +24,7 @@ const char* demo =
 "    loop\n"
 "    ; duck.print(duck.newline)\n"
 "    expr = eval(program)\n"
-"    if expr or Type(expr) == 'INT' then\n"
+"    if expr or Type(expr) != 'NIL' then\n"
 "        duck.print(\">> \")\n"
 "        duck.println(expr)\n"
 "    end\n"
