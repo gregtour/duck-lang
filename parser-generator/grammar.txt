@@ -19,6 +19,7 @@
 <stmt> ::= <let block> <endl>
 <stmt> ::= <try block> <endl>
 <stmt> ::= return <expr> <endl>
+<stmt> ::= return <endl>
 <stmt> ::= break <endl>
 <stmt> ::= continue <endl>
 <stmt> ::= throw <expr> <endl>
