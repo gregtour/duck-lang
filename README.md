@@ -194,7 +194,9 @@ Building gduck with SDL support requires SDL and OpenGL libraries. There are no 
 
 ## Credits
 Greg Tourville
+
 Hiroyuki Sano
+
 Robert Cope
 
 
