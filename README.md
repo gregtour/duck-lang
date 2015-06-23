@@ -193,8 +193,9 @@ Duck uses CMake 2.8. To build simply run:
 Building gduck with SDL support requires SDL and OpenGL libraries. There are no platform specific libraries.
 
 ## Credits
-Greg Tourville - Team Duck (http://team-duck.com)  
-Hiroyuki Sano  
+Greg Tourville
+Hiroyuki Sano
+Robert Cope
 
 
 ## Future Work
