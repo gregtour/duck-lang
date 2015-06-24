@@ -192,7 +192,9 @@ void FreeGrammarTable(GRAMMAR_TABLE* table)
     table->numTokens = 0;
 
     for (i = 0; i < table->numRules; i++)
+    {
         free(table->rules[i].rhs);
+    }
     free(table->rules);
     table->numRules = 0;
 }
@@ -240,9 +242,10 @@ int LoadGrammar(const char*    file,
     fseek(input, 0, SEEK_END);
     size = ftell(input);
     rewind(input);
-    buffer = (char*)malloc(size+1);
+    buffer = (char*)malloc(size+2);
     read = fread(buffer, 1, size, input);
-    buffer[size] = 0;
+    buffer[size] = '\n';
+    buffer[size+1] = 0;
     fclose(input);
     
     printf("Read %i of %i bytes.\n", read, size);

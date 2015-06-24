@@ -214,6 +214,7 @@ L_TOKEN* LexSource(const char*    file,
     char* buffer;
     int   size;
     int   read;
+	L_TOKEN* result;
 
     // read source file
     input = fopen(file, "rb");
@@ -235,9 +236,9 @@ L_TOKEN* LexSource(const char*    file,
     }
 
     // lex source file
-    L_TOKEN* result = LexSourceBuffer(buffer, 
-                                      stripped, 
-                                      table);
+    result = LexSourceBuffer(buffer, 
+                             stripped, 
+                             table);
     free(buffer);
     return result;
 }
@@ -254,6 +255,9 @@ L_TOKEN* LexSourceBuffer(const char*    source_buffer,
     int         size;
     int         i, j;
     int         a, b;
+
+    L_TOKEN* start = NULL;
+    L_TOKEN* end = NULL;
 
     buffer = source_buffer;
     size = strlen(buffer);
@@ -358,8 +362,6 @@ L_TOKEN* LexSourceBuffer(const char*    source_buffer,
 
     // lex
     // printf("Lexing...\n\n");
-    L_TOKEN* start = NULL;
-    L_TOKEN* end = NULL;
 
     for (i = 0; i < size; i++)
     {
@@ -509,10 +511,10 @@ void FreeLexing(L_TOKEN* lexing,
 // testing
 void PrintLexing(L_TOKEN* lexing)
 {
+    int i;
     printf("NUMBER  STRING\n");
     printf("--------------\n");
     
-    int i;
     while (lexing)
     {
         printf("0x%.4X  ", lexing->token);
