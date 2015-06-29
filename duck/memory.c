@@ -238,7 +238,7 @@ void FreeHashTable(HASH_TABLE* table)
 
 void ResizeHashTable(HASH_TABLE* table)
 {
-    // double size
+    // long double size
     int new_capacity;
     KEY_VALUE_PAIR* new_table;
 

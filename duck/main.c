@@ -60,7 +60,7 @@ int main(int argc, char* argv[])
 #ifdef _PROFILING
     // time execution
     struct timespec start, finish;
-    double elapsed;
+    long double elapsed;
 #endif // _PROFILING
 
     // lex source

@@ -57,7 +57,11 @@ VALUE Concat(VALUE a, VALUE b)
             sprintf(buffer1, "%i", a.data.primitive);
             string_a = buffer1;
         } else if (a.type == VAL_FLOATING_POINT) {
-            sprintf(buffer1, "%.16g", a.data.floatp);
+if (_SUPPORTS_80BIT_FLOATING_POINT) {
+            sprintf(buffer1, "%.18Lg", a.data.floatp);
+} else {
+            sprintf(buffer1, "%.16Lg", a.data.floatp);
+}
             string_a = buffer1;
         }
         // VAL_REFERENCE
@@ -77,7 +81,11 @@ VALUE Concat(VALUE a, VALUE b)
             sprintf(buffer2, "%i", b.data.primitive);
             string_b = buffer2;
         } else if (b.type == VAL_FLOATING_POINT) {
-            sprintf(buffer2, "%.16g", b.data.floatp);
+if (_SUPPORTS_80BIT_FLOATING_POINT) {
+            sprintf(buffer2, "%.18Lg", b.data.floatp);
+} else {
+            sprintf(buffer2, "%.16Lg", b.data.floatp);
+}
             string_b = buffer2;
         }
         // VAL_REFERENCE
@@ -183,7 +191,7 @@ VALUE Divide(VALUE a, VALUE b)
     if (a.type == VAL_FLOATING_POINT ||
         b.type == VAL_FLOATING_POINT)
     {
-        double divisor = TypeFloat(b);
+        long double divisor = TypeFloat(b);
     
         result.type = VAL_FLOATING_POINT;
         if (divisor != 0.0) {
@@ -235,7 +243,7 @@ VALUE CompareEquality(VALUE a, VALUE b)
     if ((a.type == VAL_FLOATING_POINT && b.type == VAL_PRIMITIVE) ||
         (a.type == VAL_PRIMITIVE && b.type == VAL_FLOATING_POINT))
     {
-        double a_val, b_val;
+        long double a_val, b_val;
         a_val = TypeFloat(a);
         b_val = TypeFloat(b);
         a.type = b.type = 
@@ -376,8 +384,8 @@ VALUE CompareLessThan(VALUE a, VALUE b)
     }
     else if (a.type == VAL_FLOATING_POINT || b.type == VAL_FLOATING_POINT)
     {
-        double afloat = TypeFloat(a);
-        double bfloat = TypeFloat(b);
+        long double afloat = TypeFloat(a);
+        long double bfloat = TypeFloat(b);
         result.type = VAL_PRIMITIVE;
         result.data.primitive = (afloat < bfloat);
     }
@@ -410,8 +418,8 @@ VALUE CompareGreaterThan(VALUE a, VALUE b)
     }
     else if (a.type == VAL_FLOATING_POINT || b.type == VAL_FLOATING_POINT)
     {
-        double afloat = TypeFloat(a);
-        double bfloat = TypeFloat(b);
+        long double afloat = TypeFloat(a);
+        long double bfloat = TypeFloat(b);
         result.type = VAL_PRIMITIVE;
         result.data.primitive = (afloat > bfloat);
     }
@@ -444,8 +452,8 @@ VALUE CompareLessThanOrEqual(VALUE a, VALUE b)
     }
     else if (a.type == VAL_FLOATING_POINT || b.type == VAL_FLOATING_POINT)
     {
-        double afloat = TypeFloat(a);
-        double bfloat = TypeFloat(b);
+        long double afloat = TypeFloat(a);
+        long double bfloat = TypeFloat(b);
         result.type = VAL_PRIMITIVE;
         result.data.primitive = (afloat <= bfloat);
     }
@@ -477,8 +485,8 @@ VALUE CompareGreaterThanOrEqual(VALUE a, VALUE b)
     }
     else if (a.type == VAL_FLOATING_POINT || b.type == VAL_FLOATING_POINT)
     {
-        double afloat = TypeFloat(a);
-        double bfloat = TypeFloat(b);
+        long double afloat = TypeFloat(a);
+        long double bfloat = TypeFloat(b);
         result.type = VAL_PRIMITIVE;
         result.data.primitive = (afloat >= bfloat);
     }

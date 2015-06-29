@@ -271,7 +271,7 @@ void  LinkConstPrimitive(VALUE ref_namespace, const char* identifier, int value)
     StoreRecord(identifier, constant, ref_namespace.data.reference);
 }
 
-void  LinkConstFloatp(VALUE ref_namespace, const char* identifier, double value)
+void  LinkConstFloatp(VALUE ref_namespace, const char* identifier, long double value)
 {
     VALUE constant;
     constant.type = VAL_FLOATING_POINT;

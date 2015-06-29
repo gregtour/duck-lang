@@ -43,7 +43,7 @@ typedef struct VALUE
     union 
     {
         int             primitive;
-        double          floatp;
+        long double          floatp;
         const char*     string;
         FUNCTION*       function;
         struct CONTEXT* reference;
@@ -76,7 +76,7 @@ typedef struct CALLSTACK
 
 /* casts */
 
-double TypeFloat(VALUE value);
+long double TypeFloat(VALUE value);
 int    TypeInt(VALUE value);
 int    IsDynamic(VALUE type);
 VALUE  CopyString(VALUE string);

@@ -23,7 +23,15 @@ void PrintValue(VALUE value)
     switch (value.type)
     {
         case VAL_PRIMITIVE: printf("%i", value.data.primitive); break;
-        case VAL_FLOATING_POINT: printf("%.16g", value.data.floatp); break;
+        case VAL_FLOATING_POINT: 
+            if (_SUPPORTS_80BIT_FLOATING_POINT)
+            {
+                printf("%.18Lg", value.data.floatp);
+                break;
+            } else {
+                printf("%.16Lg", value.data.floatp); 
+                break;
+            }
         case VAL_STRING: printf("%s", value.data.string); break;
         case VAL_REFERENCE: PrintObject(value.data.reference); break;
         case VAL_FUNCTION: PrintFunction(value.data.function); break;
@@ -450,7 +458,7 @@ int DuckTime(int argument_count)
 
 #ifndef WIN32
     struct timespec ctime;
-    double time;
+    long double time;
 
     clock_gettime(CLOCK_MONOTONIC, &ctime);
     time = ctime.tv_sec + ctime.tv_nsec / 1000000000.0;
@@ -459,7 +467,7 @@ int DuckTime(int argument_count)
     gLastExpression.data.floatp = time;
 #else
     unsigned int cur_t;
-    double time;
+    long double time;
 
     cur_t = GetTickCount();
     time = (cur_t - start_t) / 1000.0;

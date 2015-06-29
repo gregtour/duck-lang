@@ -25,7 +25,7 @@ void  LinkConstPrimitive(VALUE ref_namespace,
                          int value);
 void  LinkConstFloatp(VALUE ref_namespace,
                       const char* identifier,
-                      double value);
+                      long double value);
 void  LinkConstString(VALUE ref_namespace,
                       const char* identifier,
                       const char* string);
@@ -82,7 +82,7 @@ VALUE GetRecord(const char* identifier, CONTEXT* context);
 void  StoreRecord(const char* identifier, VALUE value, CONTEXT* context);
 
 /* type-casting */
-double TypeFloat(VALUE value);
+long double TypeFloat(VALUE value);
 int TypeInt(VALUE value);
 
 /* interpreter */
@@ -98,6 +98,10 @@ void PrintStackTrace();
 
 /* error */
 extern const char* ErrorMessage(int error);
+
+/* extended precision floating-point suppport */
+
+#define _SUPPORTS_80BIT_FLOATING_POINT       (sizeof(long double) > sizeof(double))
 
 #endif // _INTERPRETER_H
 

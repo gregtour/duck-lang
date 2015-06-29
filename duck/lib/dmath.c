@@ -15,8 +15,8 @@ TODO:
 
 /*Math.sin(angle)*/
 int MathSin(int arg_count){
-  double angle = 0.0;
-  double val = 0.0;
+  long double angle = 0.0;
+  long double val = 0.0;
   VALUE argument = GetRecord("angle", gCurrentContext);
 
   angle = TypeFloat(argument);
@@ -30,8 +30,8 @@ int MathSin(int arg_count){
 
 /*Math.cos(angle)*/
 int MathCos(int arg_count){
-  double angle = 0.0;
-  double val = 0.0;
+  long double angle = 0.0;
+  long double val = 0.0;
   VALUE argument = GetRecord("angle", gCurrentContext);
 
   angle = TypeFloat(argument);
@@ -45,8 +45,8 @@ int MathCos(int arg_count){
 
 /*Math.tan(angle)*/
 int MathTan(int arg_count){
-  double angle = 0.0;
-  double val = 0.0;
+  long double angle = 0.0;
+  long double val = 0.0;
   VALUE argument = GetRecord("angle", gCurrentContext);
 
   angle = TypeFloat(argument);
@@ -60,8 +60,8 @@ int MathTan(int arg_count){
 
 /*Math.asin(num)*/
 int MathAsin(int arg_count){
-  double input = 0.0;
-  double val = 0.0;
+  long double input = 0.0;
+  long double val = 0.0;
   VALUE argument = GetRecord("num", gCurrentContext);
 
   input = TypeFloat(argument);
@@ -75,8 +75,8 @@ int MathAsin(int arg_count){
 
 /*Math.acos(num)*/
 int MathAcos(int arg_count){
-  double input = 0.0;
-  double val = 0.0;
+  long double input = 0.0;
+  long double val = 0.0;
   VALUE argument = GetRecord("num", gCurrentContext);
 
   input = TypeFloat(argument);
@@ -90,8 +90,8 @@ int MathAcos(int arg_count){
 
 /*Math.atan(num)*/
 int MathAtan(int arg_count){
-  double input = 0.0;
-  double val = 0.0;
+  long double input = 0.0;
+  long double val = 0.0;
   VALUE argument = GetRecord("num", gCurrentContext);
 
   input = TypeFloat(argument);
@@ -105,9 +105,9 @@ int MathAtan(int arg_count){
 
 /*Math.atan2(num)*/
 int MathAtan2(int arg_count){
-  double input = 0.0;
-  double input2 = 0.0;
-  double val = 0.0;
+  long double input = 0.0;
+  long double input2 = 0.0;
+  long double val = 0.0;
   VALUE argument1 = GetRecord("opp", gCurrentContext);
   VALUE argument2 = GetRecord("adj", gCurrentContext);
 
@@ -123,8 +123,8 @@ int MathAtan2(int arg_count){
 
 /*Math.exp(num)*/
 int MathExp(int arg_count){
-  double input = 0.0;
-  double val = 0.0;
+  long double input = 0.0;
+  long double val = 0.0;
   VALUE argument = GetRecord("num", gCurrentContext);
 
   input = TypeFloat(argument);
@@ -138,8 +138,8 @@ int MathExp(int arg_count){
 
 /*Math.log(num)*/
 int MathLog(int arg_count){
-  double input = 0.0;
-  double val = 0.0;
+  long double input = 0.0;
+  long double val = 0.0;
   VALUE argument = GetRecord("num", gCurrentContext);
 
   input = TypeFloat(argument);
@@ -153,8 +153,8 @@ int MathLog(int arg_count){
 
 /*Math.log10(num)*/
 int MathLog10(int arg_count){
-  double input = 0.0;
-  double val = 0.0;
+  long double input = 0.0;
+  long double val = 0.0;
   VALUE argument = GetRecord("num", gCurrentContext);
 
   input = TypeFloat(argument);
@@ -168,9 +168,9 @@ int MathLog10(int arg_count){
 
 /*Math.pow(base, exponent)*/
 int MathPow(int arg_count){
-  double base = 0.0;
-  double exponent = 0.0;
-  double val = 0.0;
+  long double base = 0.0;
+  long double exponent = 0.0;
+  long double val = 0.0;
 
   VALUE base_arg = GetRecord("base", gCurrentContext);
   VALUE exp_arg = GetRecord("exponent", gCurrentContext);
@@ -188,8 +188,8 @@ int MathPow(int arg_count){
 
 /*Math.sqrt(num))*/
 int MathSqrt(int arg_count){
-  double input = 0.0;
-  double val = 0.0;
+  long double input = 0.0;
+  long double val = 0.0;
   VALUE argument = GetRecord("num", gCurrentContext);
 
   input = TypeFloat(argument);
@@ -204,8 +204,8 @@ int MathSqrt(int arg_count){
 
 /*Math.ceil(num)*/
 int MathCeil(int arg_count){
-  double input = 0.0;
-  double val = 0.0;
+  long double input = 0.0;
+  long double val = 0.0;
   VALUE argument = GetRecord("num", gCurrentContext);
 
   input = TypeFloat(argument);
@@ -220,8 +220,8 @@ int MathCeil(int arg_count){
 
 /*Math.floor(num)*/
 int MathFloor(int arg_count){
-  double input = 0.0;
-  double val = 0.0;
+  long double input = 0.0;
+  long double val = 0.0;
   VALUE argument = GetRecord("num", gCurrentContext);
 
   input = TypeFloat(argument);
@@ -236,8 +236,8 @@ int MathFloor(int arg_count){
 
 /*Math.abs(num)*/
 int MathAbs(int arg_count){
-  double input = 0.0;
-  double val = 0.0;
+  long double input = 0.0;
+  long double val = 0.0;
   VALUE argument = GetRecord("num", gCurrentContext);
 
   input = TypeFloat(argument);
@@ -284,7 +284,9 @@ void BindMathLibrary()
     AddParameter(datan2, "adj");
     LinkFunction(math_lib, "atan2", datan2);
 
-    LinkConstFloatp(math_lib, "pi", 3.141592653589793238);
+    //LinkConstFloatp(math_lib, "pi", 4* atan(1.0L));
+    //LinkConstFloatp(math_lib, "pi", 3.141592653589793238);
+    LinkConstFloatp(math_lib, "pi", 3.1415926535897932384626L);
 
     //Exponentials and logs
     VALUE dexp = CreateFunction(MathExp);

@@ -3,10 +3,10 @@
 #include "types.h"
 
 /* cast to float */
-double TypeFloat(VALUE value)
+long double TypeFloat(VALUE value)
 {
     if (value.type == VAL_PRIMITIVE) {
-        return (double)value.data.primitive;
+        return (long double)value.data.primitive;
     } else if (value.type == VAL_FLOATING_POINT) {
         return value.data.floatp;
     } else if (value.type == VAL_STRING) {
