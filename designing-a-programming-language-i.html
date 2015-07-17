@@ -43,7 +43,7 @@ blockquote{padding:0 15px;color:#000;border-left:4px solid #ddd}
     
     <script>
 var symbols = [",", "=", "(", ")", "[", "]", "+", "-", "*", "/", ".", "==", "!=", "<", ">", "<=", ">=", "!", "{", "}", ":"];
-var keywords = ["import", "include", "return", "break", "continue", "throw", "function", "end", "if", "then", "else", "for", "to", "do", "loop", "step", "in", "while", "let", "begin", "try", "complete", "catch", "object", "static", "operator", "this", "and", "or", "not", "is", "mod", "new", "true", "false"];
+var keywords = ["import", "include", "return", "break", "continue", "throw", "function", "end", "if", "then", "else", "for", "to", "do", "loop", "step", "in", "while", "let", "begin", "try", "complete", "catch", "object", "static", "operator", "this", "and", "or", "not", "is", "mod", "new", "true", "false", "int", "String", "global"];
 function stylize()
 {
   var lastKeyword = "";
@@ -256,23 +256,25 @@ relevant scope leads to a syntax error issued at compile time. The programming l
 that, when it is analyzed at a source level, the locations of all variables and functions are known by lexical
 address: i.e. given the relevant scope, a variable can be identified by the order it is defined in.</p>
 
-<p>As an example, consider the case of defining a variable in Visual Basic:</p>
+<p>As an example, consider the case of declaring variables in Java:</p>
 
-<div class="highlight highlight-vb"><pre><span class="pl-k">Dim</span> num1, num2 <span class="pl-k">As </span><span class="pl-c1">Integer</span>
-<span class="pl-k">Dim</span> text <span class="pl-k">As </span><span class="pl-c1">String</span></pre></div>
+<pre><code>int num1, num2;
+String text;
+</code></pre>
 
 <p>This would be the prototype for a static language. When variables are first declared, they must be paired with a
-type. In order to compare with a dynamically typed language, let us look at an example from ECMA script or
-JavaScript.</p>
+type. In order to compare with a dynamically typed language, let's look at an example from Python.</p>
 
-<div class="highlight highlight-javascript"><pre><span class="pl-k">var</span> num1, num2;
-<span class="pl-k">var</span> text;</pre></div>
+<pre><code>
+global num1, num2
+global text
+</code></pre>
 
 <p>In this example, no types are declared for these variables. The variable 'num1' could be used as any type by
 assigning any value to it. Additionally, the declaration step is wholly unnecessary. The way that values are stored
-includes the type information.</p>
+includes type information, so declarations are only needed when declaring scope.</p>
 
-<p>Additional examples of dynamically typed languages besides JavaScript include Python, Ruby, Lua, Scheme and Lisp, and
+<p>Additional examples of dynamically typed languages besides Python include JavaScript, Ruby, Lua, Scheme and Lisp, and
 a number of others. Aside from the style of syntax and the degree of expressiveness, these programming languages are
 largely similar because of their type system. So called dynamically typed languages are sometimes referred to as
 duck-typed or duck languages.</p>
