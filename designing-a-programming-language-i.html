@@ -808,7 +808,7 @@ internal logic is supposed to work might be a statement or instruction that must
 }</pre></div>
 
 <p>We can see how our simple production rules are able to split the work that we are doing into manageable chunks. Our
-rule isn't considered with the details of how a &lt;comparison&gt; or an &lt;arithmetic&gt; symbol is resolved into an 
+rule isn't concerned with the details of how a &lt;comparison&gt; or an &lt;arithmetic&gt; symbol is resolved into an 
 expression or a VALUE in our backend. Instead, we can focus on the atomic operation of equality. Here we have made
 external the actual logic of CompareEquality to make our code more readable. Since we have a listing of 50 to 100
 grammar productions, we want them to be as short as possible. This allows us to keep them in one place and ensure
