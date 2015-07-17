@@ -851,15 +851,17 @@ variables, procedures, function scopes, closures, and dynamic variables.</p>
         <span class="pl-k">case</span> 0x08: <span class="pl-k">return</span> <span class="pl-c1">ReduceStmtA</span>(node);
         <span class="pl-k">case</span> 0x09: <span class="pl-k">return</span> <span class="pl-c1">ReduceStmtB</span>(node);
         <span class="pl-k">case</span> 0x0A: <span class="pl-k">return</span> <span class="pl-c1">ReduceStmtC</span>(node);
-
+        
+        
         ...
+        
         <span class="pl-k">case</span> 0x74: <span class="pl-k">return</span> <span class="pl-c1">ReduceBooleanA</span>(node);
         <span class="pl-k">case</span> 0x75: <span class="pl-k">return</span> <span class="pl-c1">ReduceBooleanB</span>(node);
     <span class="pl-k">default</span>:
         <span class="pl-c1">printf</span>(<span class="pl-s"><span class="pl-pds">"</span>Unknown production <span class="pl-c1">%i</span>.<span class="pl-cce">\n</span><span class="pl-pds">"</span></span>, node-&gt;production);
         <span class="pl-k">return</span> <span class="pl-c1">1</span>;
     }
-</pre></div>
+}</pre></div>
 
 <p>Here we allow the code generator to help us somewhat by creating the jump table we will use in identifying
 productions. This isn't strictly necessary. One choice we've made here was the ability to track errors on a
