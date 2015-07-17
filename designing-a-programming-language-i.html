@@ -97,6 +97,26 @@ function stylize()
         d += "</span>";
         q--;
       }
+      // block comments
+      else if (q < t.length +1 &&
+               x == "/" && t.charAt(q+1) == "*")
+      {
+        d += "<span class=\"pl-c\">";
+        do {
+          x = t.charAt(q);
+          d += x;
+          q++;
+        } while (q < t.length + 1 &&
+                 !(t.charAt(q) == "*" &&
+                   t.charAt(q+1) == "/"));
+        if (q < t.length + 1)
+        {
+          d += t.charAt(q++);
+          d += t.charAt(q);
+        }
+        
+        d += "</span>";
+      }
       // characters
       else if (x.toLowerCase() != x.toUpperCase())
       {
@@ -118,7 +138,10 @@ function stylize()
         {
           if (keywords[j] == n)
           {
-            d += "<span class=\"pl-k\">";
+            if (firstChar == "<")
+              d += "<span class=\"pl-en\">";
+            else
+              d += "<span class=\"pl-k\">";
             d += n;
             d += "</span>";
             lastKeyword = n;
@@ -185,7 +208,10 @@ function stylize()
         if (x == ":") { dictCount++; }
         if (x == ",") { dictCount++; }
         
-        d += "<span class=\"pl-k\">";
+        if (firstChar != ",")
+          d += "<span class=\"pl-k\">";
+        else
+          d += "<span class=\"pl-c1\">";
         
         if (x != "<" && x != ">")
           d += x;
@@ -1235,7 +1261,7 @@ the whole thing. We should also recognize when we have encountered a syntax erro
 <p>Here is a simple program, written in <em>Duck</em>, that provides an interactive interpreter. It is included in the main
 program, to be executed when running the interpreter without any input.</p>
 
-<pre><code>; * Duck REPL ** Enter statements to be evaluated. *
+<pre><code>/* Duck REPL ** Enter statements to be evaluated. */
 duck.println("Duck Language REPL - type quit() to exit")
 running = true
 while running do
