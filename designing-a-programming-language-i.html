@@ -38,14 +38,173 @@ code, pre  {
 blockquote{padding:0 15px;color:#000;border-left:4px solid #ddd}
 
 .pl-c{color:#969896}.pl-c1,.pl-s .pl-v{color:#0086b3}.pl-e,.pl-en{color:#795da3}.pl-s .pl-s1,.pl-smi{color:#333}.pl-ent{color:#63a35c}.pl-k{color:#a71d5d}.pl-pds,.pl-s,.pl-s .pl-pse .pl-s1,.pl-sr,.pl-sr .pl-cce,.pl-sr .pl-sra,.pl-sr .pl-sre{color:#183691}.pl-v{color:#ed6a43}.pl-id{color:#b52a1d}.pl-ii{background-color:#b52a1d;color:#f8f8f8}.pl-sr .pl-cce{color:#63a35c;font-weight:bold}.pl-ml{color:#693a17}.pl-mh,.pl-mh .pl-en,.pl-ms{color:#1d3e81;font-weight:bold}.pl-mq{color:#008080}.pl-mi{color:#333;font-style:italic}
-.pl-mb{color:#333;font-weight:bold}.pl-md{background-color:#ffecec;color:#bd2c00}.pl-mi1{background-color:#eaffea;color:#55a532}.pl-mdr{color:#795da3;font-weight:bold}.pl-mo{color:#1d3e81}.
+.pl-mb{color:#333;font-weight:bold}.pl-md{background-color:#ffecec;color:#bd2c00}.pl-mi1{background-color:#eaffea;color:#55a532}.pl-mdr{color:#795da3;font-weight:bold}.pl-mo{color:#1d3e81}
     </style>
     
     <script>
+var symbols = [",", "=", "(", ")", "[", "]", "+", "-", "*", "/", ".", "==", "!=", "<", ">", "<=", ">=", "!", "{", "}", ":"];
+var keywords = ["import", "include", "return", "break", "continue", "throw", "function", "end", "if", "then", "else", "for", "to", "do", "loop", "step", "in", "while", "let", "begin", "try", "complete", "catch", "object", "static", "operator", "this", "and", "or", "not", "is", "mod", "new", "true", "false"];
+function stylize()
+{
+  var lastKeyword = "";
+  var inDict = false;
+  var dictCount = 0;
+  var c = document.getElementsByTagName("code");
+  var firstChar;
+  for (var s = 0; s < c.length; s++)
+  {
+    var t = c[s].innerHTML;
+    var d = "";
+    
+    t = t.replace(/&lt;/g, "<");
+    t = t.replace(/&gt;/g, ">");
+
+    if (t.length > 0) firstChar = t.charAt(0);
+    for (var q = 0; q < t.length; q++)
+    { // lexer / keyword recognizer
+      var x = t.charAt(q);
+      // whitespace
+      if (x == " " || x == "\r" || x == "\t" || x == "\n")
+      {
+        d += x;
+        if (x == "\n" && q < t.length + 1)
+          firstChar = t.charAt(q+1);
+      }
+      // strings
+      else if (x == "\"" || x == "\'")
+      {
+        var m = x;
+        d += "<span class=\"pl-s\">";
+        do {
+          d += x;
+          q++;
+          if (q >= t.length) break;
+          x = t.charAt(q);
+        } while (x != m);
+        if (q < t.length) d += x;
+        d += "</span>";
+      }
+      // comments
+      else if (x == ";")
+      {
+        d += "<span class=\"pl-c\">";
+        do {
+          d += x;
+          q++;
+          if (q >= t.length) break;
+          x = t.charAt(q);
+        } while (x != "\n");
+        d += "</span>";
+        q--;
+      }
+      // characters
+      else if (x.toLowerCase() != x.toUpperCase())
+      {
+        var n = "";
+        do {
+          n += x;
+          q++;
+          if (q >= t.length) break;
+          x = t.charAt(q);
+        } while ((x.toLowerCase() != x.toUpperCase()) ||
+                 x == "_" ||
+                 (x.charCodeAt(0) >= "0".charCodeAt(0) &&
+                  x.charCodeAt(0) <= "9".charCodeAt(0)));
+        q--;
+        
+        var j;
+        // keyword
+        for (j = 0; j < keywords.length; j++)
+        {
+          if (keywords[j] == n)
+          {
+            d += "<span class=\"pl-k\">";
+            d += n;
+            d += "</span>";
+            lastKeyword = n;
+            break;
+          }
+        }
+        
+        // identifier
+        if (j == keywords.length) {
+          if (lastKeyword == "function" ||
+              (inDict && dictCount % 2 == 0))
+          {
+            d += "<span class=\"pl-en\">";
+          } else {
+            d += "<span class=\"pl-c1\">";
+          }
+          d += n;
+          d += "</span>";
+          
+          lastKeyword = "";
+        }
+      }
+      // numbers
+      else if (x.charCodeAt(0) >= "0".charCodeAt(0) &&
+               x.charCodeAt(0) <= "9".charCodeAt(0))
+      {
+        d += "<span class=\"pl-c1\">"
+        d += x;
+        q++;
+        while (q < t.length && 
+            (t.charCodeAt(q) >= "0".charCodeAt(0) &&
+             t.charCodeAt(q) <= "9".charCodeAt(0)))
+        {
+          d += t.charAt(q);
+          q++;
+        }
+        d += "</span>";
+        q--;
+      }
+      // grammar symbols
+      else if (x == "<" && firstChar == "<")
+      {
+        d += "<span class=\"pl-c1\">";
+        d += "&lt;";
+        q++;
+        while (q < t.length && t.charAt(q) != ">") {
+          d += t.charAt(q);
+          q++;
+        }
+        d += "&gt;";
+        d += "</span>";
+      }
+      // BNF sign ::=
+      else if (x == ":" && q < t.length+2 &&
+               t.charAt(q+1) == ":" && t.charAt(q+2) == "=")
+      {
+        d += "<span class=\"pl-mb\">::=</span>";
+        q += 2;
+      }
+      // symbols
+      else {
+        if (x == "{") { inDict = true; dictCount = 0; }
+        if (x == "}") { inDict = false; }
+        if (x == ":") { dictCount++; }
+        if (x == ",") { dictCount++; }
+        
+        d += "<span class=\"pl-k\">";
+        
+        if (x != "<" && x != ">")
+          d += x;
+        else if (x == "<")
+          d += "&lt;";
+        else
+          d += "&gt;";
+          
+        d += "</span>";
+      }
+    }
+  
+    c[s].innerHTML = d;
+  }
+}
     </script>
 
   </head>
-  <body>
+  <body onLoad="stylize()">
   <div style="width: 860px; margin: 0 auto; background: white; padding: 24px; border: 1px solid gray; border-radius: 10px;">
 
   <div id="readme" class="">
@@ -132,7 +291,7 @@ is a statement that contains additional statements.</p>
 
 <pre><code>if some condition then
 
-    here is a block of statements
+    ; here is a block of statements
 
 end
 </code></pre>
@@ -142,13 +301,13 @@ condition is false, we better add support for else statements, too.</p>
 
 <pre><code>if some condition then
 
-    here is a block of statements
-    to run if the condition is true
+    ; here is a block of statements
+    ; to run if the condition is true
 
 else
 
-    here is a block of statements
-    to run if the condition is false
+    ; here is a block of statements
+    ; to run if the condition is false
 
 end
 </code></pre>
@@ -166,12 +325,12 @@ like.</p>
 
 <pre><code>function our_new_function(parameter1, parameters2)
 
-    here we have statements that do work
-    if this function returns a value then we might have
+    ; here we have statements that do work
+    ; if this function returns a value then we might have
 
     return ourResult
 
-    at the end
+    ; at the end
 
 end
 </code></pre>
@@ -195,7 +354,7 @@ integers, or possibly floating-point numbers, but always increasing by increment
 
 <pre><code>for j = 1 to 100 do
 
-    this prints the numbers 1 through 100
+    ; this prints the numbers 1 through 100
     println(j)
 
 loop
@@ -327,8 +486,8 @@ all of the keywords and symbols that we would like to use for our programming la
 are:</p>
 
 <blockquote>
-<p>import, include, return, break, continue, throw, function, end, if, then, else, for, to, do, loop, step, in, while,
-let, begin, try, complete, catch, object, static, operator, this, and, or, not, is, mod, new, true, false</p>
+<p><code>import, include, return, break, continue, throw, function, end, if, then, else, for, to, do, loop, step, in, while,
+let, begin, try, complete, catch, object, static, operator, this, and, or, not, is, mod, new, true, false</code></p>
 </blockquote>
 
 <p>Some of these include keywords for features we haven't discussed implementing. This is fine, we can use them as
@@ -364,7 +523,7 @@ following set, which we will be generating soon in the next step.</p>
 <p>These built-in token symbols used in our programming language are:</p>
 
 <blockquote>
-<p>, = ( ) [ ] + - * / . == != &lt; &gt; &lt;= &gt;= ! { } :</p>
+<p><code>, = ( ) [ ] + - * / . == != &lt; &gt; &lt;= &gt;= ! { } :</code></p>
 </blockquote>
 
 <p>Noticing that we notably missed quotation marks, we must go back and add strings to the collection of objects that we
@@ -729,7 +888,7 @@ parentheses as another requirement to maintain operator precedence.</p>
 <p>Given all of these structures, we may make way to parsing this given expression:</p>
 
 <blockquote>
-<p>-1 * 2 + 3 mod 4</p>
+<p><code>-1 * 2 + 3 mod 4</code></p>
 </blockquote>
 
 <p>As we declined to include negative numbers in the definition of our lexer, we'll also have to add negation to one of
@@ -1076,7 +1235,7 @@ the whole thing. We should also recognize when we have encountered a syntax erro
 <p>Here is a simple program, written in <em>Duck</em>, that provides an interactive interpreter. It is included in the main
 program, to be executed when running the interpreter without any input.</p>
 
-<pre><code>/* Duck REPL ** Enter statements to be evaluated. */
+<pre><code>; * Duck REPL ** Enter statements to be evaluated. *
 duck.println("Duck Language REPL - type quit() to exit")
 running = true
 while running do
