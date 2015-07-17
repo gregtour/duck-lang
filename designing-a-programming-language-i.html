@@ -247,7 +247,7 @@ adapting to use our language.</p>
 <p>A casual reader following along might not be interested in developing their own language, as of this moment. They
 might be more interested in the mechanics involved. As a rather elaborate exercise, I invite anyone to attempt to
 create their own interpreted programming language. That being said, I am about to outline the process
-and tools that I used to create <em>the duck programming language</em>, even though I recognize there are multiple ways to
+and tools that I used to create the <em>Duck programming language</em>, even though I recognize there are multiple ways to
 go about the process. </p>
 
 <p>For example, I chose to write everything in the C programming language. This is really a more difficult task than it
@@ -267,7 +267,7 @@ useful, and there are ways to improve productivity and performance by creating a
 going for is an entirely new language.</p>
 
 <p>I will note that there is one way that implementing this dynamic language in an interpreted or scripting language
-might be helpful, and that would be in the case of cross-compiling. I.e. having our <em>duck code</em> reduced to some other
+might be helpful, and that would be in the case of cross-compiling. I.e. having our <em>Duck code</em> reduced to some other
 language, like JavaScript or Python, before being executed. That would be fine but then we are dealing with code 
 compiling and other complexities which are best addressed in section II of this series.</p>
 
@@ -323,7 +323,7 @@ identify the tokens that make up <em>Duck source code</em>.</p>
 
 <p>At this point, we already have tables of keywords and symbols to begin with, and if we don't, it is something that we
 will generate in one of the next steps that we can save and store to use for the lexer. In any case, we can list off
-all of the keywords and symbols that we would like to use for your programming language. In this case those keywords
+all of the keywords and symbols that we would like to use for our programming language. In this case those keywords
 are:</p>
 
 <blockquote>
@@ -1022,7 +1022,7 @@ types, including lists, trees, dictionaries, and hash tables.</p>
 <h3><a name="part-7-the-virtual-environment" class="anchor" href="#part-7-the-virtual-environment" aria-hidden="true"><span class="hover-link"></span></a>Part 7: The Virtual Environment</h3>
 
 <p>First and foremost, we must have some idea of the data that we will be working with and manipulating in our
-language's runtime. As we have already decided, values that are used in a <em>duck program</em> must be stored with
+language's runtime. As we have already decided, values that are used in a <em>Duck program</em> must be stored with
 information about their type because of its dynamic nature. We have also discovered that the built-in types for
 integers and floating-point numbers can be passed by value, stored in a VALUE structure, and that strings, functions,
 and dictionaries must be passed by reference, as pointers in a VALUE structure. </p>
