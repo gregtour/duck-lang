@@ -1117,7 +1117,7 @@ with some simple manipulation, we can create our own namespace for a library by 
 <p>The way that our library will interface with <em>the Duck language</em> is relatively simple. At start up, the language will
 bind libraries that are included in its distribution. During this phase, the library has the opportunity to create
 hooks for its common functions, data, and constant data. Functions are integrated by first providing a pointer to the
-procedure and then providing a list of the named parameters. As we allow for any type of object to passed as
+procedure and then providing a list of the named parameters. As we allow for any type of object to be passed as
 variables, our external code will have to retrieve VALUE objects and handle them manually.</p>
 
 <p>A function itself will take an integer argument count as its parameter and it will return an error code. Returning 
