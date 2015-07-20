@@ -6,13 +6,540 @@
     <title>Duck Programming Language Official Website</title>
     <link rel="shortcut icon" type="image/x-icon" href="favicon.ico">
     <link rel="stylesheet" href="stylesheets/styles.css">
-    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
     <!--[if lt IE 9]>
     <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
+    
+    <!-- Dynamic Duck Example -->
+    <script src="terminal/grammar.js"></script>
+    <script src="terminal/lexer.js"></script>
+    <script src="terminal/tables.js"></script>
+    <script src="terminal/parser.js"></script>
+    <script src="terminal/duck.js"></script>
+    <script src="terminal/arithmetic.js"></script>
+    <script src="terminal/stdduck.js"></script>
+    
+<style>
+.pl-c{color:#969896}.pl-c1,.pl-s .pl-v{color:#0086b3}.pl-e,.pl-en{color:#795da3}.pl-s .pl-s1,.pl-smi{color:#333}.pl-ent{color:#63a35c}.pl-k{color:#a71d5d}.pl-pds,.pl-s,.pl-s .pl-pse .pl-s1,.pl-sr,.pl-sr .pl-cce,.pl-sr .pl-sra,.pl-sr .pl-sre{color:#183691}.pl-v{color:#ed6a43}.pl-id{color:#b52a1d}.pl-ii{background-color:#b52a1d;color:#f8f8f8}.pl-sr .pl-cce{color:#63a35c;font-weight:bold}.pl-ml{color:#693a17}.pl-mh,.pl-mh .pl-en,.pl-ms{color:#1d3e81;font-weight:bold}.pl-mq{color:#008080}.pl-mi{color:#333;font-style:italic}
+.pl-mb{color:#333;font-weight:bold}.pl-md{background-color:#ffecec;color:#bd2c00}.pl-mi1{background-color:#eaffea;color:#55a532}.pl-mdr{color:#795da3;font-weight:bold}.pl-mo{color:#1d3e81}
+
+#terminal {
+  font-family:  Courier, Courier New, 
+    Lucida Console, Terminal, Monospace;
+  font-weight: normal;
+  font-size: 16px;
+  color: white;
+  background: black;
+  display: block;
+  height: 300px;
+  margin:0 0 20px;
+  padding:8px 15px;
+  word-wrap: break-word;
+  white-space: pre-wrap;
+  border-radius: 5px;
+  overflow: auto;
+  line-height: 100%;
+}
+
+.tc {
+    font-weight: normal;
+    font-family:  Courier, Courier New, Lucida Console, Terminal, Monospace;
+    margin: 0;
+    padding: 0;
+    display: inline;
+    word-wrap: break-word;
+    white-space: pre-wrap;
+    background: black;
+    color: white;
+    line-height: 100%;
+    border: 0;
+    border-radius: 0;
+    font-size: inherit;
+}
+
+#cursor {
+  color: black;
+  background: white;
+  border: 0;
+  border-radius: 0;
+  line-height: 100%;
+  font-weight: normal;
+  font-size: inherit;
+}
+
+</style>
+<script>
+<!-- Syntax Highlighting -->
+var symbols = [",", "=", "(", ")", "[", "]", "+", "-", "*", "/", ".", "==", "!=", "<", ">", "<=", ">=", "!", "{", "}", ":"];
+var keywords = ["import", "include", "return", "break", "continue", "throw", "function", "end", "if", "then", "else", "for", "to", "do", "loop", "step", "in", "while", "let", "begin", "try", "complete", "catch", "object", "static", "operator", "this", "and", "or", "not", "is", "mod", "new", "true", "false", "int", "String", "global", "void", "VALUE"];
+function stylize()
+{
+  var lastKeyword = "";
+  var inDict = false;
+  var dictCount = 0;
+  var c = document.getElementsByTagName("code");
+  var firstChar;
+  for (var s = 0; s < c.length; s++)
+  {
+    var t = c[s].innerHTML;
+    var d = "";
+    
+    t = t.replace(/&lt;/g, "<");
+    t = t.replace(/&gt;/g, ">");
+
+    if (t.length > 0) firstChar = t.charAt(0);
+    for (var q = 0; q < t.length; q++)
+    { // lexer / keyword recognizer
+      var x = t.charAt(q);
+      // whitespace
+      if (x == " " || x == "\r" || x == "\t" || x == "\n")
+      {
+        d += x;
+        if (x == "\n" && q < t.length + 1)
+          firstChar = t.charAt(q+1);
+      }
+      // strings
+      else if (x == "\"" || x == "\'")
+      {
+        var m = x;
+        d += "<span class=\"pl-s\">";
+        do {
+          d += x;
+          q++;
+          if (q >= t.length) break;
+          x = t.charAt(q);
+        } while (x != m);
+        if (q < t.length) d += x;
+        d += "</span>";
+      }
+      // comments
+      else if (x == ";")
+      {
+        d += "<span class=\"pl-c\">";
+        do {
+          d += x;
+          q++;
+          if (q >= t.length) break;
+          x = t.charAt(q);
+        } while (x != "\n");
+        d += "</span>";
+        q--;
+      }
+      // block comments
+      else if (q < t.length +1 &&
+               x == "/" && t.charAt(q+1) == "*")
+      {
+        d += "<span class=\"pl-c\">";
+        do {
+          x = t.charAt(q);
+          d += x;
+          q++;
+        } while (q < t.length + 1 &&
+                 !(t.charAt(q) == "*" &&
+                   t.charAt(q+1) == "/"));
+        if (q < t.length + 1)
+        {
+          d += t.charAt(q++);
+          d += t.charAt(q);
+        }
+        
+        d += "</span>";
+      }
+      else if (q < t.length +1 &&
+               x == "/" && t.charAt(q+1) == "/" ||
+               x == "#")
+      {
+        d += "<span class=\"pl-c\">";
+        do {
+          x = t.charAt(q);
+          d += x;
+          q++;
+        } while (q < t.length && !(t.charAt(q) == '\n'));
+        d += "</span>"
+        q--;
+      }
+      // characters
+      else if (x.toLowerCase() != x.toUpperCase())
+      {
+        var n = "";
+        do {
+          n += x;
+          q++;
+          if (q >= t.length) break;
+          x = t.charAt(q);
+        } while ((x.toLowerCase() != x.toUpperCase()) ||
+                 x == "_" ||
+                 (x.charCodeAt(0) >= "0".charCodeAt(0) &&
+                  x.charCodeAt(0) <= "9".charCodeAt(0)));
+        q--;
+        
+        var j;
+        // keyword
+        for (j = 0; j < keywords.length; j++)
+        {
+          if (keywords[j] == n)
+          {
+            if (firstChar == "<")
+              d += "<span class=\"pl-en\">";
+            else
+              d += "<span class=\"pl-k\">";
+            d += n;
+            d += "</span>";
+            lastKeyword = n;
+            break;
+          }
+        }
+        
+        // identifier
+        if (j == keywords.length) {
+          if (lastKeyword == "function" ||
+              (inDict && dictCount % 2 == 0))
+          {
+            d += "<span class=\"pl-en\">";
+          } else {
+            d += "<span class=\"pl-c1\">";
+          }
+          d += n;
+          d += "</span>";
+          
+          lastKeyword = "";
+        }
+      }
+      // numbers
+      else if (x.charCodeAt(0) >= "0".charCodeAt(0) &&
+               x.charCodeAt(0) <= "9".charCodeAt(0))
+      {
+        d += "<span class=\"pl-c1\">"
+        d += x;
+        q++;
+        while (q < t.length && 
+            (t.charCodeAt(q) >= "0".charCodeAt(0) &&
+             t.charCodeAt(q) <= "9".charCodeAt(0)))
+        {
+          d += t.charAt(q);
+          q++;
+        }
+        d += "</span>";
+        q--;
+      }
+      // grammar symbols
+      else if (x == "<" && firstChar == "<")
+      {
+        d += "<span class=\"pl-c1\">";
+        d += "&lt;";
+        q++;
+        while (q < t.length && t.charAt(q) != ">") {
+          d += t.charAt(q);
+          q++;
+        }
+        d += "&gt;";
+        d += "</span>";
+      }
+      // BNF sign ::=
+      else if (x == ":" && q < t.length+2 &&
+               t.charAt(q+1) == ":" && t.charAt(q+2) == "=")
+      {
+        d += "<span class=\"pl-mb\">::=</span>";
+        q += 2;
+      }
+      // symbols
+      else {
+        if (x == "{") { inDict = true; dictCount = 0; }
+        if (x == "}") { inDict = false; }
+        if (x == ":") { dictCount++; }
+        if (x == ",") { dictCount++; }
+        
+        if (firstChar != ",")
+          d += "<span class=\"pl-k\">";
+        else
+          d += "<span class=\"pl-c1\">";
+        
+        if (x != "<" && x != ">")
+          d += x;
+        else if (x == "<")
+          d += "&lt;";
+        else
+          d += "&gt;";
+          
+        d += "</span>";
+      }
+    }
+  
+    c[s].innerHTML = d;
+  }
+}
+<!-- Dynamic Duck Language -->
+var new_prompt = "duck> ";
+var continue_prompt = "    > ";
+var source_code = "";
+var program = {};
+var prog_out = "";
+function println(text) 
+{
+    prevOutputBox.textContent = prevOutputBox.textContent + text + "\n";
+}
+function output(text)
+{
+    prevOutputBox.textContent = prevOutputBox.textContent + text;
+}
+program.output = println;
+program.print = output;
+function RunProgram(buffer)
+{
+  source_code = source_code + buffer + "\n";
+  var result = TestParse(source_code);
+  
+  if (result == -1) {
+    println("Syntax error.\n");
+    source_code = "";
+    output(new_prompt);
+  } else if (result == 1) {
+    RunAndPrintValue(source_code);
+    source_code = "";
+    output(new_prompt);
+  } else {
+    output(continue_prompt);
+  }
+}
+var blinkstate;
+function Blink() 
+{
+    var cursor = caretElement;
+    blinkstate = (blinkstate + 1) % 2;
+    if (blinkstate) {
+      cursor.style.background = "black";
+      cursor.style.color = "white";
+    } else {
+      cursor.style.background = "white";
+      cursor.style.color = "black";
+    }
+}
+var timerid;
+function StartBlink()
+{
+  if (timerid !== undefined)
+  {
+      window.clearInterval(timerid);
+  }
+
+  timerid = window.setInterval(Blink, 600);
+  blinkstate = 1;
+  Blink();
+}
+var prevInputs = [];
+var prevInputCount = 0;
+var prevInputIndex = 0;
+function ResetLine()
+{
+    prevInputIndex = prevInputCount;
+}
+function MoveLineUp() 
+{ 
+    if (prevInputIndex > 0) {
+        buffer = prevInputs[prevInputIndex - 1];
+        prevInputIndex = prevInputIndex - 1;
+        bufferLen = buffer.length;
+        caretPos = 0;
+        UpdateBuffers();
+    }
+}
+function MoveLineDown() 
+{ 
+    if (prevInputIndex < prevInputCount - 1)
+    {
+        buffer = prevInputs[prevInputIndex + 1];
+        prevInputIndex = prevInputIndex + 1;
+        bufferLen = buffer.length
+        caretPos = 0;
+        UpdateBuffers();
+    }
+}
+var terminalArea;
+var prevOutputBox;
+var preTextBox;
+var postTextBox;
+var caretElement;
+var buffer = "";
+var bufferLen = 0;
+var caretPos = 0;
+function UpdateBuffers()
+{
+    var pre = buffer.substring(0, caretPos);
+    var post = buffer.substring(caretPos+1, bufferLen);
+    var caret = buffer.substring(caretPos, caretPos + 1);
+    preTextBox.textContent = pre;
+    if (caret == "\n") {
+        caretElement.innerHTML = "&nbsp;";
+        postTextBox.textContent = "\n" + post;
+    } else if (caretPos == bufferLen)
+    {
+        caretElement.innerHTML = "&nbsp;";
+        postTextBox.textContent = "";
+    }
+    else
+    {
+        caretElement.innerHTML = caret;
+        postTextBox.textContent = post + "";
+    }
+    //window.scrollTo(0,document.body.scrollHeight);
+    terminalArea.scrollTop = terminalArea.scrollHeight;
+    StartBlink();
+}
+function InsertCharacter(character)
+{
+    if (caretPos == bufferLen)
+    {
+        buffer = buffer + character;
+        bufferLen = bufferLen + 1;
+        caretPos = caretPos + 1;
+    } else {
+        var pre = buffer.substring(0, caretPos);
+        var post = buffer.substring(caretPos, bufferLen);
+        buffer = pre + character + post;
+        bufferLen = bufferLen + 1;
+        caretPos = caretPos + 1;
+    }
+    ResetLine();
+}
+function PressEnter()
+{
+    var source = buffer;
+    prevInputs[prevInputCount] = buffer;
+    prevInputCount = prevInputCount + 1;
+    prevInputIndex = prevInputCount;
+    output(buffer);
+    output("\n");
+    buffer = "";
+    bufferLen = 0;
+    caretPos = 0;
+    UpdateBuffers();
+    RunProgram(source);
+    //window.scrollTo(0,document.body.scrollHeight);
+    terminalArea.scrollTop = terminalArea.scrollHeight;
+}
+function DeletePress()
+{
+    if (caretPos < bufferLen)
+    {
+        buffer = buffer.substring(0, caretPos) + buffer.substring(caretPos+1, bufferLen);
+        bufferLen = bufferLen - 1;
+        UpdateBuffers();
+    }
+    ResetLine();
+}
+function Backspace()
+{
+    if (caretPos > 0)
+    {
+        buffer = buffer.substring(0, caretPos-1) 
+          + buffer.substring(caretPos, bufferLen);
+        bufferLen = bufferLen - 1;
+        caretPos = caretPos - 1;
+        UpdateBuffers();
+    }
+    ResetLine();
+}
+function MoveCaretLeft()
+{
+    if (caretPos > 0)
+    {
+        caretPos = caretPos - 1;
+        UpdateBuffers();
+    }
+}
+function MoveCaretRight()
+{
+    if (caretPos < bufferLen)
+    {
+        caretPos = caretPos + 1;
+        UpdateBuffers();
+    }
+}
+function Home()
+{
+    caretPos = 0;
+    UpdateBuffers();
+}
+function End()
+{
+    caretPos = bufferLen;
+    UpdateBuffers();
+}
+function SpecialKeyHandler(e)
+{
+    var key = /*e.keyCode ? e.keyCode :*/ e.which;
+    switch (key)
+    {
+      case  8: Backspace(); e.preventDefault(); break;
+      case 13: PressEnter(); e.preventDefault(); break;
+      case 37: MoveCaretLeft(); e.preventDefault(); break;
+      case 39: MoveCaretRight(); e.preventDefault(); break;
+      case 38: MoveLineUp(); e.preventDefault(); break;
+      case 40: MoveLineDown(); e.preventDefault(); break; 
+      case 46: DeletePress(); e.preventDefault(); break;
+      case 35: End(); e.preventDefault(); break;
+      case 36: Home(); e.preventDefault(); break;
+    }
+    //e.preventDefault();
+}
+/* Used on key press */
+function KeyHandler(e) 
+{
+    var key = /*e.keyCode ? e.keyCode :*/ e.which;
+    if (key >= 32 && key <= 126) 
+    {
+        if (!e.ctrlKey && !e.metaKey && !e.altKey)
+        {
+            var character = String.fromCharCode(key);
+            InsertCharacter(character);
+            UpdateBuffers();
+        }
+        e.preventDefault();
+    } else {
+      switch (key)
+      {
+        case  8: 
+        case 13: 
+        case 37: 
+        case 39: 
+        case 38: 
+        case 40: 
+        case 46: 
+        case 35: 
+        case 36: 
+          e.preventDefault()
+          break;
+      }
+    }
+};
+function Start()
+{
+    StartUpDuckRuntime();
+    terminalArea = document.getElementById("terminal");
+    prevOutputBox = document.getElementById("prev-output");
+    preTextBox = document.getElementById("pre-text");
+    postTextBox = document.getElementById("post-text");
+    caretElement = document.getElementById("cursor");
+    document.keypress = document.onkeypress = KeyHandler;
+    document.keydown = document.onkeydown = SpecialKeyHandler;
+    output("Welcome to the Duck programming language interactive interpreter! ");
+    output("This virtual terminal will allow you to test your Duck programs.");
+    println("    ");
+    output(new_prompt);
+    UpdateBuffers();
+}
+
+
+<!-- Start Up -->
+function launch()
+{
+  stylize();
+  Start();
+}
+</script>
   </head>
-  <body>
+  <body onLoad="launch()">
     <div class="wrapper">
       <header>
         <h1>DuckLang.org</h1>
@@ -61,27 +588,9 @@ loop
 loop
 </code></pre>
 
-<p>Notice the use of the syntax `do' and `loop.'  There are a number of other example programs in the <em>examples</em> directory of the source repository. Additionally, there is the online interactive interpreter available <a href="http://ducklang.org/demo">here</a>.</p>
+<p>Notice the use of the syntax `do' and `loop.'  There are a number of other example programs in the <em>examples</em> directory of the source repository.</p>
 
 <p>The programming language's grammar is defined in deterministic context-free Backas-Naur form, viewable <a href="http://ducklang.org/syntax.html">here</a>. The duck language has its own parser-generator, generating SLR(1) parse tables, so it is relatively easy to change the syntax of the language. Other optional ways to configure the language include disabling case-sensitivity or changing the format of comments, which are currently implemented as <code>/* C-style block comments */</code>, <code>// full line comments</code>, <code>; semicolon until end of line comments</code>, and <code># any macro use</code>.</p>
-
-<p>It is easy to port libraries to Duck. Function hooks are implemented as pointers, of the form <code>int (function_pointer)(int)</code> where the argument count is passed as the only parameter. Arguments are bound as string identifiers, and are accessed dynamically in the bound-function's body.</p>
-
-<p>Example:</p>
-
-<div class="highlight highlight-c"><pre><span class="pl-s">void</span> <span class="pl-enf">BindStandardLibrary</span>()
-{
-    VALUE duckStdLib = <span class="pl-sf">LinkNamespace</span>(<span class="pl-s1"><span class="pl-pds">"</span>duck<span class="pl-pds">"</span></span>);
-
-    VALUE print = <span class="pl-sf">CreateFunction</span>(DuckPrint);
-    <span class="pl-sf">AddParameter</span>(print, <span class="pl-s1"><span class="pl-pds">"</span>output<span class="pl-pds">"</span></span>);
-
-    <span class="pl-sf">LinkFunction</span>(duckStdLib, <span class="pl-s1"><span class="pl-pds">"</span>print<span class="pl-pds">"</span></span>, print);
-    <span class="pl-sf">LinkFunction</span>(duckStdLib, <span class="pl-s1"><span class="pl-pds">"</span>println<span class="pl-pds">"</span></span>, print);
-
-    VALUE prompt = <span class="pl-sf">CreateFunction</span>(DuckPrompt);
-    <span class="pl-sf">LinkFunction</span>(duckStdLib, <span class="pl-s1"><span class="pl-pds">"</span>prompt<span class="pl-pds">"</span></span>, prompt);
-}</pre></div>
 
 <p>As an example of what a typical program might look like written in Duck, the following is an example of computing prime numbers.</p>
 
@@ -97,12 +606,57 @@ loop
 			for j = 2 to limit/i do
 				numbers[i*j] = 0
 			loop
-			duck.print(i)
+			duck.println(i)
 		end
 	loop
 end
 </code></pre>
 
+
+<a id="demo" class="anchor" href="#demo" aria-hidden="true"><span class="octicon octicon-link"></span></a><h2>Demo</h2>
+
+<p>This is a virtual console running the Duck interpreter.</p>
+
+<div id="terminal"><pre class="tc" id="prev-output"></pre><pre class="tc" id="pre-text"></pre><span id="cursor" class="tc">&nbsp;</span><pre class="tc" id="post-text"></pre></div>
+
+
+<p> Additionally, there is a less interactive scratchpad for programming <a href="http://ducklang.org/demo">here</a> and a larger version of this console app <a href="http://ducklang.org/terminal/">here</a> although the recommended way to develop using duck is to download the runtime executable.</p>
+
+
+<a id="libraries" class="anchor" href="#libraries" aria-hidden="true"><span class="octicon octicon-link"></span></a><h2>Libraries</h2>
+
+<p>It is easy to port libraries to Duck. Function hooks are implemented as pointers, of the form <code>int (function_pointer)(int)</code> where the argument count is passed as the only parameter. Arguments are bound as string identifiers, and are accessed dynamically in the bound-function's body.</p>
+
+<p>Example:</p>
+
+<pre><code>void BindStandardLibrary()
+{
+    VALUE duckStdLib = LinkNamespace("duck");
+
+    VALUE print = CreateFunction(DuckPrint);
+    AddParameter(print, "output");
+
+    LinkFunction(duckStdLib, "print", print);
+    LinkFunction(duckStdLib, "println", print);
+
+    VALUE prompt = CreateFunction(DuckPrompt);
+    LinkFunction(duckStdLib, "prompt", prompt);
+}</code></pre>
+<!--
+<div class="highlight highlight-c"><pre><span class="pl-s">void</span> <span class="pl-enf">BindStandardLibrary</span>()
+{
+    VALUE duckStdLib = <span class="pl-sf">LinkNamespace</span>(<span class="pl-s1"><span class="pl-pds">"</span>duck<span class="pl-pds">"</span></span>);
+
+    VALUE print = <span class="pl-sf">CreateFunction</span>(DuckPrint);
+    <span class="pl-sf">AddParameter</span>(print, <span class="pl-s1"><span class="pl-pds">"</span>output<span class="pl-pds">"</span></span>);
+
+    <span class="pl-sf">LinkFunction</span>(duckStdLib, <span class="pl-s1"><span class="pl-pds">"</span>print<span class="pl-pds">"</span></span>, print);
+    <span class="pl-sf">LinkFunction</span>(duckStdLib, <span class="pl-s1"><span class="pl-pds">"</span>println<span class="pl-pds">"</span></span>, print);
+
+    VALUE prompt = <span class="pl-sf">CreateFunction</span>(DuckPrompt);
+    <span class="pl-sf">LinkFunction</span>(duckStdLib, <span class="pl-s1"><span class="pl-pds">"</span>prompt<span class="pl-pds">"</span></span>, prompt);
+}</pre></div>
+-->
 <h2>
 <a id="standard-library" class="anchor" href="#standard-library" aria-hidden="true"><span class="octicon octicon-link"></span></a>Standard Library</h2>
 
@@ -156,26 +710,26 @@ There are also SDL and OpenGL bindings to support graphical windowed programming
 
 <p>Duck uses CMake 2.8. To build simply run:</p>
 
-<pre><code>&gt; cmake .
+<!--<pre><code>&gt; cmake .
 &gt; make
-</code></pre>
+</code></pre>-->
+<div class="highlight highlight-c"><pre>&gt; cmake .
+&gt; make
+</pre></div>
 
 <p>Building gduck with SDL support requires SDL and OpenGL libraries. There are no platform specific libraries.</p>
 
 <h2>
 <a id="credits" class="anchor" href="#credits" aria-hidden="true"><span class="octicon octicon-link"></span></a>Credits</h2>
 
-<p>Greg Tourville - Team Duck (<a href="http://team-duck.com">http://team-duck.com</a>)<br>
-Hiroyuki Sano  </p>
+<p>Greg Tourville - <a href="http://team-duck.com">Team Duck</a><br>
+Hiroyuki Sano  <br>
+Robert Cope</p>
 
 <h2>
 <a id="future-work" class="anchor" href="#future-work" aria-hidden="true"><span class="octicon octicon-link"></span></a>Future Work</h2>
 
 <ul>
-<li>Implementing a binary compiler</li>
-<li>Memory management and garbage collection, to prevent crashes due to running out of memory</li>
-<li>Optional, strongly/statically typed form of DUCK</li>
-<li>Multithreaded parallelism — implicit or explicit through syntax analysis or library functions</li>
 <li>Benchmark and profiling performance intrinsics</li>
 <li>Expanding the standard library</li>
 </ul>
