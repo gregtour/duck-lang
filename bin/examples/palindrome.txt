@@ -1,0 +1,52 @@
+// duck
+function mod(n, base)
+    if n < 0 then 
+        n = -n
+    end
+    while n >= base do
+        n = n - base
+    loop
+    return n
+end
+
+function is_palindrome(number)
+    digits = []
+    log = 0
+    palindrome = true
+    while number > 0 do
+        digits[log] = (mod(number,10))
+        number = number / 10
+        log = log + 1
+    loop
+    for i = 0 to (log-1)/2 do
+        if digits[i] != digits[log-i-1] then
+            palindrome = false
+            break
+        end
+    loop
+    return palindrome
+end
+
+
+function main(limit)
+	duck.println("Palindrome primes less than " + limit + ":")
+	count = 0
+	numbers = []
+	for i = 2 to limit do
+		numbers[i] = 1
+	loop
+	for i = 2 to limit do
+		if numbers[i] == 1 then
+			//count = count + 1
+			for j = 2 to limit/i do
+				numbers[i*j] = 0
+			loop
+            if is_palindrome(i) then
+                count = count + 1
+    			duck.println(count + ". " + i)
+            end
+		end
+	loop
+end
+
+main(100000)

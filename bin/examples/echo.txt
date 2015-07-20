@@ -1,0 +1,4 @@
+duck.input = duck.prompt
+duck.println(duck.input())
+function func_name()
+end

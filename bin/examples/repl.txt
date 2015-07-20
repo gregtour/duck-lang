@@ -1,0 +1,36 @@
+/* Duck REPL * * Enter two blank lines to evaluate. */
+import duck
+
+println("Duck Language REPL - type quit() to exit")
+running = true
+println("Type expression or statements:")
+while running do
+    program = ""
+    typing = true
+    expr = 0
+
+#    println("Type expression or statements:")
+
+    while typing do
+        line = prompt(" > ")
+        program = program + line + newline
+
+        parsable = parses(program)
+        if parsable == 1 then
+            typing = false
+        else if parsable == -1 then
+            println("Syntax error.")
+            print(newline)
+            program = ""
+        end
+    loop
+
+    ; duck.print(duck.newline)
+    expr = eval(program)
+    ;if expr or Type(expr) == "INT" then
+    ;    print(">> ")
+    ;    println(expr)
+    ;end
+    ;print(newline)
+loop
+
