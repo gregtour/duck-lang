@@ -73,7 +73,8 @@
 <!-- Syntax Highlighting -->
 var symbols = [",", "=", "(", ")", "[", "]", "+", "-", "*", "/", ".", "==", "!=", "<", ">", "<=", ">=", "!", "{", "}", ":"];
 var keywords = ["import", "include", "return", "break", "continue", "throw", "function", "end", "if", "then", "else", "for", "to", "do", "loop", "step", "in", "while", "let", "begin", "try", "complete", "catch", "object", "static", "operator", "this", "and", "or", "not", "is", "mod", "new", "true", "false", "int", "String", "global", "void", "VALUE"];
-function stylize()
+var stylized = false;
+function Stylize()
 {
   var lastKeyword = "";
   var inDict = false;
@@ -534,7 +535,11 @@ function Start()
 <!-- Start Up -->
 function launch()
 {
-  stylize();
+  if (stylized == false)
+  {
+    Stylize();
+    stylized = true;
+  }
   Start();
 }
 </script>
