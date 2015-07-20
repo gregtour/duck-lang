@@ -6,7 +6,7 @@
     <title>Designing a Programming Language: I | Duck Programming Language Official Website</title>
     <link rel="shortcut icon" type="image/x-icon" href="favicon.ico">
 
-    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=yes">
     <style>
 body {
   color: #000;
@@ -38,14 +38,199 @@ code, pre  {
 blockquote{padding:0 15px;color:#000;border-left:4px solid #ddd}
 
 .pl-c{color:#969896}.pl-c1,.pl-s .pl-v{color:#0086b3}.pl-e,.pl-en{color:#795da3}.pl-s .pl-s1,.pl-smi{color:#333}.pl-ent{color:#63a35c}.pl-k{color:#a71d5d}.pl-pds,.pl-s,.pl-s .pl-pse .pl-s1,.pl-sr,.pl-sr .pl-cce,.pl-sr .pl-sra,.pl-sr .pl-sre{color:#183691}.pl-v{color:#ed6a43}.pl-id{color:#b52a1d}.pl-ii{background-color:#b52a1d;color:#f8f8f8}.pl-sr .pl-cce{color:#63a35c;font-weight:bold}.pl-ml{color:#693a17}.pl-mh,.pl-mh .pl-en,.pl-ms{color:#1d3e81;font-weight:bold}.pl-mq{color:#008080}.pl-mi{color:#333;font-style:italic}
-.pl-mb{color:#333;font-weight:bold}.pl-md{background-color:#ffecec;color:#bd2c00}.pl-mi1{background-color:#eaffea;color:#55a532}.pl-mdr{color:#795da3;font-weight:bold}.pl-mo{color:#1d3e81}.
+.pl-mb{color:#333;font-weight:bold}.pl-md{background-color:#ffecec;color:#bd2c00}.pl-mi1{background-color:#eaffea;color:#55a532}.pl-mdr{color:#795da3;font-weight:bold}.pl-mo{color:#1d3e81}
     </style>
     
     <script>
+var symbols = [",", "=", "(", ")", "[", "]", "+", "-", "*", "/", ".", "==", "!=", "<", ">", "<=", ">=", "!", "{", "}", ":"];
+var keywords = ["import", "include", "return", "break", "continue", "throw", "function", "end", "if", "then", "else", "for", "to", "do", "loop", "step", "in", "while", "let", "begin", "try", "complete", "catch", "object", "static", "operator", "this", "and", "or", "not", "is", "mod", "new", "true", "false", "int", "String", "global"];
+function stylize()
+{
+  var lastKeyword = "";
+  var inDict = false;
+  var dictCount = 0;
+  var c = document.getElementsByTagName("code");
+  var firstChar;
+  for (var s = 0; s < c.length; s++)
+  {
+    var t = c[s].innerHTML;
+    var d = "";
+    
+    t = t.replace(/&lt;/g, "<");
+    t = t.replace(/&gt;/g, ">");
+
+    if (t.length > 0) firstChar = t.charAt(0);
+    for (var q = 0; q < t.length; q++)
+    { // lexer / keyword recognizer
+      var x = t.charAt(q);
+      // whitespace
+      if (x == " " || x == "\r" || x == "\t" || x == "\n")
+      {
+        d += x;
+        if (x == "\n" && q < t.length + 1)
+          firstChar = t.charAt(q+1);
+      }
+      // strings
+      else if (x == "\"" || x == "\'")
+      {
+        var m = x;
+        d += "<span class=\"pl-s\">";
+        do {
+          d += x;
+          q++;
+          if (q >= t.length) break;
+          x = t.charAt(q);
+        } while (x != m);
+        if (q < t.length) d += x;
+        d += "</span>";
+      }
+      // comments
+      else if (x == ";")
+      {
+        d += "<span class=\"pl-c\">";
+        do {
+          d += x;
+          q++;
+          if (q >= t.length) break;
+          x = t.charAt(q);
+        } while (x != "\n");
+        d += "</span>";
+        q--;
+      }
+      // block comments
+      else if (q < t.length +1 &&
+               x == "/" && t.charAt(q+1) == "*")
+      {
+        d += "<span class=\"pl-c\">";
+        do {
+          x = t.charAt(q);
+          d += x;
+          q++;
+        } while (q < t.length + 1 &&
+                 !(t.charAt(q) == "*" &&
+                   t.charAt(q+1) == "/"));
+        if (q < t.length + 1)
+        {
+          d += t.charAt(q++);
+          d += t.charAt(q);
+        }
+        
+        d += "</span>";
+      }
+      // characters
+      else if (x.toLowerCase() != x.toUpperCase())
+      {
+        var n = "";
+        do {
+          n += x;
+          q++;
+          if (q >= t.length) break;
+          x = t.charAt(q);
+        } while ((x.toLowerCase() != x.toUpperCase()) ||
+                 x == "_" ||
+                 (x.charCodeAt(0) >= "0".charCodeAt(0) &&
+                  x.charCodeAt(0) <= "9".charCodeAt(0)));
+        q--;
+        
+        var j;
+        // keyword
+        for (j = 0; j < keywords.length; j++)
+        {
+          if (keywords[j] == n)
+          {
+            if (firstChar == "<")
+              d += "<span class=\"pl-en\">";
+            else
+              d += "<span class=\"pl-k\">";
+            d += n;
+            d += "</span>";
+            lastKeyword = n;
+            break;
+          }
+        }
+        
+        // identifier
+        if (j == keywords.length) {
+          if (lastKeyword == "function" ||
+              (inDict && dictCount % 2 == 0))
+          {
+            d += "<span class=\"pl-en\">";
+          } else {
+            d += "<span class=\"pl-c1\">";
+          }
+          d += n;
+          d += "</span>";
+          
+          lastKeyword = "";
+        }
+      }
+      // numbers
+      else if (x.charCodeAt(0) >= "0".charCodeAt(0) &&
+               x.charCodeAt(0) <= "9".charCodeAt(0))
+      {
+        d += "<span class=\"pl-c1\">"
+        d += x;
+        q++;
+        while (q < t.length && 
+            (t.charCodeAt(q) >= "0".charCodeAt(0) &&
+             t.charCodeAt(q) <= "9".charCodeAt(0)))
+        {
+          d += t.charAt(q);
+          q++;
+        }
+        d += "</span>";
+        q--;
+      }
+      // grammar symbols
+      else if (x == "<" && firstChar == "<")
+      {
+        d += "<span class=\"pl-c1\">";
+        d += "&lt;";
+        q++;
+        while (q < t.length && t.charAt(q) != ">") {
+          d += t.charAt(q);
+          q++;
+        }
+        d += "&gt;";
+        d += "</span>";
+      }
+      // BNF sign ::=
+      else if (x == ":" && q < t.length+2 &&
+               t.charAt(q+1) == ":" && t.charAt(q+2) == "=")
+      {
+        d += "<span class=\"pl-mb\">::=</span>";
+        q += 2;
+      }
+      // symbols
+      else {
+        if (x == "{") { inDict = true; dictCount = 0; }
+        if (x == "}") { inDict = false; }
+        if (x == ":") { dictCount++; }
+        if (x == ",") { dictCount++; }
+        
+        if (firstChar != ",")
+          d += "<span class=\"pl-k\">";
+        else
+          d += "<span class=\"pl-c1\">";
+        
+        if (x != "<" && x != ">")
+          d += x;
+        else if (x == "<")
+          d += "&lt;";
+        else
+          d += "&gt;";
+          
+        d += "</span>";
+      }
+    }
+  
+    c[s].innerHTML = d;
+  }
+}
     </script>
 
   </head>
-  <body>
+  <body onLoad="stylize()">
   <div style="width: 860px; margin: 0 auto; background: white; padding: 24px; border: 1px solid gray; border-radius: 10px;">
 
   <div id="readme" class="">
@@ -54,7 +239,7 @@ blockquote{padding:0 15px;color:#000;border-left:4px solid #ddd}
 
 <blockquote>
 <p><img src="res/small.png?raw=true" alt="Duck-logo" title="Duck programming language logo" style="max-width:100%;">  Designing a language and building an interpreter
-from concept to evolution.</p>
+from beginning to end.</p>
 </blockquote>
 
 <h3><a name="part-1-the-premise" class="anchor" href="#part-1-the-premise" aria-hidden="true"><span class="hover-link"></span></a>Part 1: The Premise</h3>
@@ -71,25 +256,27 @@ relevant scope leads to a syntax error issued at compile time. The programming l
 that, when it is analyzed at a source level, the locations of all variables and functions are known by lexical
 address: i.e. given the relevant scope, a variable can be identified by the order it is defined in.</p>
 
-<p>As an example, consider the case of defining a variable in Visual Basic:</p>
+<p>As an example, consider the case of declaring variables in Java:</p>
 
-<div class="highlight highlight-vb"><pre><span class="pl-k">Dim</span> num1, num2 <span class="pl-k">As </span><span class="pl-c1">Integer</span>
-<span class="pl-k">Dim</span> text <span class="pl-k">As </span><span class="pl-c1">String</span></pre></div>
+<pre><code>int num1, num2;
+String text;
+</code></pre>
 
 <p>This would be the prototype for a static language. When variables are first declared, they must be paired with a
-type. In order to compare with a dynamically typed language, let us look at an example from ECMA script or
-JavaScript.</p>
+type. In order to compare with a dynamically typed language, let's look at an example from Python.</p>
 
-<div class="highlight highlight-javascript"><pre><span class="pl-k">var</span> num1, num2;
-<span class="pl-k">var</span> text;</pre></div>
+<pre><code>
+global num1, num2
+global text
+</code></pre>
 
 <p>In this example, no types are declared for these variables. The variable 'num1' could be used as any type by
 assigning any value to it. Additionally, the declaration step is wholly unnecessary. The way that values are stored
-includes the type information.</p>
+includes type information, so declarations are only needed when declaring scope.</p>
 
-<p>Additional examples of dynamically typed languages besides JavaScript include Python, Ruby, Lua, Scheme and Lisp, and
-a number of others. Aside from the style of syntax and the degree of expressiveness, these programming languages are
-largely similar because of their type system. So called dynamically typed languages are sometimes referred to as
+<p>Additional examples of dynamically typed languages besides Python include JavaScript, Ruby, Lua, Clojure, Scheme and 
+Lisp, and a number of others. Aside from the style of syntax and the degree of expressiveness, these programming languages
+are largely similar because of their type system. So called dynamically typed languages are sometimes referred to as 
 duck-typed or duck languages.</p>
 
 <p>Adopting many of these identifying features, and really as an exercise in constructing a language from basic parts,
@@ -132,7 +319,7 @@ is a statement that contains additional statements.</p>
 
 <pre><code>if some condition then
 
-    here is a block of statements
+    ; here is a block of statements
 
 end
 </code></pre>
@@ -142,13 +329,13 @@ condition is false, we better add support for else statements, too.</p>
 
 <pre><code>if some condition then
 
-    here is a block of statements
-    to run if the condition is true
+    ; here is a block of statements
+    ; to run if the condition is true
 
 else
 
-    here is a block of statements
-    to run if the condition is false
+    ; here is a block of statements
+    ; to run if the condition is false
 
 end
 </code></pre>
@@ -166,12 +353,12 @@ like.</p>
 
 <pre><code>function our_new_function(parameter1, parameters2)
 
-    here we have statements that do work
-    if this function returns a value then we might have
+    ; here we have statements that do work
+    ; if this function returns a value then we might have
 
     return ourResult
 
-    at the end
+    ; at the end
 
 end
 </code></pre>
@@ -195,7 +382,7 @@ integers, or possibly floating-point numbers, but always increasing by increment
 
 <pre><code>for j = 1 to 100 do
 
-    this prints the numbers 1 through 100
+    ; this prints the numbers 1 through 100
     println(j)
 
 loop
@@ -247,7 +434,7 @@ adapting to use our language.</p>
 <p>A casual reader following along might not be interested in developing their own language, as of this moment. They
 might be more interested in the mechanics involved. As a rather elaborate exercise, I invite anyone to attempt to
 create their own interpreted programming language. That being said, I am about to outline the process
-and tools that I used to create <em>the duck programming language</em>, even though I recognize there are multiple ways to
+and tools that I used to create the <em>Duck programming language</em>, even though I recognize there are multiple ways to
 go about the process. </p>
 
 <p>For example, I chose to write everything in the C programming language. This is really a more difficult task than it
@@ -267,7 +454,7 @@ useful, and there are ways to improve productivity and performance by creating a
 going for is an entirely new language.</p>
 
 <p>I will note that there is one way that implementing this dynamic language in an interpreted or scripting language
-might be helpful, and that would be in the case of cross-compiling. I.e. having our <em>duck code</em> reduced to some other
+might be helpful, and that would be in the case of cross-compiling. I.e. having our <em>Duck code</em> reduced to some other
 language, like JavaScript or Python, before being executed. That would be fine but then we are dealing with code 
 compiling and other complexities which are best addressed in section II of this series.</p>
 
@@ -322,13 +509,13 @@ file until we are dealing with program source directly. Now we will work charact
 identify the tokens that make up <em>Duck source code</em>.</p>
 
 <p>At this point, we already have tables of keywords and symbols to begin with, and if we don't, it is something that we
-will generate in one of the next steps that we can save and store to use for the lexer. In any case, we can list off
-all of the keywords and symbols that we would like to use for your programming language. In this case those keywords
+will generate in one of the next steps that we can save and store for use in the lexer. In any case, we can list off
+all of the keywords and symbols that we would like to use for our programming language. In this case those keywords
 are:</p>
 
 <blockquote>
-<p>import, include, return, break, continue, throw, function, end, if, then, else, for, to, do, loop, step, in, while,
-let, begin, try, complete, catch, object, static, operator, this, and, or, not, is, mod, new, true, false</p>
+<p><code>import, include, return, break, continue, throw, function, end, if, then, else, for, to, do, loop, step, in, while,
+let, begin, try, complete, catch, object, static, operator, this, and, or, not, is, mod, new, true, false</code></p>
 </blockquote>
 
 <p>Some of these include keywords for features we haven't discussed implementing. This is fine, we can use them as
@@ -364,7 +551,7 @@ following set, which we will be generating soon in the next step.</p>
 <p>These built-in token symbols used in our programming language are:</p>
 
 <blockquote>
-<p>, = ( ) [ ] + - * / . == != &lt; &gt; &lt;= &gt;= ! { } :</p>
+<p><code>, = ( ) [ ] + - * / . == != &lt; &gt; &lt;= &gt;= ! { } :</code></p>
 </blockquote>
 
 <p>Noticing that we notably missed quotation marks, we must go back and add strings to the collection of objects that we
@@ -409,7 +596,7 @@ deterministic language. But we are looking for a more sure-footed answer than th
 <p>There are a class of languages known as context-free languages which we will focus on. Context-free languages are the
 class of languages that can be recognized or generated by a context-free grammar. This applies to us as we will most
 likely be writing our programming language as a context-free language, or something close it. In any case, we will be
-combining the power of our lexer, our parser, and any processing we might do after parsing to form our programming
+combining the power of our lexer, our parser, and any processing we might do before or after parsing to form our programming
 language. At this point we need to concern ourselves with context-free languages and to what extent they apply, so we
 will take a brief overview of what LR(k) languages are, what LR(1) languages are, and how we can use the LR algorithm
 to write a generic parser for any sort of grammar we can think of. We will be working with context-free grammars and
@@ -729,7 +916,7 @@ parentheses as another requirement to maintain operator precedence.</p>
 <p>Given all of these structures, we may make way to parsing this given expression:</p>
 
 <blockquote>
-<p>-1 * 2 + 3 mod 4</p>
+<p><code>-1 * 2 + 3 mod 4</code></p>
 </blockquote>
 
 <p>As we declined to include negative numbers in the definition of our lexer, we'll also have to add negation to one of
@@ -808,7 +995,7 @@ internal logic is supposed to work might be a statement or instruction that must
 }</pre></div>
 
 <p>We can see how our simple production rules are able to split the work that we are doing into manageable chunks. Our
-rule isn't considered with the details of how a &lt;comparison&gt; or an &lt;arithmetic&gt; symbol is resolved into an 
+rule isn't concerned with the details of how a &lt;comparison&gt; or an &lt;arithmetic&gt; symbol is resolved into an 
 expression or a VALUE in our backend. Instead, we can focus on the atomic operation of equality. Here we have made
 external the actual logic of CompareEquality to make our code more readable. Since we have a listing of 50 to 100
 grammar productions, we want them to be as short as possible. This allows us to keep them in one place and ensure
@@ -851,8 +1038,17 @@ variables, procedures, function scopes, closures, and dynamic variables.</p>
         <span class="pl-k">case</span> 0x08: <span class="pl-k">return</span> <span class="pl-c1">ReduceStmtA</span>(node);
         <span class="pl-k">case</span> 0x09: <span class="pl-k">return</span> <span class="pl-c1">ReduceStmtB</span>(node);
         <span class="pl-k">case</span> 0x0A: <span class="pl-k">return</span> <span class="pl-c1">ReduceStmtC</span>(node);
-
-        ...</pre></div>
+        
+        
+        ...
+        
+        <span class="pl-k">case</span> 0x74: <span class="pl-k">return</span> <span class="pl-c1">ReduceBooleanA</span>(node);
+        <span class="pl-k">case</span> 0x75: <span class="pl-k">return</span> <span class="pl-c1">ReduceBooleanB</span>(node);
+    <span class="pl-k">default</span>:
+        <span class="pl-c1">printf</span>(<span class="pl-s"><span class="pl-pds">"</span>Unknown production <span class="pl-c1">%i</span>.<span class="pl-cce">\n</span><span class="pl-pds">"</span></span>, node-&gt;production);
+        <span class="pl-k">return</span> <span class="pl-c1">1</span>;
+    }
+}</pre></div>
 
 <p>Here we allow the code generator to help us somewhat by creating the jump table we will use in identifying
 productions. This isn't strictly necessary. One choice we've made here was the ability to track errors on a
@@ -997,7 +1193,7 @@ complex but involve similar logic and are mostly implementation defined. </p>
 <p>In discussing the syntax for an 'else if' more than the procedures of how else branches will be executed, which
 should be on about the same difficulty as our other language elements, we will have to go back to the grammar.</p>
 
-<p>One possible way of formalizing this in a context free manner is the following.</p>
+<p>One possible way of formalizing this in a context-free manner is the following.</p>
 
 <pre><code>&lt;if&gt; ::= if &lt;condition&gt; then &lt;endl&gt; &lt;stmt list&gt; &lt;else if&gt;
 &lt;else if&gt; ::= else &lt;endl&gt; &lt;stmt list&gt; end
@@ -1009,7 +1205,7 @@ should be on about the same difficulty as our other language elements, we will h
 definition as to how a sequence of if, else if, and else statements should be parsed, without ambiguity.</p>
 
 <p>Pragmatically then, we will interpret the &lt;else if&gt; node only if the condition is false. In that case, that could
-lead to either a &lt;stmt list&gt; that is always executed, an &lt;if&gt; statement this is also executed, or an empty
+lead to either a &lt;stmt list&gt; that is always executed, an &lt;if&gt; statement that is also executed, or an empty
 production.</p>
 
 <p>That determines a large number of the ways we are set to handle all of the different kinds of statements and
@@ -1022,7 +1218,7 @@ types, including lists, trees, dictionaries, and hash tables.</p>
 <h3><a name="part-7-the-virtual-environment" class="anchor" href="#part-7-the-virtual-environment" aria-hidden="true"><span class="hover-link"></span></a>Part 7: The Virtual Environment</h3>
 
 <p>First and foremost, we must have some idea of the data that we will be working with and manipulating in our
-language's runtime. As we have already decided, values that are used in a <em>duck program</em> must be stored with
+language's runtime. As we have already decided, values that are used in a <em>Duck program</em> must be stored with
 information about their type because of its dynamic nature. We have also discovered that the built-in types for
 integers and floating-point numbers can be passed by value, stored in a VALUE structure, and that strings, functions,
 and dictionaries must be passed by reference, as pointers in a VALUE structure. </p>
@@ -1117,7 +1313,7 @@ with some simple manipulation, we can create our own namespace for a library by 
 <p>The way that our library will interface with <em>the Duck language</em> is relatively simple. At start up, the language will
 bind libraries that are included in its distribution. During this phase, the library has the opportunity to create
 hooks for its common functions, data, and constant data. Functions are integrated by first providing a pointer to the
-procedure and then providing a list of the named parameters. As we allow for any type of object to passed as
+procedure and then providing a list of the named parameters. As we allow for any type of object to be passed as
 variables, our external code will have to retrieve VALUE objects and handle them manually.</p>
 
 <p>A function itself will take an integer argument count as its parameter and it will return an error code. Returning 
@@ -1178,7 +1374,7 @@ However, once in place it is a very effective way to free memory that is able to
 references. It's also very much behind the scenes, as long as allocations are being tracked.</p>
 
 <p>The <em>Duck programming language</em> currently uses a tracing garbage collector. It is highly accurate and handles a
-number issues like dead call stacks and parameter lists rather well. One concern would be to offer better integration
+number of issues like dead call stacks and parameter lists rather well. One concern would be to offer better integration
 with user libraries, which is definitely one area for improvement in the future. There are also a number of ways to
 go about improving its performance by using better data structures.</p>
 
@@ -1236,7 +1432,7 @@ language and lay out the road map for us to write our own compiler.</p>
 
 <p>The legendary green and red dragon books, by Aho and Ullman and Aho, Sethi, and Ullman.</p>
 
-<p><a href="res/green.jpg?raw=true" target="_blank"><img src="res/green.jpg?raw=true" alt="The Green Dragon Book" title="Green" style="max-width:100%;"></a> <a href="res/red.jpg?raw=true" target="_blank"><img src="res/red.jpg?raw=true" alt="The Red Dragon Book" title="Red" style="max-width:100%;"></a></p>
+<p><a href="res/green.jpg?raw=true" target="_blank"><img src="res/green.jpg?raw=true" alt="The Green Dragon Book" title="Green" style="max-height:250px;"></a> <a href="res/red.jpg?raw=true" target="_blank"><img src="res/red.jpg?raw=true" alt="The Red Dragon Book" title="Red" style="max-height:250px;"></a></p>
 
 <p>[1] "Principles of Compiler Design." Alfred Aho and Jeffrey Ullman.</p>
 
@@ -1247,6 +1443,8 @@ language and lay out the road map for us to write our own compiler.</p>
 <p>[4] <a href="https://github.com/gregtour/parsergenerator">The Duck Programming Language Parser Generator</a> </p>
 
 <p>[5] "Engineering a Compiler." 2nd Edition. Keith Cooper and Linda Torczon. Morgan Kaufmann 2011. </p>
+
+<p>[6] <a href="http://www.rose-hulman.edu/class/csse/csse404/201230/">CSSE 304 and CSSE 404</a></a></p>
   </div>
 
 </div>
