@@ -209,6 +209,10 @@ function ReduceStmtG(node)
 
     var error = 0;
     error = InterpretNode(if1);
+    
+    if (!returning) {
+      gLastExpression = {type: VAL_NIL, primitive: 0};
+    }
 
     return error;
 }
@@ -221,6 +225,10 @@ function ReduceStmtH(node)
 
     var error = 0;
     error = InterpretNode(for_loop1);
+    
+    if (!returning) {
+      gLastExpression = {type: VAL_NIL, primitive: 0};
+    }
 
     return error;
 }
@@ -233,6 +241,10 @@ function ReduceStmtI(node)
 
     var error = 0;
     error = InterpretNode(while_loop1);
+    
+    if (!returning) {
+      gLastExpression = {type: VAL_NIL, primitive: 0};
+    }
 
     return error;
 }
@@ -260,6 +272,8 @@ function ReduceStmtK(node)
     var error = 0;
 
     breaking = true;
+    
+    gLastExpression = {type: VAL_NIL, primitive: 0};
 
     return error;
 }
@@ -272,6 +286,8 @@ function ReduceStmtL(node)
     var error = 0;
 
     continuing = true;
+    
+    gLastExpression = {type: VAL_NIL, primitive: 0};
 
     return error;
 }
@@ -1452,7 +1468,7 @@ function ReduceReferenceC(node)
         var i = 0;
         for (; i < param.length && i < arg.length; i++)
         {
-            StoreRecord(param[i], arg[i], func_context);
+            func_context.list.push({"identifier": param[i], "value": arg[i]});
         }
 
         // call function
@@ -1492,9 +1508,14 @@ function ReduceArgumentsA(node)
     var error = 0;
     error = InterpretNode(arguments1);
     if (error) return error;
+    
+    arguments = gArgumentEvaluation;
 
     error = InterpretNode(expr1);
-    gArgumentEvaluation.push(gLastExpression);
+    
+    arguments.push(gLastExpression);
+    
+    gArgumentEvaluation = arguments;
 
     return error;
 }
@@ -1652,8 +1673,6 @@ function ReduceDictionaryInitB(node)
     var expr1 = node.children[2];
 
     var error = 0;
-    error = InterpretNode(identifier1);
-    if (error) return error;
     error = InterpretNode(expr1);
 
     gDictionaryInit = {};
@@ -1832,15 +1851,23 @@ function InterpretProgram(syntax_tree, use_existing_environment)
     {
       BindStandardLibrary();
     }
+
 //    BindMathLibrary();
-//    BindAdditionalLibraries();
 //    BindRandLibrary();
+//    BindAdditionalLibraries();
 
     var error = InterpretNode(syntax_tree);
 
     //if (error) alert("Error: " + error);
     if (error) { /*program.output("Error: " + error);*/ 
-        program.output("Reference error.");
+        if (error == 12345)
+        {
+            program.output("Reference error.\n");
+        }
+        else
+        {
+            program.output("Error " + error + ".\n");
+        }
     }
     return gLastExpression;
 }

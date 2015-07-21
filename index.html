@@ -559,6 +559,9 @@ function launch()
           <li><a href="https://github.com/gregtour/duck-lang/tarball/master">Download <strong>TAR Ball</strong></a></li>
           <li><a href="https://github.com/gregtour/duck-lang">View On <strong>GitHub</strong></a></li>
         </ul>
+        
+        <p>This project is maintained by <br><a href="https://github.com/gregtour">Greg Tourville</a></p>
+        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
       </header>
       <section>
         <h1>
@@ -647,21 +650,7 @@ end
     VALUE prompt = CreateFunction(DuckPrompt);
     LinkFunction(duckStdLib, "prompt", prompt);
 }</code></pre>
-<!--
-<div class="highlight highlight-c"><pre><span class="pl-s">void</span> <span class="pl-enf">BindStandardLibrary</span>()
-{
-    VALUE duckStdLib = <span class="pl-sf">LinkNamespace</span>(<span class="pl-s1"><span class="pl-pds">"</span>duck<span class="pl-pds">"</span></span>);
 
-    VALUE print = <span class="pl-sf">CreateFunction</span>(DuckPrint);
-    <span class="pl-sf">AddParameter</span>(print, <span class="pl-s1"><span class="pl-pds">"</span>output<span class="pl-pds">"</span></span>);
-
-    <span class="pl-sf">LinkFunction</span>(duckStdLib, <span class="pl-s1"><span class="pl-pds">"</span>print<span class="pl-pds">"</span></span>, print);
-    <span class="pl-sf">LinkFunction</span>(duckStdLib, <span class="pl-s1"><span class="pl-pds">"</span>println<span class="pl-pds">"</span></span>, print);
-
-    VALUE prompt = <span class="pl-sf">CreateFunction</span>(DuckPrompt);
-    <span class="pl-sf">LinkFunction</span>(duckStdLib, <span class="pl-s1"><span class="pl-pds">"</span>prompt<span class="pl-pds">"</span></span>, prompt);
-}</pre></div>
--->
 <h2>
 <a id="standard-library" class="anchor" href="#standard-library" aria-hidden="true"><span class="octicon octicon-link"></span></a>Standard Library</h2>
 
@@ -740,8 +729,6 @@ Robert Cope</p>
 </ul>
       </section>
       <footer>
-        <p>This project is maintained by <br><a href="https://github.com/gregtour">Greg Tourville</a></p>
-        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
       </footer>
     </div>
     <script src="javascripts/scale.fix.js"></script>
