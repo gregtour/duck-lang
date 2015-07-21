@@ -209,6 +209,10 @@ function ReduceStmtG(node)
 
     var error = 0;
     error = InterpretNode(if1);
+    
+    if (!returning) {
+      gLastExpression = {type: VAL_NIL, primitive: 0};
+    }
 
     return error;
 }
@@ -221,6 +225,10 @@ function ReduceStmtH(node)
 
     var error = 0;
     error = InterpretNode(for_loop1);
+    
+    if (!returning) {
+      gLastExpression = {type: VAL_NIL, primitive: 0};
+    }
 
     return error;
 }
@@ -233,6 +241,10 @@ function ReduceStmtI(node)
 
     var error = 0;
     error = InterpretNode(while_loop1);
+    
+    if (!returning) {
+      gLastExpression = {type: VAL_NIL, primitive: 0};
+    }
 
     return error;
 }
@@ -260,6 +272,8 @@ function ReduceStmtK(node)
     var error = 0;
 
     breaking = true;
+    
+    gLastExpression = {type: VAL_NIL, primitive: 0};
 
     return error;
 }
@@ -272,6 +286,8 @@ function ReduceStmtL(node)
     var error = 0;
 
     continuing = true;
+    
+    gLastExpression = {type: VAL_NIL, primitive: 0};
 
     return error;
 }
@@ -1452,7 +1468,7 @@ function ReduceReferenceC(node)
         var i = 0;
         for (; i < param.length && i < arg.length; i++)
         {
-            StoreRecord(param[i], arg[i], func_context);
+            func_context.list.push({"identifier": param[i], "value": arg[i]});
         }
 
         // call function
@@ -1492,9 +1508,14 @@ function ReduceArgumentsA(node)
     var error = 0;
     error = InterpretNode(arguments1);
     if (error) return error;
+    
+    arguments = gArgumentEvaluation;
 
     error = InterpretNode(expr1);
-    gArgumentEvaluation.push(gLastExpression);
+    
+    arguments.push(gLastExpression);
+    
+    gArgumentEvaluation = arguments;
 
     return error;
 }
@@ -1652,8 +1673,6 @@ function ReduceDictionaryInitB(node)
     var expr1 = node.children[2];
 
     var error = 0;
-    error = InterpretNode(identifier1);
-    if (error) return error;
     error = InterpretNode(expr1);
 
     gDictionaryInit = {};
@@ -1802,14 +1821,17 @@ function InterpretNode(node)
 }
 
 
-function InterpretProgram(syntax_tree) 
+function InterpretProgram(syntax_tree, use_existing_environment) 
 {
     halting = 0;
     returning = 0;
     breaking = 0;
     continuing = 0;
 
-    gGlobalContext = {"parent": undefined, list: []};
+    if (use_existing_environment === undefined || !use_existing_environment)
+    {
+      gGlobalContext = {"parent": undefined, list: []};
+    }
     gCurrentContext = gGlobalContext;
     gLastExpression = {type: VAL_NIL, primitive: 0};
     gParameterListing = undefined;
@@ -1825,15 +1847,80 @@ function InterpretProgram(syntax_tree)
     failed_production = undefined;
     line_error = -1;
 
-    BindStandardLibrary();
+    if (use_existing_environment === undefined || !use_existing_environment)
+    {
+      BindStandardLibrary();
+    }
+
 //    BindMathLibrary();
-//    BindAdditionalLibraries();
 //    BindRandLibrary();
+//    BindAdditionalLibraries();
 
     var error = InterpretNode(syntax_tree);
 
-    if (error) alert("Error: " + error);
+    //if (error) alert("Error: " + error);
+    if (error) { /*program.output("Error: " + error);*/ 
+        if (error == 12345)
+        {
+            program.output("Reference error.\n");
+        }
+        else
+        {
+            program.output("Error " + error + ".\n");
+        }
+    }
     return gLastExpression;
+}
+
+var duck_grammar;
+function StartUpDuckRuntime()
+{
+  duck_grammar = LoadGrammar(DUCK_GRAMMAR);
+  // ...
+}
+
+function TestParse(source)
+{
+  var lexing = LexSource(source, duck_grammar);
+  if (lexing) {
+      return ParseSucceeds(lexing, PARSE_TABLE, duck_grammar);
+  } else {
+      return -1;
+  }
+}
+
+var runcount = 0;
+function RunAndPrintValue(source)
+{
+  var lexing = LexSource(source, duck_grammar);
+  if (lexing) {
+    var parsing = ParseSource(lexing, PARSE_TABLE, duck_grammar);
+    if (parsing) {
+      var expr = InterpretProgram(parsing, (runcount > 0));
+      runcount++;
+      if (expr !== undefined && expr.type != VAL_NIL)
+      {
+        if (expr.type == VAL_STRING) {
+            program.output(">> " + expr.string);
+        } else if (expr.type == VAL_PRIMITIVE) {
+            program.output(">> " + expr.primitive + "");
+        } else if (expr.type == VAL_FLOATING_POINT) {
+            program.output(">> " + expr.floatp + "");
+        } else if (expr.type == VAL_FUNCTION) {
+            program.output(">> " + "function");
+        } else if (expr.type == VAL_REFERENCE) {
+            program.output(">> " + "reference");
+        } else {
+            program.output(">> " + "unknown");
+        }
+        program.output("");
+      }
+    } else {
+      program.output("Error, parsing source.");
+    }
+  } else {
+      program.output("Error, lexing source code.");
+  }
 }
 
 function Interpret(source_code)

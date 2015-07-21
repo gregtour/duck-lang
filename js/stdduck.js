@@ -23,6 +23,36 @@ function BindStandardLibrary()
     {
         var text = GetRecord("output", gCurrentContext);
         if (text.type == VAL_STRING) {
+            program.print(text.string);
+        } else if (text.type == VAL_PRIMITIVE) {
+            program.print(text.primitive + "");
+        } else if (text.type == VAL_FLOATING_POINT) {
+            program.print(text.floatp + "");
+        } else if (text.type == VAL_FUNCTION) {
+            program.print("function");
+        } else if (text.type == VAL_REFERENCE) {
+            program.print("reference");
+        } else if (text.type == VAL_NIL) {
+            program.print("nill");
+        } else {
+            program.print("unknown type");
+        }
+        gLastExpression = {type: VAL_NIL, primitive: 0};
+        return 0;
+    };
+    print_func.func.fn_name = "duck.print";
+    
+    var println_func = {};
+    println_func.type = VAL_FUNCTION;
+    println_func.func = {};
+    println_func.func.body = undefined;
+    println_func.func.closure = gCurrentContext;
+    println_func.func.built_in = 1;
+    println_func.func.parameters = ["output"];
+    println_func.func.functor = function (arg_count) 
+    {
+        var text = GetRecord("output", gCurrentContext);
+        if (text.type == VAL_STRING) {
             program.output(text.string);
         } else if (text.type == VAL_PRIMITIVE) {
             program.output(text.primitive + "");
@@ -37,9 +67,10 @@ function BindStandardLibrary()
         } else {
             program.output("unknown type");
         }
+        gLastExpression = {type: VAL_NIL, primitive: 0};
         return 0;
     };
-    print_func.func.fn_name = "duck.print";
+    println_func.func.fn_name = "duck.println";
 
     var duck_obj = {};
     
@@ -50,7 +81,7 @@ function BindStandardLibrary()
 
     StoreRecord("duck", duck_obj, gGlobalContext);
     StoreRecord("print", print_func, duck_obj.reference);
-    StoreRecord("println", print_func, duck_obj.reference);
+    StoreRecord("println", println_func, duck_obj.reference);
 
     return 0;
 }
