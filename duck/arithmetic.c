@@ -54,7 +54,11 @@ VALUE Concat(VALUE a, VALUE b)
         string_a = (char*)a.data.string;
     } else {
         if (a.type == VAL_PRIMITIVE) {
-            sprintf(buffer1, "%i", a.data.primitive);
+//#ifdef WIN32
+//            sprintf(buffer1, "%l64i", a.data.primitive);
+//#else
+            sprintf(buffer1, "%lli", a.data.primitive);
+//#endif
             string_a = buffer1;
         } else if (a.type == VAL_FLOATING_POINT) {
 if (_SUPPORTS_80BIT_FLOATING_POINT) {
@@ -78,7 +82,11 @@ if (_SUPPORTS_80BIT_FLOATING_POINT) {
         string_b = (char*)b.data.string;
     } else {
         if (b.type == VAL_PRIMITIVE) {
-            sprintf(buffer2, "%i", b.data.primitive);
+//#ifdef WIN32
+//            sprintf(buffer2, "%l64i", b.data.primitive);
+//#else
+			sprintf(buffer2, "%lli", b.data.primitive);
+//#endif
             string_b = buffer2;
         } else if (b.type == VAL_FLOATING_POINT) {
 if (_SUPPORTS_80BIT_FLOATING_POINT) {
@@ -204,7 +212,7 @@ VALUE Divide(VALUE a, VALUE b)
     else if (a.type == VAL_PRIMITIVE ||
              b.type == VAL_PRIMITIVE)
     {
-        int divisor = TypeInt(b);
+        int64 divisor = TypeInt(b);
 
         result.type = VAL_PRIMITIVE;
         if (divisor != 0) {

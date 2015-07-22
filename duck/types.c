@@ -17,12 +17,12 @@ long double TypeFloat(VALUE value)
 }
 
 /* cast to int */
-int TypeInt(VALUE value)
+int64 TypeInt(VALUE value)
 {
     if (value.type == VAL_PRIMITIVE) {
         return value.data.primitive;
     } else if (value.type == VAL_FLOATING_POINT) {
-        return (int)value.data.floatp;
+        return (int64)value.data.floatp;
     } else if (value.type == VAL_STRING) {
         return atoi(value.data.string);
     } else {

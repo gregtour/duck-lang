@@ -22,7 +22,13 @@ void PrintValue(VALUE value)
 {
     switch (value.type)
     {
-        case VAL_PRIMITIVE: printf("%i", value.data.primitive); break;
+        case VAL_PRIMITIVE: 
+//#ifdef WIN32
+//			printf("%l64i", value.data.primitive); 
+//#else
+			printf("%lli", value.data.primitive); 
+//#endif
+			break;
         case VAL_FLOATING_POINT: 
             if (_SUPPORTS_80BIT_FLOATING_POINT)
             {
@@ -404,7 +410,7 @@ int DuckLength(int argument_count)
 
     if (argument.type == VAL_REFERENCE)
     {
-        int count = 0;
+        long int count = 0;
         CONTEXT* reference;
         PAIR* iterator;
 

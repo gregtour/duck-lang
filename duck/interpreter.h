@@ -22,7 +22,7 @@ void  LinkFunction(VALUE ref_namespace,
                    VALUE function);
 void  LinkConstPrimitive(VALUE ref_namespace,
                          const char* identifier,
-                         int value);
+                         long long int value);
 void  LinkConstFloatp(VALUE ref_namespace,
                       const char* identifier,
                       long double value);
@@ -37,8 +37,8 @@ extern VALUE    gLastExpression;
 extern PAIR*    gParameterListing;
 //extern CONTEXT* gDictionaryInit;
 extern struct HASH_TABLE* gDictionaryInit;
-extern int      gArrayIndex;
-extern PAIR*    gArgumentEvaluation;
+extern long int  gArrayIndex;
+extern PAIR*     gArgumentEvaluation;
 extern CALLSTACK gStackTrace;
 
 
@@ -82,8 +82,8 @@ VALUE GetRecord(const char* identifier, CONTEXT* context);
 void  StoreRecord(const char* identifier, VALUE value, CONTEXT* context);
 
 /* type-casting */
-long double TypeFloat(VALUE value);
-int TypeInt(VALUE value);
+//long double TypeFloat(VALUE value);
+//long int TypeInt(VALUE value);
 
 /* interpreter */
 int Interpret(SYNTAX_TREE*);

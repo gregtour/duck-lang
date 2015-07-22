@@ -6,6 +6,7 @@
 #ifdef WIN32
 #define CONTEXT     FCONTEXT
 #define namespace   NAMESPACE
+#define atoll       _atoi64
 #endif
 
 /* constants */
@@ -19,6 +20,9 @@
 
 /* floating-point precision */
 #define  DOUBLE_EPSILON     (1.0E-12)
+
+/* long long int */
+typedef long long int int64;
 
 /* types */
 
@@ -42,8 +46,8 @@ typedef struct VALUE
     int         type;
     union 
     {
-        int             primitive;
-        long double          floatp;
+        int64           primitive;
+        long double     floatp;
         const char*     string;
         FUNCTION*       function;
         struct CONTEXT* reference;
@@ -77,7 +81,7 @@ typedef struct CALLSTACK
 /* casts */
 
 long double TypeFloat(VALUE value);
-int    TypeInt(VALUE value);
+int64  TypeInt(VALUE value);
 int    IsDynamic(VALUE type);
 VALUE  CopyString(VALUE string);
 

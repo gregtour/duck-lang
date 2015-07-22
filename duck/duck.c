@@ -1719,7 +1719,7 @@ int ReduceFinalC(SYNTAX_TREE* node)
     int error = 0;
 
     gLastExpression.type = VAL_PRIMITIVE;
-    gLastExpression.data.primitive = atoi(integer1->string);
+    gLastExpression.data.primitive = atoll(integer1->string);
 
     return error;
 }
@@ -2125,7 +2125,7 @@ int ReduceArrayInitA(SYNTAX_TREE* node)
     error = InterpretNode(array_init1);
 
     HASH_TABLE* dictionary = gDictionaryInit;
-    int index = gArrayIndex;
+    long int index = gArrayIndex;
     
     error = (error ? error : InterpretNode(expr1));
     VALUE expr = gLastExpression;
