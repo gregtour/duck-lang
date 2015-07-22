@@ -17,8 +17,8 @@ PAIR*    gParameterListing;
 
 //CONTEXT* gDictionaryInit;
 HASH_TABLE* gDictionaryInit;
-int      gArrayIndex;
-PAIR*    gArgumentEvaluation;
+long int    gArrayIndex;
+PAIR*       gArgumentEvaluation;
 
 const char* gLValueIdentifier;
 CONTEXT*    gLValueContext;
@@ -171,7 +171,11 @@ void PrintContext(CONTEXT* context)
             printf("%s: ", list->identifier);
             VALUE value = list->value;
             if (value.type == VAL_PRIMITIVE)
-                printf("%i", value.data.primitive);
+//#ifdef WIN32
+//                printf("%l64i", value.data.primitive);
+//#else
+                printf("%lli", value.data.primitive);
+//#endif
             else if (value.type == VAL_STRING)
                 printf("%s", value.data.string);
             else if (value.type == VAL_REFERENCE)
@@ -263,7 +267,7 @@ void  LinkFunction(VALUE ref_namespace, const char* identifier, VALUE function)
     }
 }
 
-void  LinkConstPrimitive(VALUE ref_namespace, const char* identifier, int value)
+void  LinkConstPrimitive(VALUE ref_namespace, const char* identifier, long long int value)
 {
     VALUE constant;
     constant.type = VAL_PRIMITIVE;
