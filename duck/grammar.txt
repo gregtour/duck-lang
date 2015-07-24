@@ -105,7 +105,7 @@
 <object> ::= [ ]
 <object> ::= [ <array-init> ]
 <object> ::= [ <dictionary-init> ]
-<array-init> ::= <array-init> , <opt-endl> <expr>
+<array-init> ::= <array-init> , <expr>
 <array-init> ::= <expr>
 <dictionary-init> ::= <dictionary-init> , <identifier> : <expr>
 <dictionary-init> ::= <identifier> : <expr>
