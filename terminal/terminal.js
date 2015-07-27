@@ -4,6 +4,7 @@ Undo, Redo, support Ctrl+C, Ctrl+X, Ctrl+V,
 Color support
 Possible syntax highlighting
 */
+var fullscreen = false;
 
 var new_prompt = "duck> ";
 var continue_prompt = "    > ";
@@ -122,18 +123,25 @@ function UpdateBuffers()
     if (caret == "\n") {
         caretElement.innerHTML = "&nbsp;";
         postTextBox.textContent = "\n" + post;
+        if (fullscreen) postTextBox.textContent += "\n\n";
     } else if (caretPos == bufferLen)
     {
         caretElement.innerHTML = "&nbsp;";
         postTextBox.textContent = "";
+        if (fullscreen) postTextBox.textContent = "\n\n"
     }
     else
     {
         caretElement.innerHTML = caret;
         postTextBox.textContent = post + "";
+        if (fullscreen) postTextBox.textContent += "\n\n";
     }
-    //window.scrollTo(0,document.body.scrollHeight);
-    terminalArea.scrollTop = terminalArea.scrollHeight;
+    if (fullscreen)
+    {
+        window.scrollTo(0,document.body.scrollHeight);
+    } else {
+        terminalArea.scrollTop = terminalArea.scrollHeight;
+    }
     StartBlink();
 }
 
@@ -177,7 +185,13 @@ function PressEnter()
     caretPos = 0;
     UpdateBuffers();
     RunProgram(source);
-    terminalArea.scrollTop = terminalArea.scrollHeight;
+
+    if (fullscreen)
+    {
+        window.scrollTo(0,document.body.scrollHeight);
+    } else {
+        terminalArea.scrollTop = terminalArea.scrollHeight;
+    }
 }
 
 function DeletePress()
