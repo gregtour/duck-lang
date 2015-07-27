@@ -279,7 +279,7 @@ int ReduceStmtN(SYNTAX_TREE* node)
     error = InterpretNode(expr1);
 
     returning = 1;
-	continuing = 0;
+    continuing = 0;
 
     return error;
 }
@@ -618,7 +618,7 @@ int ReduceForLoopA(SYNTAX_TREE* node)
                && start.data.floatp <= end.data.floatp
                && error == 0
                && breaking == 0
-			   && returning == 0)
+               && returning == 0)
         {
             StoreRecord(id, start, gCurrentContext);
             error = InterpretNode(stmt_list1);
@@ -637,7 +637,7 @@ int ReduceForLoopA(SYNTAX_TREE* node)
                && start.data.primitive <= end.data.primitive
                && error == 0
                && breaking == 0
-			   && returning == 0)
+               && returning == 0)
         {
             StoreRecord(id, start, gCurrentContext);
             error = InterpretNode(stmt_list1);
@@ -699,7 +699,7 @@ int ReduceForLoopB(SYNTAX_TREE* node)
                && start.data.floatp <= end.data.floatp
                && error == 0
                && breaking == 0
-			   && returning == 0)
+               && returning == 0)
         {
             StoreRecord(id, start, gCurrentContext);
             error = InterpretNode(stmt_list1);
@@ -719,7 +719,7 @@ int ReduceForLoopB(SYNTAX_TREE* node)
                && start.data.primitive <= end.data.primitive
                && error == 0
                && breaking == 0
-			   && returning == 0)
+               && returning == 0)
         {
             StoreRecord(id, start, gCurrentContext);
             error = InterpretNode(stmt_list1);
@@ -770,7 +770,7 @@ int ReduceWhileLoop(SYNTAX_TREE* node)
            && EvaluatesTrue(gLastExpression)
            && error == 0
            && breaking == 0
-		   && returning == 0)
+           && returning == 0)
     {
         error = InterpretNode(stmt_list1);
         if (error == 0 && returning == 0) {
