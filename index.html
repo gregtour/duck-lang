@@ -59,13 +59,18 @@
 }
 
 #cursor {
-  color: black;
-  background: white;
-  border: 0;
-  border-radius: 0;
-  line-height: 100%;
-  font-weight: normal;
-  font-size: inherit;
+    color: white;
+    background: black;
+    border: 0;
+    border-radius: 0;
+    line-height: 100%;
+    font-weight: normal;
+    font-size: inherit;
+}
+
+#click-enable {
+    margin-top: 140px;
+    text-align: center;
 }
 
 </style>
@@ -531,6 +536,16 @@ function Start()
     UpdateBuffers();
 }
 
+var started = false;
+function StartConsole()
+{
+    if (!started)
+    {
+        document.getElementById("prev-output").innerHTML = "";
+        Start();
+    }
+}
+
 
 <!-- Start Up -->
 function launch()
@@ -540,7 +555,7 @@ function launch()
     Stylize();
     stylized = true;
   }
-  Start();
+  //Start();
 }
 </script>
   </head>
@@ -625,7 +640,7 @@ end
 
 <p>This is a virtual console running the Duck interpreter.</p>
 
-<div id="terminal"><pre class="tc" id="prev-output"></pre><pre class="tc" id="pre-text"></pre><span id="cursor" class="tc">&nbsp;</span><pre class="tc" id="post-text"></pre></div>
+<div id="terminal" onClick="StartConsole();"><pre class="tc" id="prev-output"><div id="click-enable">Click to Enable.</div></pre><pre class="tc" id="pre-text"></pre><span id="cursor" class="tc">&nbsp;</span><pre class="tc" id="post-text"></pre></div>
 
 
 <p> Additionally, there is a less interactive scratchpad for programming <a href="http://ducklang.org/demo">here</a> and a larger version of this console app <a href="http://ducklang.org/terminal/">here</a> although the recommended way to develop using duck is to download the runtime executable.</p>
