@@ -260,6 +260,7 @@ function ReduceStmtJ(node)
     error = InterpretNode(expr1);
 
     returning = true;
+    continuing = false;
 
     return error;
 }
@@ -462,7 +463,8 @@ function ReduceForLoop(node)
                 && end.type == VAL_FLOATING_POINT
                 && start.floatp <= end.floatp
                 && error == 0
-                && breaking == 0)
+                && breaking == 0
+                && returning == 0)
         {
             StoreRecord(id, start, gCurrentContext);
             error = InterpretNode(stmt_list1);
@@ -481,7 +483,8 @@ function ReduceForLoop(node)
                 && end.type == VAL_PRIMITIVE
                 && start.primitive <= end.primitive
                 && error == 0
-                && breaking == 0)
+                && breaking == 0
+                && returning == 0)
         {
             StoreRecord(id, start, gCurrentContext);
             error = InterpretNode(stmt_list1);
@@ -516,10 +519,11 @@ function ReduceWhileLoop(node)
     error = InterpretNode(condition1);
     while (EvaluatesTrue(gLastExpression)
             && error == 0
-            && breaking == 0)
+            && breaking == 0
+            && returning == 0)
     {
         error = InterpretNode(stmt_list1);
-        if (error == 0) {
+        if (error == 0 && returning == 0) {
             error = InterpretNode(condition1);
         }
         continuing = 0;
