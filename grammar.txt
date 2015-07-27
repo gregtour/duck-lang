@@ -34,8 +34,8 @@
 <self-assignment> ::= <l-value> ++
 <self-assignment> ::= <l-value> --
 <function-def> ::= func <function-decl>
-<function-decl> ::= <identifier> <parameters> <endl> <stmtlist> end func
-<function-decl> ::= <string> <parameters> <endl> <stmtlist> end func
+<function-decl> ::= <identifier> <parameters> <endl> <stmtlist> end
+<function-decl> ::= <string> <parameters> <endl> <stmtlist> end
 <class> ::= class <identifier> <parameters> <endl> <stmtlist> end def
 <parameters> ::= ( )
 <parameters> ::= ( <param-decl> )
@@ -55,9 +55,9 @@
 <let-block> ::= let <bindings> begin <endl> <stmtlist> end
 <bindings> ::= <identifier> = <expr> , <bindings>
 <bindings> ::= <identifier> = <expr> 
-<try-block> ::= try <endl> <stmtlist> <catch-block> done
-<catch-block> ::= catch <l-value> <endl> <stmtlist>
-<catch-block> ::= <epsilon>
+<try-block> ::= try <endl> <stmtlist> <catch-block>
+<catch-block> ::= catch <l-value> <endl> <stmtlist> done
+<catch-block> ::= done
 <l-value> ::= <identifier>
 <l-value> ::= ( <l-value> )
 <l-value> ::= <reference> . <identifier>
