@@ -42,9 +42,30 @@ add_executable(gduck
   ../duck/lib/drand.c
 )
 
+#test
+add_executable(unittest
+  ../duck/unittest.c
+  ../duck/interpreter.c
+  ../duck/arithmetic.c
+  ../duck/lexer.c
+  ../duck/parser.c
+  ../duck/grammar.c
+  ../duck/duck.c
+  ../duck/tables.c
+  ../duck/types.c
+  ../duck/memory.c
+  ../duck/garbage.c
+  ../duck/lib/library.c
+  ../duck/lib/stdduck.c
+  ../duck/lib/dmath.c
+  ../duck/lib/drand.c
+)
+
 include_directories(../duck)
 
 SET_TARGET_PROPERTIES(duck PROPERTIES COMPILE_FLAGS "-O2 ")
 TARGET_LINK_LIBRARIES(duck -lm -lrt)
 SET_TARGET_PROPERTIES(gduck PROPERTIES COMPILE_FLAGS "-O2 -D_GDUCK -D_LIB_SDL")
 TARGET_LINK_LIBRARIES(gduck ${SDL_LIBRARY} ${OPENGL_LIBRARY} -lm -lrt)
+SET_TARGET_PROPERTIES(unittest PROPERTIES COMPILE_FLAGS "-O2 ")
+TARGET_LINK_LIBRARIES(unittest -lm -lrt)

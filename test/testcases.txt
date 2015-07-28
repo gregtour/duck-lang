@@ -1,0 +1,276 @@
+// Unit Tests
+// This file contains a set of unit tests for the Duck programming language.
+// Each test is preceded by the sign @test >test-name< and followed by @output to
+// signify the expected output for the test. @end marks the end of program output.
+// Any failures will be reported by the test system.
+
+// A simple example testcase.
+@test simple-test
+duck.println(1 + duck.newline + 2 + duck.newline + (1+2))
+@output
+1
+2
+3
+@end
+
+// Testing an empty program.
+@test empty-test
+@output
+@end
+
+@test print-ln-test
+duck.println("Test.")
+@output
+Test.
+@end
+
+// Testing recursive functions.
+@test fibonacci-test-1
+function fib(n)
+  if n > 2 then
+    return fib(n-1) + fib(n-2)
+  else
+    return 1
+  end
+end
+
+for i = 1 to 5 do
+  duck.println(fib(i))
+loop
+@output
+1
+1
+2
+3
+5
+@end
+
+// Testing the same function without recursion.
+@test fibonacci-test-2
+function fib(n)
+  a = 1
+  b = 0
+  while n > 0 do
+    c = a
+    a = a + b
+    b = c
+    n = n - 1
+  loop
+  return b
+end
+
+for i = 1 to 7 do
+  duck.println(fib(i))
+loop
+@output
+1
+1
+2
+3
+5
+8
+13
+@end
+
+// Testing computing factorial numbers.
+@test factorial-test
+function fact(n)
+  if n > 1 then
+    return n * fact(n-1)
+  end
+  return 1
+end
+duck.println(fact(4))
+@output
+24
+@end
+
+
+// Testing dictionaries and arrays.
+// This creates a number of extraneous references between dictionaries.
+@test dictionary-array
+x = []
+a = []
+b = [1, 2, 3, 4]
+
+duck.println(b[0])
+a[1] = b[1]
+duck.println(a[1])
+x.e = b
+x.c = [x.e[1], x.e[2], x.e[3]]
+x["e"] = x
+duck.println(x.e.c[1])
+a.a = b[3]
+a = a.a
+duck.println(a)
+
+@output
+1
+2
+3
+4
+@end
+
+// Test basic arithmetic.
+@test arithmetic-1
+d = duck.println
+d(1)
+d(1+1)
+d(3 - 0)
+d(2*2)
+d(8-1*3)
+d(1*2*3)
+d(21/3)
+d(22/3+1)
+d(5/2*2+1/3+4/1*2-2-1)
+d(1+2+3+4)
+@output
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+@end
+
+// Test basic arithmetic, again.
+@test arithmetic-2
+for i = 1 to 10 do
+  duck.println(i)
+loop
+@output
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+@end
+
+// Test floating-point numbers.
+@test float-math-1
+duck.println(1.0 - 1)
+duck.println(1.0/10.0)
+duck.println(0.2*5)
+duck.println(50.0 + 50.0)
+@output
+0
+0.1
+1
+100
+@end
+
+// Test string operations.
+@test hello-string
+duck.print("Hello,  ")
+duck.println('Hello,')
+duck.println("World. "+" World.")
+
+if "string" != "s" + "t" + "r" + "i" + "n" + "g" then
+  duck.println("failure")
+end
+if "abcd" > "defg" then
+  duck.println("failure")
+end
+if "bbbb" < "aaaa" then
+  duck.println("failure")
+end
+if "aaa" <= "bbb" then
+else
+  duck.println("failure")
+end
+if "abc" >= "acc" then
+  duck.println("failure")
+else if "D" == "d" then
+  duck.println("failure")
+end
+
+@output
+Hello,  Hello,
+World.  World.
+@end
+
+
+// Test prime numbers.
+@test simple-prime
+r = [1, 1, 1, 1, 1, 1]
+for i = 2 to 5 do
+    if (r[i] > 0) then
+      duck.println(i)
+      j = i
+      while j < 5 do
+        r[j] = 0
+        j = j + i
+      loop
+    end
+loop
+@output
+2
+3
+5
+@end
+
+// Test conditional logic.
+@test conditional-logic-1
+
+function t
+  duck.println("true")
+end
+function f
+  duck.println("false")
+end
+
+  if true then
+    t()
+  else
+    f()
+  end
+  
+  if false then
+    f()
+  else if true then
+    t()
+  end
+  
+  if false then
+    f()
+  else if false then
+    f()
+  else
+    t()
+  end
+  
+  if 0 or false or 1 and 1.0 and "yes" then
+    t()
+  end
+  
+  x = []
+  if y then
+    f()
+  end
+  if x then
+    t()
+  end
+  
+  if 0 then
+    f()
+  else if 0.0 then
+    f()
+  end
+  
+@output
+true
+true
+true
+true
+true
+@end
+
