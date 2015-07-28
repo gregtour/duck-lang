@@ -44,7 +44,7 @@ add_executable(gduck
 
 #test
 add_executable(unittest
-  ../duck/unittest.c
+  ../duck/test/unittest.c
   ../duck/interpreter.c
   ../duck/arithmetic.c
   ../duck/lexer.c
