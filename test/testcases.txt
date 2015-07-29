@@ -156,17 +156,17 @@ loop
 @end
 
 // Test floating-point numbers.
-@test float-math-1
-duck.println(1.0 - 1)
-duck.println(1.0/10.0)
-duck.println(0.2*5)
-duck.println(50.0 + 50.0)
-@output
-0
-0.1
-1
-100
-@end
+//@test float-math-1
+//duck.println(1.0 - 1)
+//duck.println(1.0/10.0)
+//duck.println(0.2*5)
+//duck.println(50.0 + 50.0)
+//@output
+//0
+//0.1
+//1
+//100
+//@end
 
 // Test string operations.
 @test hello-string
