@@ -74,6 +74,8 @@ extern SYNTAX_TREE* failed_production;
 extern int gc_collect_count;
 extern int gc_inst_count;
 
+extern long int test_inst_count;;
+
 //extern int return_value_exists;
 
 /* functions */
@@ -102,6 +104,9 @@ extern const char* ErrorMessage(int error);
 /* extended precision floating-point suppport */
 
 #define _SUPPORTS_80BIT_FLOATING_POINT       (sizeof(long double) > sizeof(double))
+
+/* Unit tests */
+#define  TEST_INST_LIMIT            1048576
 
 #endif // _INTERPRETER_H
 

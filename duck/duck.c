@@ -2258,6 +2258,14 @@ int InterpretNode(SYNTAX_TREE* node)
     line_error = node->line;
     failed_production = node;
 
+#ifdef _UNITTEST
+    if((++test_inst_count) == TEST_INST_LIMIT)
+    {
+        halting = 1;
+        return -1;
+    }
+#endif
+
     switch (node->production)
     {
         case 0x01: return ReduceProgram(node);

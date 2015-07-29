@@ -43,6 +43,8 @@ int stack_depth;
 int gc_collect_count;
 int gc_inst_count;
 
+long int test_inst_count;
+
 // memory tracker
 #ifdef _MEM_TRACKING
 int gTotalMemoryUsage = 0;
@@ -399,6 +401,8 @@ int Interpret(SYNTAX_TREE* tree)
 
     gc_inst_count = 0;
     gc_collect_count = 0;
+
+    test_inst_count = 0;
 
     /* global namespace */
     gCurrentContext = gGlobalContext = (CONTEXT*)ALLOC(sizeof(CONTEXT));
