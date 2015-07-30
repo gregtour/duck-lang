@@ -220,7 +220,7 @@ loop
 @end
 
 // Test conditional logic.
-@test conditional-logic-1
+@test conditional-logic
 
 function t
   duck.println("true")
@@ -297,12 +297,12 @@ bar
 @test unicode-encoding
 // これは Go language  みたいな ハロー・ワールド です。
 duck.println("Hello, 世界.")
+duck.println("ℵ0 ℵ1") // aleph_0 and aleph_1
 duck.println("é")
-duck.println("ℵ0 ℵ1")
 @output
 Hello, 世界.
-é
 ℵ0 ℵ1
+é
 @end
 
 // Test running a program for computing digits of Pi.
@@ -441,8 +441,52 @@ loop
 *********
 @end
 
-// Another empty test.
-@test halt
-1
+// Test lexical scoping.
+@test lexical-scope
+function inner()
+  localx = 1
+end
+
+inner()
+if localx then
+  duck.println("fail")
+end
+
+localx = 0
+inner()
+if localx then
+  duck.println("pass")
+end
 @output
+pass
 @end
+
+// Test scope and closure rules.
+@test closure-test
+function closure()
+  var = 1  
+  function get()
+    return var
+  end
+  function set(x)
+    var = x
+  end
+  return [get: get, set: set]
+end
+
+obj = closure()
+if var then
+  duck.println("fail")
+end
+
+obj.set("pass")
+duck.println(obj.get())
+
+if var then
+  duck.println("fail")
+end
+@output
+pass
+@end
+
+
