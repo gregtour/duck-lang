@@ -205,8 +205,7 @@ int RunTests(TEST_PROGRAM* testSuite)
             failures++;
         } else {
             if (buffer[0] != '@') {
-                printf("fail]:\n");
-                printf("Could not capture output.\n");
+                printf("fail]: Could not capture output.\n");
                 failures++;
             } else {
                 int matches = 1;
