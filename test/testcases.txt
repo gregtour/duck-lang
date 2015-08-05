@@ -489,4 +489,29 @@ end
 pass
 @end
 
+// Test McCarthy 91 function.
+//  M(n) = { n - 10, n > 100
+//         { M(M(n+11)), n <=  100
+@test mccarthy-91
+function M(n)
+  if n > 100 then
+    return n - 10
+  else
+    return M(M(n+11))
+  end
+end
 
+duck.println(M(1))
+duck.println(M(21))
+duck.println(M(41))
+duck.println(M(61))
+duck.println(M(81))
+duck.println(M(110))
+@output
+91
+91
+91
+91
+91
+100
+@end
