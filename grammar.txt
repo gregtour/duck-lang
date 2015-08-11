@@ -36,12 +36,14 @@
 <function-def> ::= func <function-decl>
 <function-decl> ::= <identifier> <parameters> <endl> <stmtlist> end
 <function-decl> ::= <string> <parameters> <endl> <stmtlist> end
-<class> ::= class <identifier> <parameters> <endl> <stmtlist> end def
+<class> ::= class <identifier> <opt-extends> <parameters> <endl> <stmtlist> end def
 <parameters> ::= ( )
 <parameters> ::= ( <param-decl> )
 <parameters> ::= <epsilon>
 <param-decl> ::= <identifier>
 <param-decl> ::= <identifier> , <param-decl>
+<opt-extends> ::= : <identifier-list>
+<opt-extends> ::= <epsilon>
 <if> ::= if <condition> then <endl> <stmtlist> <elseif>
 <elseif> ::= else <endl> <stmtlist> endif
 <elseif> ::= else <if>
