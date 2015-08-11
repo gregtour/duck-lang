@@ -473,12 +473,95 @@ There are also SDL and OpenGL bindings to support graphical windowed programming
 
 <p>Building gduck with SDL support requires SDL and OpenGL libraries. There are no platform specific libraries.</p>
 
+
+<h2>Language Spec</h2>
+
+<pre><code>; duck programming language
+&lt;program&gt; ::= &lt;stmt list&gt;
+&lt;stmt list&gt; ::= &lt;stmt&gt; &lt;stmt list&gt;
+&lt;stmt list&gt; ::= &lt;epsilon&gt;
+&lt;stmt&gt; ::= import &lt;identifier&gt; &lt;endl&gt;
+&lt;stmt&gt; ::= &lt;endl&gt;
+&lt;stmt&gt; ::= &lt;expr&gt; &lt;endl&gt;
+&lt;stmt&gt; ::= &lt;assignment&gt; &lt;endl&gt;
+&lt;stmt&gt; ::= &lt;function def&gt; &lt;endl&gt;
+&lt;stmt&gt; ::= &lt;if&gt; &lt;endl&gt;
+&lt;stmt&gt; ::= &lt;for loop&gt; &lt;endl&gt;
+&lt;stmt&gt; ::= &lt;while loop&gt; &lt;endl&gt;
+&lt;stmt&gt; ::= return &lt;expr&gt; &lt;endl&gt;
+&lt;stmt&gt; ::= break &lt;endl&gt;
+&lt;stmt&gt; ::= continue &lt;endl&gt;
+&lt;function def&gt; ::= function &lt;identifier&gt; &lt;parameters&gt; &lt;endl&gt; &lt;stmt list&gt; end
+&lt;parameters&gt; ::= &lt;epsilon&gt;
+&lt;parameters&gt; ::= ( )
+&lt;parameters&gt; ::= (&lt;param decl&gt;)
+&lt;param decl&gt; ::= &lt;identifier&gt;
+&lt;param decl&gt; ::= &lt;param decl&gt;, &lt;identifier&gt;
+&lt;if&gt; ::= if &lt;condition&gt; then &lt;endl&gt; &lt;stmt list&gt; &lt;else if&gt;
+&lt;else if&gt; ::= else &lt;endl&gt; &lt;stmt list&gt; end
+&lt;else if&gt; ::= else &lt;if&gt;
+&lt;else if&gt; ::= end
+&lt;for loop&gt; ::= for &lt;identifier&gt; = &lt;arithmetic&gt; to &lt;arithmetic&gt; do &lt;endl&gt; &lt;stmt list&gt; loop
+&lt;while loop&gt; ::= while &lt;condition&gt; do &lt;endl&gt; &lt;stmt list&gt; loop
+&lt;assignment&gt; ::= &lt;l-value&gt; = &lt;assignment&gt;
+&lt;assignment&gt; ::= &lt;l-value&gt; = &lt;condition&gt;
+&lt;l-value&gt; ::= &lt;identifier&gt;
+&lt;l-value&gt; ::= ( &lt;l-value&gt; )
+&lt;l-value&gt; ::= &lt;reference&gt; . &lt;identifier&gt;
+&lt;l-value&gt; ::= &lt;reference&gt; [ &lt;expr&gt; ]
+&lt;expr&gt; ::= &lt;condition&gt;
+&lt;condition&gt; ::= &lt;condition&gt; and &lt;logic&gt;
+&lt;condition&gt; ::= &lt;condition&gt; or &lt;logic&gt;
+&lt;condition&gt; ::= &lt;logic&gt;
+&lt;logic&gt; ::= not &lt;comparison&gt;
+&lt;logic&gt; ::= &lt;comparison&gt;
+&lt;comparison&gt; ::= &lt;comparison&gt; == &lt;arithmetic&gt;
+&lt;comparison&gt; ::= &lt;comparison&gt; != &lt;arithmetic&gt;
+&lt;comparison&gt; ::= &lt;comparison&gt; \&lt; &lt;arithmetic&gt;
+&lt;comparison&gt; ::= &lt;comparison&gt; &gt; &lt;arithmetic&gt;
+&lt;comparison&gt; ::= &lt;comparison&gt; \&lt;= &lt;arithmetic&gt;
+&lt;comparison&gt; ::= &lt;comparison&gt; &gt;= &lt;arithmetic&gt;
+&lt;comparison&gt; ::= &lt;arithmetic&gt;
+&lt;arithmetic&gt; ::= &lt;arithmetic&gt; + &lt;term&gt;
+&lt;arithmetic&gt; ::= &lt;arithmetic&gt; - &lt;term&gt;
+&lt;arithmetic&gt; ::= &lt;term&gt;
+&lt;term&gt; ::= &lt;term&gt; * &lt;factor&gt;
+&lt;term&gt; ::= &lt;term&gt; / &lt;factor&gt;
+&lt;term&gt; ::= &lt;factor&gt;
+&lt;factor&gt; ::= -&lt;factor&gt;
+&lt;factor&gt; ::= !&lt;factor&gt;
+&lt;factor&gt; ::= &lt;final&gt;
+&lt;final&gt; ::= ( &lt;expr&gt; )
+&lt;final&gt; ::= &lt;boolean&gt;
+&lt;final&gt; ::= &lt;integer&gt;
+&lt;final&gt; ::= &lt;float&gt;
+&lt;final&gt; ::= &lt;string&gt;
+&lt;final&gt; ::= &lt;object&gt;
+&lt;final&gt; ::= &lt;reference&gt;
+&lt;reference&gt; ::= &lt;l-value&gt;
+&lt;reference&gt; ::= &lt;reference&gt; ( )
+&lt;reference&gt; ::= &lt;reference&gt; ( &lt;arguments&gt; )
+&lt;arguments&gt; ::= &lt;arguments&gt;, &lt;expr&gt;
+&lt;arguments&gt; ::= &lt;expr&gt;
+&lt;object&gt; ::= [ ]
+&lt;object&gt; ::= [ &lt;array init&gt; ]
+&lt;object&gt; ::= [ &lt;dictionary init&gt; ]
+&lt;array init&gt; ::= &lt;array init&gt;, &lt;expr&gt;
+&lt;array init&gt; ::= &lt;expr&gt;
+&lt;dictionary init&gt; ::= &lt;dictionary init&gt;, &lt;identifier&gt; : &lt;expr&gt;
+&lt;dictionary init&gt; ::= &lt;identifier&gt; : &lt;expr&gt;
+&lt;boolean&gt; ::= true
+&lt;boolean&gt; ::= false
+</pre></code>
+
 <h2>
 <a id="credits" class="anchor" href="#credits" aria-hidden="true"><span class="octicon octicon-link"></span></a>Credits</h2>
 
 <p>Greg Tourville - <a href="http://team-duck.com">Team Duck</a><br>
 Hiroyuki Sano  <br>
 Robert Cope</p>
+
+
 
 <h2>
 <a id="future-work" class="anchor" href="#future-work" aria-hidden="true"><span class="octicon octicon-link"></span></a>Future Work</h2>
