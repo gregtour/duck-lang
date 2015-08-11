@@ -11,21 +11,225 @@
     <!--[if lt IE 9]>
     <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
+<style>
+.pl-c{color:#969896}.pl-c1,.pl-s .pl-v{color:#0086b3}.pl-e,.pl-en{color:#795da3}.pl-s .pl-s1,.pl-smi{color:#333}.pl-ent{color:#63a35c}.pl-k{color:#a71d5d}.pl-pds,.pl-s,.pl-s .pl-pse .pl-s1,.pl-sr,.pl-sr .pl-cce,.pl-sr .pl-sra,.pl-sr .pl-sre{color:#183691}.pl-v{color:#ed6a43}.pl-id{color:#b52a1d}.pl-ii{background-color:#b52a1d;color:#f8f8f8}.pl-sr .pl-cce{color:#63a35c;font-weight:bold}.pl-ml{color:#693a17}.pl-mh,.pl-mh .pl-en,.pl-ms{color:#1d3e81;font-weight:bold}.pl-mq{color:#008080}.pl-mi{color:#333;font-style:italic}
+.pl-mb{color:#333;font-weight:bold}.pl-md{background-color:#ffecec;color:#bd2c00}.pl-mi1{background-color:#eaffea;color:#55a532}.pl-mdr{color:#795da3;font-weight:bold}.pl-mo{color:#1d3e81}
+</style>
+<script>
+<!-- Syntax Highlighting -->
+var symbols = [",", "=", "(", ")", "[", "]", "+", "-", "*", "/", ".", "==", "!=", "<", ">", "<=", ">=", "!", "{", "}", ":"];
+var keywords = ["import", "include", "return", "break", "continue", "throw", "function", "end", "if", "then", "else", "for", "to", "do", "loop", "step", "in", "while", "let", "begin", "try", "complete", "catch", "object", "static", "operator", "this", "and", "or", "not", "is", "mod", "new", "true", "false", "int", "String", "global", "void", "VALUE"];
+var stylized = false;
+function Stylize()
+{
+  var lastKeyword = "";
+  var inDict = false;
+  var dictCount = 0;
+  var c = document.getElementsByTagName("code");
+  var firstChar;
+  for (var s = 0; s < c.length; s++)
+  {
+    var t = c[s].innerHTML;
+    var d = "";
+    
+    t = t.replace(/&lt;/g, "<");
+    t = t.replace(/&gt;/g, ">");
+
+    if (t.length > 0) firstChar = t.charAt(0);
+    for (var q = 0; q < t.length; q++)
+    { // lexer / keyword recognizer
+      var x = t.charAt(q);
+      // whitespace
+      if (x == " " || x == "\r" || x == "\t" || x == "\n")
+      {
+        d += x;
+        if (x == "\n" && q < t.length + 1)
+          firstChar = t.charAt(q+1);
+      }
+      // strings
+      else if (x == "\"" || x == "\'")
+      {
+        var m = x;
+        d += "<span class=\"pl-s\">";
+        do {
+          d += x;
+          q++;
+          if (q >= t.length) break;
+          x = t.charAt(q);
+        } while (x != m);
+        if (q < t.length) d += x;
+        d += "</span>";
+      }
+      // comments
+      else if (x == ";")
+      {
+        d += "<span class=\"pl-c\">";
+        do {
+          d += x;
+          q++;
+          if (q >= t.length) break;
+          x = t.charAt(q);
+        } while (x != "\n");
+        d += "</span>";
+        q--;
+      }
+      // block comments
+      else if (q < t.length +1 &&
+               x == "/" && t.charAt(q+1) == "*")
+      {
+        d += "<span class=\"pl-c\">";
+        do {
+          x = t.charAt(q);
+          d += x;
+          q++;
+        } while (q < t.length + 1 &&
+                 !(t.charAt(q) == "*" &&
+                   t.charAt(q+1) == "/"));
+        if (q < t.length + 1)
+        {
+          d += t.charAt(q++);
+          d += t.charAt(q);
+        }
+        
+        d += "</span>";
+      }
+      else if (q < t.length +1 &&
+               x == "/" && t.charAt(q+1) == "/" ||
+               x == "#")
+      {
+        d += "<span class=\"pl-c\">";
+        do {
+          x = t.charAt(q);
+          d += x;
+          q++;
+        } while (q < t.length && !(t.charAt(q) == '\n'));
+        d += "</span>"
+        q--;
+      }
+      // characters
+      else if (x.toLowerCase() != x.toUpperCase())
+      {
+        var n = "";
+        do {
+          n += x;
+          q++;
+          if (q >= t.length) break;
+          x = t.charAt(q);
+        } while ((x.toLowerCase() != x.toUpperCase()) ||
+                 x == "_" ||
+                 (x.charCodeAt(0) >= "0".charCodeAt(0) &&
+                  x.charCodeAt(0) <= "9".charCodeAt(0)));
+        q--;
+        
+        var j;
+        // keyword
+        for (j = 0; j < keywords.length; j++)
+        {
+          if (keywords[j] == n)
+          {
+            if (firstChar == "<")
+              d += "<span class=\"pl-en\">";
+            else
+              d += "<span class=\"pl-k\">";
+            d += n;
+            d += "</span>";
+            lastKeyword = n;
+            break;
+          }
+        }
+        
+        // identifier
+        if (j == keywords.length) {
+          if (lastKeyword == "function" ||
+              (inDict && dictCount % 2 == 0))
+          {
+            d += "<span class=\"pl-en\">";
+          } else {
+            d += "<span class=\"pl-c1\">";
+          }
+          d += n;
+          d += "</span>";
+          
+          lastKeyword = "";
+        }
+      }
+      // numbers
+      else if (x.charCodeAt(0) >= "0".charCodeAt(0) &&
+               x.charCodeAt(0) <= "9".charCodeAt(0))
+      {
+        d += "<span class=\"pl-c1\">"
+        d += x;
+        q++;
+        while (q < t.length && 
+            (t.charCodeAt(q) >= "0".charCodeAt(0) &&
+             t.charCodeAt(q) <= "9".charCodeAt(0)))
+        {
+          d += t.charAt(q);
+          q++;
+        }
+        d += "</span>";
+        q--;
+      }
+      // grammar symbols
+      else if (x == "<" && firstChar == "<")
+      {
+        d += "<span class=\"pl-c1\">";
+        d += "&lt;";
+        q++;
+        while (q < t.length && t.charAt(q) != ">") {
+          d += t.charAt(q);
+          q++;
+        }
+        d += "&gt;";
+        d += "</span>";
+      }
+      // BNF sign ::=
+      else if (x == ":" && q < t.length+2 &&
+               t.charAt(q+1) == ":" && t.charAt(q+2) == "=")
+      {
+        d += "<span class=\"pl-mb\">::=</span>";
+        q += 2;
+      }
+      // symbols
+      else {
+        if (x == "{") { inDict = true; dictCount = 0; }
+        if (x == "}") { inDict = false; }
+        if (x == ":") { dictCount++; }
+        if (x == ",") { dictCount++; }
+        
+        if (firstChar != ",")
+          d += "<span class=\"pl-k\">";
+        else
+          d += "<span class=\"pl-c1\">";
+        
+        if (x != "<" && x != ">")
+          d += x;
+        else if (x == "<")
+          d += "&lt;";
+        else
+          d += "&gt;";
+          
+        d += "</span>";
+      }
+    }
+  
+    c[s].innerHTML = d;
+  }
+}
+</script>
   </head>
-  <body>
+  <body onLoad="Stylize();">
 <h1 style="text-align: center;">Duck Programming Language Context Free Grammar</h1>
-   <pre style="width: 80%; margin: auto;"><code>; duck programming language
+   <pre style="width: 80%; margin: auto;"><code>; duck programming language specification
 &lt;program&gt; ::= &lt;stmt list&gt;
 &lt;stmt list&gt; ::= &lt;stmt&gt; &lt;stmt list&gt;
 &lt;stmt list&gt; ::= &lt;epsilon&gt;
 &lt;stmt&gt; ::= import &lt;identifier&gt; &lt;endl&gt;
-&lt;stmt&gt; ::= call &lt;reference&gt; &lt;endl&gt;
 &lt;stmt&gt; ::= &lt;endl&gt;
 &lt;stmt&gt; ::= &lt;expr&gt; &lt;endl&gt;
 &lt;stmt&gt; ::= &lt;assignment&gt; &lt;endl&gt;
 &lt;stmt&gt; ::= &lt;function def&gt; &lt;endl&gt;
 &lt;stmt&gt; ::= &lt;if&gt; &lt;endl&gt;
-&lt;stmt&gt; ::= &lt;if else&gt; &lt;endl&gt;
 &lt;stmt&gt; ::= &lt;for loop&gt; &lt;endl&gt;
 &lt;stmt&gt; ::= &lt;while loop&gt; &lt;endl&gt;
 &lt;stmt&gt; ::= return &lt;expr&gt; &lt;endl&gt;
@@ -37,8 +241,10 @@
 &lt;parameters&gt; ::= (&lt;param decl&gt;)
 &lt;param decl&gt; ::= &lt;identifier&gt;
 &lt;param decl&gt; ::= &lt;param decl&gt;, &lt;identifier&gt;
-&lt;if&gt; ::= if &lt;condition&gt; then &lt;endl&gt; &lt;stmt list&gt; end
-&lt;if else&gt; ::= if &lt;condition&gt; then &lt;endl&gt; &lt;stmt list&gt; else &lt;endl&gt; &lt;stmt list&gt; end
+&lt;if&gt; ::= if &lt;condition&gt; then &lt;endl&gt; &lt;stmt list&gt; &lt;else if&gt;
+&lt;else if&gt; ::= else &lt;endl&gt; &lt;stmt list&gt; end
+&lt;else if&gt; ::= else &lt;if&gt;
+&lt;else if&gt; ::= end
 &lt;for loop&gt; ::= for &lt;identifier&gt; = &lt;arithmetic&gt; to &lt;arithmetic&gt; do &lt;endl&gt; &lt;stmt list&gt; loop
 &lt;while loop&gt; ::= while &lt;condition&gt; do &lt;endl&gt; &lt;stmt list&gt; loop
 &lt;assignment&gt; ::= &lt;l-value&gt; = &lt;assignment&gt;
@@ -50,8 +256,6 @@
 &lt;expr&gt; ::= &lt;condition&gt;
 &lt;condition&gt; ::= &lt;condition&gt; and &lt;logic&gt;
 &lt;condition&gt; ::= &lt;condition&gt; or &lt;logic&gt;
-&lt;condition&gt; ::= &lt;condition&gt; nor &lt;logic&gt;
-&lt;condition&gt; ::= &lt;condition&gt; xor &lt;logic&gt;
 &lt;condition&gt; ::= &lt;logic&gt;
 &lt;logic&gt; ::= not &lt;comparison&gt;
 &lt;logic&gt; ::= &lt;comparison&gt;
@@ -64,8 +268,6 @@
 &lt;comparison&gt; ::= &lt;arithmetic&gt;
 &lt;arithmetic&gt; ::= &lt;arithmetic&gt; + &lt;term&gt;
 &lt;arithmetic&gt; ::= &lt;arithmetic&gt; - &lt;term&gt;
-&lt;arithmetic&gt; ::= &lt;arithmetic&gt; &amp; &lt;term&gt;
-&lt;arithmetic&gt; ::= &lt;arithmetic&gt; | &lt;term&gt;
 &lt;arithmetic&gt; ::= &lt;term&gt;
 &lt;term&gt; ::= &lt;term&gt; * &lt;factor&gt;
 &lt;term&gt; ::= &lt;term&gt; / &lt;factor&gt;
