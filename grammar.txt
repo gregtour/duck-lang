@@ -36,7 +36,7 @@
 <function-def> ::= func <function-decl>
 <function-decl> ::= <identifier> <parameters> <endl> <stmtlist> end
 <function-decl> ::= <string> <parameters> <endl> <stmtlist> end
-<class> ::= class <identifier> <opt-extends> <parameters> <endl> <stmtlist> end def
+<class> ::= class <identifier> <opt-extends> <parameters> <endl> <stmtlist> end
 <parameters> ::= ( )
 <parameters> ::= ( <param-decl> )
 <parameters> ::= <epsilon>
