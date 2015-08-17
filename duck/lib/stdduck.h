@@ -6,6 +6,8 @@
 
 extern unsigned int start_t;
 
+char* ToString(VALUE value);
+
 void PrintValue(VALUE);
 void PrintFunction(FUNCTION*);
 void PrintObject(CONTEXT*);

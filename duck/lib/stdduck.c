@@ -17,6 +17,14 @@ HASH_TABLE* duck_print_records = NULL;
 
 unsigned int start_t = 0;
 
+/* to string function declarations */
+void PrintString(char** dest, unsigned int* size, const char* text);
+void PrintValueString(char** dest, unsigned int* size, VALUE value);
+void PrintFunctionString(char** dest, unsigned int* size, FUNCTION* function);
+void PrintObjectString(char** dest, unsigned int* size, CONTEXT* context);
+void PrintDictionaryString(char** string, unsigned int* size, HASH_TABLE* dictionary);
+
+
 /* printing functions */
 void PrintValue(VALUE value)
 {
@@ -42,7 +50,7 @@ void PrintValue(VALUE value)
         case VAL_REFERENCE: PrintObject(value.data.reference); break;
         case VAL_FUNCTION: PrintFunction(value.data.function); break;
         case VAL_DICTIONARY: PrintDictionary(value.data.dictionary); break;
-        default:
+    default:
         case VAL_NIL: printf("[NIL]"); break;
     }
 }
@@ -133,41 +141,166 @@ void PrintDictionary(HASH_TABLE* dictionary)
     printf("]");
 }
 
-/* TODO: Implement or come up with another scheme to manage strings. */
-void ReallocStringsRef(CONTEXT* context) { return; }
-void ReallocStringsFunc(FUNCTION* func) { return; }
-void ReallocStringsDict(HASH_TABLE* table) { return; }
 
-/* sanitize strings */
-VALUE ReallocStrings(VALUE value)
+/* ToString functions */
+
+void PrintString(char** dest, unsigned int* size, const char* text)
 {
-    int   size;
-    char* copy;
-    switch (value.type)
-    {
-        case VAL_STRING:
-            size = strlen(value.data.string);
-            copy = (char*)ALLOCATE(sizeof(char) * (size+1));
-            sprintf(copy, "%s", value.data.string);
-            value.data.string = copy;
-            return value;
-        case VAL_REFERENCE: 
-            ReallocStringsRef(value.data.reference);
-            return value;
-        case VAL_FUNCTION: 
-            ReallocStringsFunc(value.data.function);
-            return value;
-        case VAL_DICTIONARY: 
-            ReallocStringsDict(value.data.dictionary);
-            return value;
-        case VAL_PRIMITIVE:
-        case VAL_FLOATING_POINT:
-        case VAL_NIL: 
-        default:
-            break;
-    }
-    return value;
+	unsigned int necessary_space;
+	unsigned int len;
+
+	len = strlen(*dest);
+	necessary_space = len + strlen(text) + 1;
+	if (necessary_space > *size)
+	{
+		*size = *size * 2;
+		*dest = (char*)realloc(*dest, *size);
+	}
+
+	sprintf(*dest + len, "%s", text);
 }
+
+void PrintValueString(char** dest, unsigned int* size, VALUE value)
+{
+	char buffer[128];
+	switch (value.type)
+	{
+	case VAL_PRIMITIVE: 
+		//#ifdef WIN32
+		//			printf("%l64i", value.data.primitive); 
+		//#else
+		sprintf(buffer, "%lli", value.data.primitive); 
+		PrintString(dest, size, buffer);
+		//#endif
+		break;
+	case VAL_FLOATING_POINT: 
+		if (_SUPPORTS_80BIT_FLOATING_POINT)
+		{
+			sprintf(buffer, "%.18Lg", value.data.floatp);
+			break;
+		} else {
+			sprintf(buffer, "%.16Lg", value.data.floatp); 
+			break;
+		}
+	case VAL_STRING: PrintString(dest, size, value.data.string); break;
+	case VAL_REFERENCE: PrintObjectString(dest, size, value.data.reference); break;
+	case VAL_FUNCTION: PrintFunctionString(dest, size, value.data.function); break;
+	case VAL_DICTIONARY: PrintDictionaryString(dest, size, value.data.dictionary); break;
+	default:
+	case VAL_NIL: printf("[NIL]"); break;
+	}
+}
+
+void PrintFunctionString(char** dest, unsigned int* size, FUNCTION* function)
+{
+	if (function) {
+		if (function->fn_name) {
+			PrintString(dest, size, function->fn_name);
+			PrintString(dest, size, "(");
+		} else {
+			PrintString(dest, size, "function(");
+		}
+		PAIR* itr = function->parameters;
+		while (itr)
+		{
+			PrintString(dest, size, itr->identifier);
+			if (itr->next) {
+				PrintString(dest, size, ", ");
+			}
+			itr = itr->next;
+		}
+		PrintString(dest, size, ")");
+	}
+}
+
+void PrintObjectString(char** dest, unsigned int* size, CONTEXT* context)
+{
+	VALUE key;
+
+	key.type = VAL_REFERENCE;
+	key.data.reference = context;
+
+	// check for recursion
+	if (HashGet(key, duck_print_records).type != VAL_NIL) {
+		PrintString(dest, size, "...");
+		return;
+	} else {
+		VALUE value;
+		value.type = VAL_PRIMITIVE;
+		value.data.primitive = 1;
+		HashStore(key, value, duck_print_records);
+	}
+
+	PrintString(dest, size, "[");
+	PAIR* list = context->list;
+	while (list)
+	{
+		PrintValueString(dest, size, list->value);
+
+		if (list->next) {
+			PrintString(dest, size, ", ");
+		}
+		list = list->next;
+	}
+	PrintString(dest, size, "]");
+}
+
+
+void PrintDictionaryString(char** string, unsigned int* size, HASH_TABLE* dictionary)
+{
+	VALUE key;
+	unsigned int i, dictionary_size;
+	dictionary_size = dictionary->size;
+	key.type = VAL_DICTIONARY;
+	key.data.dictionary = dictionary;
+
+	// check for recursion
+	if (HashGet(key, duck_print_records).type != VAL_NIL) {
+		PrintString(string, size, "...");
+		return;
+	} else {
+		VALUE value;
+		value.type = VAL_PRIMITIVE;
+		value.data.primitive = 1;
+		HashStore(key, value, duck_print_records);
+	}
+
+	PrintString(string, size, "[");
+	for (i = 0; i < dictionary->capacity; i++)
+	{
+		if (dictionary->table[i].key.type != VAL_NIL)
+		{
+			dictionary_size--;
+			PrintValueString(string, size, dictionary->table[i].key);
+			PrintString(string, size, ": ");
+			PrintValueString(string, size, dictionary->table[i].value);
+			if (dictionary_size) { PrintString(string, size, ", "); }
+		}
+	}
+	PrintString(string, size, "]");
+}
+
+
+char* ToString(VALUE value)
+{
+	char* string;
+	unsigned int size;
+
+	duck_print_records = CreateHashTable();
+
+	size = 512;
+	string = (char*)malloc(size * sizeof(char));
+	sprintf(string, "");
+
+	 PrintValueString(&string, &size, value);
+
+	FreeHashTable(duck_print_records);
+	duck_print_records = NULL;
+
+	return string;
+}
+
+
 
 /* parses(source) -> boolean */
 int DuckParses(int argument_count)
