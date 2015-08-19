@@ -22,6 +22,7 @@ PAIR*       gArgumentEvaluation;
 
 const char* gLValueIdentifier;
 CONTEXT*    gLValueContext;
+VALUE       gLValueStringReference;
 VALUE       gLValueIndex;
 HASH_TABLE* gLValueDictionary;
 

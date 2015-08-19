@@ -55,6 +55,7 @@ int  PopExecutionStack();
 
 extern const char* gLValueIdentifier;
 extern CONTEXT*    gLValueContext;
+extern VALUE       gLValueStringReference;
 extern VALUE       gLValueIndex;
 extern struct HASH_TABLE* gLValueDictionary;
 

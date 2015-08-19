@@ -343,9 +343,27 @@ int ReduceAssignmentA(SYNTAX_TREE* node)
 
     if (array_indexing)
     {
-        VALUE previous = HashGet(gLValueIndex, gLValueDictionary);
-        HashStore(gLValueIndex, expr, gLValueDictionary);
-        array_indexing = 0;
+        if (gLValueDictionary)
+        {
+            VALUE previous = HashGet(gLValueIndex, gLValueDictionary);
+            HashStore(gLValueIndex, expr, gLValueDictionary);
+            array_indexing = 0;
+        } else {
+            if (!gLValueStringReference.const_string &&
+                expr.type == VAL_STRING)
+            {
+                int len, index;
+
+                len = strlen(gLValueStringReference.data.string);
+                index = gLValueIndex.data.primitive;
+
+                if (index < len)
+                {
+                    //gLValueStringReference.data.string[index] = expr.data.string[0];
+                }
+            }
+            array_indexing = 0;
+        }
     }
     else
     {
@@ -381,16 +399,34 @@ int ReduceAssignmentB(SYNTAX_TREE* node)
     
     if (array_indexing)
     {
-        VALUE previous = HashGet(gLValueIndex, gLValueDictionary);
-        
-        if (gLValueIndex.type == VAL_STRING &&
-            gLValueIndex.const_string == 0)
+        if (gLValueDictionary)
         {
-            gLValueIndex = CopyString(gLValueIndex);
-        }
+            VALUE previous = HashGet(gLValueIndex, gLValueDictionary);
+        
+            if (gLValueIndex.type == VAL_STRING &&
+                gLValueIndex.const_string == 0)
+            {
+                gLValueIndex = CopyString(gLValueIndex);
+            }
 
-        HashStore(gLValueIndex, expr, gLValueDictionary);
-        array_indexing = 0;
+            HashStore(gLValueIndex, expr, gLValueDictionary);
+            array_indexing = 0;
+        } else {
+            if (!gLValueStringReference.const_string &&
+                expr.type == VAL_STRING)
+            {
+                int len, index;
+
+                len = strlen(gLValueStringReference.data.string);
+                index = gLValueIndex.data.primitive;
+
+                if (index < len)
+                {
+                    //gLValueStringReference.data.string[index] = expr.data.string[0];
+                }
+            }
+            array_indexing = 0;
+        }
     }
     else
     {
@@ -1155,6 +1191,15 @@ int ReduceLValueD(SYNTAX_TREE* node)
         gLValueDictionary = NULL;
         array_indexing = 0;
     }
+    else if (reference.type == VAL_STRING &&
+             index.type == VAL_PRIMITIVE)
+    {
+        gLValueStringReference = reference;
+        gLValueIndex = index;
+        gLValueDictionary = NULL;
+        gLValueIdentifier = NULL;
+        array_indexing = 1;
+    }
     else if (reference.type == VAL_DICTIONARY)
     {
         gLValueIndex = index;
@@ -1783,14 +1828,35 @@ int ReduceFinalG(SYNTAX_TREE* node)
 int ReduceReferenceA(SYNTAX_TREE* node)
 {
     SYNTAX_TREE* l_value1 = node->children[0];
-
+    int len;
     int error = 0;
+    char* str;
+    int index;
     error = InterpretNode(l_value1);
     
     if (array_indexing)
     {
-        gLastExpression = HashGet(gLValueIndex, gLValueDictionary);
-        array_indexing = 0;
+        if (gLValueDictionary)
+        {
+            gLastExpression = HashGet(gLValueIndex, gLValueDictionary);
+            array_indexing = 0;
+        } else {
+            gLastExpression.type = VAL_STRING;
+            len = strlen(gLValueStringReference.data.string);
+            index = gLValueIndex.data.primitive;
+            str = (char*)malloc(sizeof(char) * 2);
+
+            if (index >= 0 && index < len) {
+                str[0] = gLValueStringReference.data.string[index];
+            } else {
+                str[0] = '\0';
+            }
+            str[1] = '\0';
+            gLastExpression.data.string = str;
+
+            GCAddString(str, &gGCManager);
+            array_indexing = 0;
+        }
     }
     else
     {
