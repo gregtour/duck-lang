@@ -1,4 +1,4 @@
-// Unit Tests
+﻿// Unit Tests
 // This file contains a set of unit tests for the Duck programming language.
 // Each test is preceded by the sign @test >test-name< and followed by @output to
 // signify the expected output for the test. @end marks the end of program output.
@@ -515,3 +515,41 @@ duck.println(M(110))
 91
 100
 @end
+
+// Test array length function.
+@test array-length
+array = [1,2,3,4,5,6,7,8,9,10]
+array.y = 2
+duck.println(len([1,2,3,4,5,6,7,8,9,10]))
+duck.println(len(array))
+@output
+10
+11
+@end
+
+// Test string length.
+@test string-length
+x = "Hello, World!"
+duck.println(len("abcdefghijklmnopqrstuvwxyz"))
+duck.println(len(x))
+@output
+26
+13
+@end
+
+// Test string indexing.
+@test string-index
+string = "ABCD"
+duck.println(string[0])
+duck.println(string[1])
+duck.println(string[2])
+duck.println(string[3])
+@output
+A
+B
+C
+D
+@end
+
+
+
