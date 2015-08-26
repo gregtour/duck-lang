@@ -1344,18 +1344,15 @@ assigned to a named variable, its number of references is increased, and if it i
 variables, it increases again. If the scope or context holding these references is destroyed, its reference count
 decreases, until finally, if the last reference to the object is lost, it should be destroyed or freed. </p>
 
-<p>When working correctly, which is not something I was able to achieve, there are a number of advantages to reference
-counting as a garbage collection method. First of all, it does not require stopping execution to reclaim memory. This
-is something that happens automatically as objects come into and out of scope. It is also relatively easy to
-understand and should be simple to implement. Unfortunately, I was unable to find all of the possible edge cases
-where references were created and lost, so I was not able to test this method. This leads me to the drawbacks.</p>
+<p>There are a number of advantages to reference counting as a garbage collection method. First of all, it does not 
+require stopping execution to reclaim memory. This is something that happens automatically as objects come into and 
+out of scope. It is also relatively easy to understand and should be simple to implement.</p>
 
-<p>Reference counting as a form of garbage collection requires a careful watch on when objects are destroyed. If an
-object is destroyed, all of its elements must be checked to decrement references that they may hold to other objects.
+<p>Reference counting as a form of garbage collection requires a careful watch on when objects are destroyed. If an 
+object is destroyed, all of its elements must be checked to decrement references that they may hold to other objects. 
 All of the possible places where references can be made, increased, or decreased have to be handled precisely, as if
-we lose count by one, then we will either leak memory or try to free the same memory twice. Additionally, there are
-certain types of circular references that may never be freed under this scheme, although that's not a huge concern to
-look at from the start.</p>
+we lose count by one, then we will either leak memory or try to free the same memory twice. Additionally, there are 
+certain types of circular references that may never be freed under this scheme.</p>
 
 <p>Which leads us to the next form of garbage collection: the tracing garbage collector. What this method involves is,
 first holding a list of every dynamic value, every dynamic string, every context, every function, and every
