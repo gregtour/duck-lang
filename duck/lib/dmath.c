@@ -14,7 +14,7 @@ TODO:
 #include "interpreter.h"
 
 /*Math.sin(angle)*/
-int MathSin(int arg_count){
+int MathSin(int arg_count, void* data){
   long double angle = 0.0;
   long double val = 0.0;
   VALUE argument = GetRecord("angle", gCurrentContext);
@@ -29,7 +29,7 @@ int MathSin(int arg_count){
 }
 
 /*Math.cos(angle)*/
-int MathCos(int arg_count){
+int MathCos(int arg_count, void* data){
   long double angle = 0.0;
   long double val = 0.0;
   VALUE argument = GetRecord("angle", gCurrentContext);
@@ -44,7 +44,7 @@ int MathCos(int arg_count){
 }
 
 /*Math.tan(angle)*/
-int MathTan(int arg_count){
+int MathTan(int arg_count, void* data){
   long double angle = 0.0;
   long double val = 0.0;
   VALUE argument = GetRecord("angle", gCurrentContext);
@@ -59,7 +59,7 @@ int MathTan(int arg_count){
 }
 
 /*Math.asin(num)*/
-int MathAsin(int arg_count){
+int MathAsin(int arg_count, void* data){
   long double input = 0.0;
   long double val = 0.0;
   VALUE argument = GetRecord("num", gCurrentContext);
@@ -74,7 +74,7 @@ int MathAsin(int arg_count){
 }
 
 /*Math.acos(num)*/
-int MathAcos(int arg_count){
+int MathAcos(int arg_count, void* data){
   long double input = 0.0;
   long double val = 0.0;
   VALUE argument = GetRecord("num", gCurrentContext);
@@ -89,7 +89,7 @@ int MathAcos(int arg_count){
 }
 
 /*Math.atan(num)*/
-int MathAtan(int arg_count){
+int MathAtan(int arg_count, void* data){
   long double input = 0.0;
   long double val = 0.0;
   VALUE argument = GetRecord("num", gCurrentContext);
@@ -104,7 +104,7 @@ int MathAtan(int arg_count){
 }
 
 /*Math.atan2(num)*/
-int MathAtan2(int arg_count){
+int MathAtan2(int arg_count, void* data){
   long double input = 0.0;
   long double input2 = 0.0;
   long double val = 0.0;
@@ -122,7 +122,7 @@ int MathAtan2(int arg_count){
 }
 
 /*Math.exp(num)*/
-int MathExp(int arg_count){
+int MathExp(int arg_count, void* data){
   long double input = 0.0;
   long double val = 0.0;
   VALUE argument = GetRecord("num", gCurrentContext);
@@ -137,7 +137,7 @@ int MathExp(int arg_count){
 }
 
 /*Math.log(num)*/
-int MathLog(int arg_count){
+int MathLog(int arg_count, void* data){
   long double input = 0.0;
   long double val = 0.0;
   VALUE argument = GetRecord("num", gCurrentContext);
@@ -152,7 +152,7 @@ int MathLog(int arg_count){
 }
 
 /*Math.log10(num)*/
-int MathLog10(int arg_count){
+int MathLog10(int arg_count, void* data){
   long double input = 0.0;
   long double val = 0.0;
   VALUE argument = GetRecord("num", gCurrentContext);
@@ -167,7 +167,7 @@ int MathLog10(int arg_count){
 }
 
 /*Math.pow(base, exponent)*/
-int MathPow(int arg_count){
+int MathPow(int arg_count, void* data){
   long double base = 0.0;
   long double exponent = 0.0;
   long double val = 0.0;
@@ -187,7 +187,7 @@ int MathPow(int arg_count){
 }
 
 /*Math.sqrt(num))*/
-int MathSqrt(int arg_count){
+int MathSqrt(int arg_count, void* data){
   long double input = 0.0;
   long double val = 0.0;
   VALUE argument = GetRecord("num", gCurrentContext);
@@ -203,7 +203,7 @@ int MathSqrt(int arg_count){
 }
 
 /*Math.ceil(num)*/
-int MathCeil(int arg_count){
+int MathCeil(int arg_count, void* data){
   long double input = 0.0;
   long double val = 0.0;
   VALUE argument = GetRecord("num", gCurrentContext);
@@ -219,7 +219,7 @@ int MathCeil(int arg_count){
 }
 
 /*Math.floor(num)*/
-int MathFloor(int arg_count){
+int MathFloor(int arg_count, void* data){
   long double input = 0.0;
   long double val = 0.0;
   VALUE argument = GetRecord("num", gCurrentContext);
@@ -235,7 +235,7 @@ int MathFloor(int arg_count){
 }
 
 /*Math.abs(num)*/
-int MathAbs(int arg_count){
+int MathAbs(int arg_count, void* data){
   long double input = 0.0;
   long double val = 0.0;
   VALUE argument = GetRecord("num", gCurrentContext);

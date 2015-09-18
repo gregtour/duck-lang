@@ -34,10 +34,11 @@ typedef struct FUNCTION
     struct PAIR* parameters;
     SYNTAX_TREE* body;
     unsigned int built_in;
-    int (*functor)(int);
+    int (*functor)(int, void*);
     struct CONTEXT* closure;
     int ref_count;
     const char* fn_name;
+    void* func_data;
 } FUNCTION;
 
 struct HASH_TABLE;

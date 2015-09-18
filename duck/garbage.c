@@ -449,6 +449,9 @@ void ClearFunction(FUNCTION* function)
             itr = itr_next;
         }
         //ClearContext(function->closure);
+        if (function->built_in) {
+            free(function->func_data);
+        }
         free(function);
     }
 }

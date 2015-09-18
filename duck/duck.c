@@ -493,6 +493,7 @@ int ReduceFunctionDef(SYNTAX_TREE* node)
         record.data.function->built_in = 0;
         record.data.function->functor = NULL;
         record.data.function->fn_name = identifier1->string;
+        record.data.function->func_data = NULL;
         
         StoreRecord(identifier1->string, record, gCurrentContext);
         GCAddFunction(record.data.function, &gGCManager);

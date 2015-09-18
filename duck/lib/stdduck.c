@@ -304,7 +304,7 @@ char* ToString(VALUE value)
 
 
 /* parses(source) -> boolean */
-int DuckParses(int argument_count)
+int DuckParses(int argument_count, void* data)
 {
     L_TOKEN*      lexing;
     char*         buffer;
@@ -339,7 +339,7 @@ int DuckParses(int argument_count)
 }
 
 /* eval(source) */
-int DuckEval(int argument_count)
+int DuckEval(int argument_count, void* data)
 {
     L_TOKEN*      lexing;
     SYNTAX_TREE*  ast;
@@ -408,7 +408,7 @@ int DuckEval(int argument_count)
 }
 
 /* duck.print(output) */
-int DuckPrint(int argument_count)
+int DuckPrint(int argument_count, void* data)
 {
     int error = 0;
     VALUE argument = GetRecord("output", gCurrentContext);
@@ -427,7 +427,7 @@ int DuckPrint(int argument_count)
 }
 
 /* duck.println(output) */
-int DuckPrintLn(int argument_count)
+int DuckPrintLn(int argument_count, void* data)
 {
     int error = 0;
     VALUE argument = GetRecord("output", gCurrentContext);
@@ -447,7 +447,7 @@ int DuckPrintLn(int argument_count)
 }
 
 /* duck.prompt(message) */
-int DuckPrompt(int argument_count)
+int DuckPrompt(int argument_count, void* data)
 {
     int error = 0;
 
@@ -487,7 +487,7 @@ int DuckPrompt(int argument_count)
 }
 
 /* Type(object) */
-int DuckType(int argument_count)
+int DuckType(int argument_count, void* data)
 {
     int error = 0;
 
@@ -510,7 +510,7 @@ int DuckType(int argument_count)
 }
 
 /* int(value) */
-int DuckInt(int argument_count)
+int DuckInt(int argument_count, void* data)
 {
     int error = 0;
 
@@ -523,7 +523,7 @@ int DuckInt(int argument_count)
 }
 
 /* float(value) */
-int DuckFloat(int argument_count)
+int DuckFloat(int argument_count, void* data)
 {
     int error = 0;
 
@@ -536,7 +536,7 @@ int DuckFloat(int argument_count)
 }
 
 /* len(array) */
-int DuckLength(int argument_count)
+int DuckLength(int argument_count, void* data)
 {
     int error = 0;
 
@@ -584,7 +584,7 @@ int DuckLength(int argument_count)
 }
 
 /* quit() */
-int DuckQuit(int argument_count)
+int DuckQuit(int argument_count, void* data)
 {
     int error = 0;
 
@@ -597,7 +597,7 @@ int DuckQuit(int argument_count)
 }
 
 /* float time() */
-int DuckTime(int argument_count)
+int DuckTime(int argument_count, void* data)
 {
     int error = 0;
 
@@ -683,7 +683,7 @@ void BindStandardLibrary()
 #endif
 }
 
-int StringSplit(int argument_count)
+int StringSplit(int argument_count, void* data)
 {
     int error = 0;
 

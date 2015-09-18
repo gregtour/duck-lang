@@ -16,17 +16,17 @@ void PrintDictionary(struct HASH_TABLE*);
 void BindStandardLibrary();
 void BindStringLibrary();
 
-int DuckEval(int argument_count);
-int DuckParses(int argument_count);
-int DuckPrint(int argument_count);
-int DuckPrompt(int argument_count);
-int DuckType(int argument_count);
-int DuckInt(int argument_count);
-int DuckFloat(int argument_count);
-int DuckLength(int argument_count);
-int DuckQuit(int argument_count);
+int DuckEval(int argument_count, void* data);
+int DuckParses(int argument_count, void* data);
+int DuckPrint(int argument_count, void* data);
+int DuckPrompt(int argument_count, void* data);
+int DuckType(int argument_count, void* data);
+int DuckInt(int argument_count, void* data);
+int DuckFloat(int argument_count, void* data);
+int DuckLength(int argument_count, void* data);
+int DuckQuit(int argument_count, void* data);
 
-int DuckTime(int argument_count);
+int DuckTime(int argument_count, void* data);
 
 #endif // _STDDUCK_H
 
