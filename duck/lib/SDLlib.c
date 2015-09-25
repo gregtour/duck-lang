@@ -27,7 +27,7 @@ void SetupGL(int SCR_WIDTH, int SCR_HEIGHT)
 
 void BindSDL()
 {
-    /* SDL namespace */
+    /* SDL NameSpace */
     VALUE duckSDL = LinkNamespace("SDL");
     VALUE makeWindow = CreateFunction(MakeWindow);
     AddParameter(makeWindow, "width");

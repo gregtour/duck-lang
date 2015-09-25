@@ -27,7 +27,7 @@ GC_DATA_MANAGEMENT
     AST_STORE*      parseTrees;
 
     // program data
-    CONTEXT**   contexts;
+    CLOSURE**   contexts;
     unsigned int ctx_capacity;
     unsigned int ctx_size;
 
@@ -47,16 +47,16 @@ GC_DATA_MANAGEMENT
 GC_DATA_MANAGEMENT InitGC(/*GC_DATA_MANAGEMENT*/);
 void FreeGCMgmtObject(GC_DATA_MANAGEMENT);
 
-int CallGCRecurseContext(CONTEXT*, GC_DATA_MANAGEMENT*);
+int CallGCRecurseContext(CLOSURE*, GC_DATA_MANAGEMENT*);
 int CallGCRecurseDictionary(HASH_TABLE*, GC_DATA_MANAGEMENT*);
 int CallGCRecurseFunction(FUNCTION*, GC_DATA_MANAGEMENT*);
 
-void CallGCTraceRoot(CONTEXT*, VALUE);
+void CallGCTraceRoot(CLOSURE*, VALUE);
 void ClearAllGC();
 
 int GCAddValue(VALUE, GC_DATA_MANAGEMENT*);
 int GCAddString(char*, GC_DATA_MANAGEMENT*);
-int GCAddContext(CONTEXT*, GC_DATA_MANAGEMENT*);
+int GCAddContext(CLOSURE*, GC_DATA_MANAGEMENT*);
 int GCAddFunction(FUNCTION*, GC_DATA_MANAGEMENT*);
 int GCAddDictionary(HASH_TABLE*, GC_DATA_MANAGEMENT*);
 
@@ -68,7 +68,7 @@ extern GC_DATA_MANAGEMENT   gGCManager;
 // aux type clearing functions
 void ClearFunction(FUNCTION*);
 void ClearString(char*);
-void ClearContext(CONTEXT*);
+void ClearContext(CLOSURE*);
 void ClearDictionary(HASH_TABLE*);
 
 #endif // _GARBAGE_H

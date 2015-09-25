@@ -4,8 +4,6 @@
 #include "lr_parser.h"
 
 #ifdef WIN32
-#define CONTEXT     FCONTEXT
-#define namespace   NAMESPACE
 #define atoll       _atoi64
 #endif
 
@@ -26,7 +24,7 @@ typedef long long int int64;
 
 /* types */
 
-struct CONTEXT;
+struct CLOSURE;
 struct PAIR;
 
 typedef struct FUNCTION
@@ -35,7 +33,7 @@ typedef struct FUNCTION
     SYNTAX_TREE* body;
     unsigned int built_in;
     int (*functor)(int, void*);
-    struct CONTEXT* closure;
+    struct CLOSURE* closure;
     int ref_count;
     const char* fn_name;
     void* func_data;
@@ -51,7 +49,7 @@ typedef struct VALUE
         long double     floatp;
         const char*     string;
         FUNCTION*       function;
-        struct CONTEXT* reference;
+        struct CLOSURE* reference;
         struct HASH_TABLE* 
                         dictionary;
     } data;
@@ -65,12 +63,12 @@ typedef struct PAIR
     struct PAIR* next;
 } PAIR;
 
-typedef struct CONTEXT
+typedef struct CLOSURE
 {
     PAIR*       list;
     int         ref_count;
-    struct CONTEXT* parent;
-} CONTEXT;
+    struct CLOSURE* parent;
+} CLOSURE;
 
 typedef struct CALLSTACK
 {

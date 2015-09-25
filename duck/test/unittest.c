@@ -41,7 +41,6 @@ Ex:
 #include "main.h"
 #include "interpreter.h"
 
-
 const char* ErrorMessage(int error)
 {
     if (error == 12345)
@@ -137,14 +136,17 @@ int RunTest(TEST_PROGRAM* program, char** destbuffer, int* size)
     if (program == NULL) return 0;
 
     // Redirect standard output to our pipe
-    saved_stdout = dup(STDOUT_FILENO);
 #ifdef WIN32
+    saved_stdout = _dup(STDOUT_FILENO);
     pipe(out_pipe /**/, 12000, O_BINARY /**/);
+    _dup2(out_pipe[1], STDOUT_FILENO);
+    _close(out_pipe[1]);
 #else
+    saved_stdout = dup(STDOUT_FILENO);
     pipe(out_pipe);
-#endif
-    dup2(out_pipe[1], STDOUT_FILENO);
+	dup2(out_pipe[1], STDOUT_FILENO);
     close(out_pipe[1]);
+#endif
 
     // Run the program to get its output
     printf("@");
@@ -258,22 +260,31 @@ int main(int argc, char* argv[])
     char* bufferRn = 0;
     TEST_PROGRAM* testsuite = NULL;
     TEST_PROGRAM* tail = NULL;
-    int   size;
-    int   read;
-    int   result = 1;
-    int   index = 0;
-    int   count;
-    int   parsed;
-    int   testcount;
+    unsigned int   size;
+    unsigned int   read;
+    unsigned int   index = 0;
+    unsigned int   count;
+    unsigned int   parsed;
+    unsigned int   testcount;
+	int   result = 1;
 
     // must include unit test file argument
     if (argc != 2)
-    {   return -1;  }
+    {   
+		printf("Please provide an argument for the unit test file.\n");
+#ifdef WIN32
+		getchar();
+#endif
+		return -1;  
+	}
 
     input = fopen(argv[1], "rb");
     if (input == 0) {
         // file must exit
         printf("Could not open unit tests.\n");
+#ifdef WIN32
+		getchar();
+#endif
         return 1;
     }
     fseek(input, 0, SEEK_END);
@@ -297,6 +308,9 @@ int main(int argc, char* argv[])
     if (size == 0) {
         // file must not be empty
         printf("Unable to read input file.\n");
+#ifdef WIN32
+		getchar();
+#endif
         return 1;
     }
 
@@ -413,6 +427,17 @@ end_test:
     }
 
     free(buffer);
+
+#ifdef _MEM_TRACKING
+	PrintMemoryUsage();
+#endif
+
+	if (result == 0 && CheckMemoryUsage() != 0)
+	{
+		printf("\nTest failed due to memory leak!\n");
+		result = 1;
+	}
+
     fflush(stdout);
 #ifdef WIN32
     getchar();

@@ -10,18 +10,18 @@
 #include "garbage.h"
 
 // global data
-CONTEXT* gGlobalContext;
-CONTEXT* gCurrentContext;
+CLOSURE* gGlobalContext;
+CLOSURE* gCurrentContext;
 VALUE    gLastExpression;
 PAIR*    gParameterListing;
 
-//CONTEXT* gDictionaryInit;
+//CLOSURE* gDictionaryInit;
 HASH_TABLE* gDictionaryInit;
 long int    gArrayIndex;
 PAIR*       gArgumentEvaluation;
 
 const char* gLValueIdentifier;
-CONTEXT*    gLValueContext;
+CLOSURE*    gLValueContext;
 VALUE       gLValueStringReference;
 VALUE       gLValueIndex;
 HASH_TABLE* gLValueDictionary;
@@ -67,25 +67,25 @@ int gFreeCalls = 0;
 
 void* MallocTrackMemory(size_t size)
 {
-    void* data;
+    unsigned int* data;
     gTotalMemoryUsage += (int)size;
 
     if (gTotalMemoryUsage > gPeakMemoryUsage) {
         gPeakMemoryUsage = gTotalMemoryUsage;
     }
 
-    data = malloc(size + sizeof(unsigned int));
+    data = (unsigned int*)malloc(size + sizeof(unsigned int));
     gMallocCalls++;
-    *((unsigned int*)data) = (unsigned int)size;
-    data = data + sizeof(unsigned int);
-    return data;
+    (*data) = (unsigned int)size;
+	data = data + 1;
+    return (void*)data;
 }
 
 void FreeTrackMemory(void* data)
 {
     if (data) 
     {
-        unsigned int* data_sz = data - sizeof(unsigned int);
+        unsigned int* data_sz = (unsigned int*)data - 1;
         unsigned int data_size = *data_sz;
 
         //printf("Freeing size: %i\n", (int)data_size);
@@ -99,20 +99,20 @@ void FreeTrackMemory(void* data)
 void* ReallocTrackMemory(void* data, size_t size)
 {
     if (data) {
-        unsigned int* data_sz = data - sizeof(unsigned int);
+        unsigned int* data_sz = (unsigned int*)data - 1;
         unsigned int data_size = *data_sz;
 
         //printf("Realloc %i for %i\n", data_size, (unsigned int)size);
         gTotalMemoryUsage -= data_size;
-        gTotalMemoryUsage += (int)size;
+        gTotalMemoryUsage += (unsigned int)size;
 
         if (gTotalMemoryUsage > gPeakMemoryUsage) {
             gPeakMemoryUsage = gTotalMemoryUsage;
         }
 
-        void* new_data = malloc(size + sizeof(unsigned int));
-        *((unsigned int*)new_data) = (unsigned int)size;
-        new_data = new_data + sizeof(unsigned int);
+        unsigned int* new_data = (unsigned int*)malloc(size + sizeof(unsigned int));
+        *(new_data) = (unsigned int)size;
+        new_data = new_data + 1;
     
         unsigned int i;
         for (i = 0; i < data_size; i++) {
@@ -120,7 +120,7 @@ void* ReallocTrackMemory(void* data, size_t size)
         }
 
         free((void*)data_sz);
-        return new_data;
+        return (void*)new_data;
     } else {
         return MallocTrackMemory(size);
     }
@@ -137,33 +137,48 @@ void* ReallocTrackMemory(void* data, size_t size)
 #ifndef realloc
 #define realloc     ReallocTrackMemory
 #endif
-
+#endif // _MEM_TRACKING
 
 void PrintMemoryUsage()
 {
-    int b = gPeakMemoryUsage % 1000;
-    int kb = (gPeakMemoryUsage / 1000) % 1000;
-    int mb = (gPeakMemoryUsage / 1000000) % 1000;
-    if (mb) {
-        float n = (float)mb + (float)kb/1000.0f;
-        printf("Peak memory usage: %g mb\n", n);
-    } else {
-        float n = (float)kb + (float)b/1000.0f;
-        printf("Peak memory usage: %g kb\n", n);
-    }
+#ifdef _MEM_TRACKING
+	int b = gPeakMemoryUsage % 1000;
+	int kb = (gPeakMemoryUsage / 1000) % 1000;
+	int mb = (gPeakMemoryUsage / 1000000) % 1000;
+	if (mb) {
+		float n = (float)mb + (float)kb/1000.0f;
+		printf("Peak memory usage: %g mb\n", n);
+	} else {
+		float n = (float)kb + (float)b/1000.0f;
+		printf("Peak memory usage: %g kb\n", n);
+	}
 
-    printf("%i calls to malloc() with %i calls to free()\n",
-        gMallocCalls,
-        gFreeCalls);
+	printf("%i calls to malloc() with %i calls to free()\n",
+		gMallocCalls,
+		gFreeCalls);
 
-    if (gTotalMemoryUsage) {
-        printf("Error: %i bytes still in use at program exit.\n",
-                gTotalMemoryUsage);
-    }
+	if (gTotalMemoryUsage) {
+		printf("Error: %i bytes still in use at program exit.\n",
+			gTotalMemoryUsage);
+	} else {
+		printf("No unallocated memory.\n");
+	}
+#else
+	return;
+#endif
 }
-#endif // _MEM_TRACKING
 
-void PrintContext(CONTEXT* context)
+unsigned int CheckMemoryUsage()
+{
+#ifdef _MEM_TRACKING
+	return gTotalMemoryUsage;
+#else
+	printf("Warning: Platform not built with memory tracking.\n");
+	return 0;
+#endif
+}
+
+void PrintContext(CLOSURE* context)
 {
     while (context)
     {
@@ -204,7 +219,7 @@ void PrintContext(CONTEXT* context)
 /* closure stack */
 CONTEXT_STACK*   gExecutionStack = NULL;
 
-void PushExecutionStack(CONTEXT* context)
+void PushExecutionStack(CLOSURE* context)
 {
     if (gExecutionStack == NULL) {
         gExecutionStack = (CONTEXT_STACK*)malloc(sizeof(CONTEXT_STACK));
@@ -251,7 +266,7 @@ VALUE LinkNamespace(const char* identifier)
 {
     VALUE ref_namespace;
     ref_namespace.type = VAL_REFERENCE;
-    ref_namespace.data.reference = (CONTEXT*)ALLOC(sizeof(CONTEXT));
+    ref_namespace.data.reference = (CLOSURE*)ALLOC(sizeof(CLOSURE));
     ref_namespace.data.reference->parent = NULL;
     ref_namespace.data.reference->list = NULL;
     ref_namespace.data.reference->ref_count = -1;
@@ -286,16 +301,16 @@ void  LinkConstFloatp(VALUE ref_namespace, const char* identifier, long double v
     StoreRecord(identifier, constant, ref_namespace.data.reference);
 }
 
-void  LinkConstString(VALUE namespace, const char* identifier, const char* string)
+void  LinkConstString(VALUE NameSpace, const char* identifier, const char* string)
 {
     VALUE constant;
     constant.type = VAL_STRING;
     constant.data.string = string;
     constant.const_string = 1;
-    StoreRecord(identifier, constant, namespace.data.reference);
+    StoreRecord(identifier, constant, NameSpace.data.reference);
 }
 
-VALUE CreateFunction(int (*function)(int))
+VALUE CreateFunction(int (*function)(int, void*))
 {
     VALUE record;
     record.type = VAL_FUNCTION;
@@ -308,6 +323,7 @@ VALUE CreateFunction(int (*function)(int))
     record.data.function->ref_count = -1;
   //record.data.function->fn_name = "[built-in]";
     record.data.function->fn_name = "function";
+    record.data.function->func_data = NULL;
 
     GCAddFunction(record.data.function, &gGCManager);
 
@@ -405,8 +421,8 @@ int Interpret(SYNTAX_TREE* tree)
 
     test_inst_count = 0;
 
-    /* global namespace */
-    gCurrentContext = gGlobalContext = (CONTEXT*)ALLOC(sizeof(CONTEXT));
+    /* global NameSpace */
+    gCurrentContext = gGlobalContext = (CLOSURE*)ALLOC(sizeof(CLOSURE));
     gCurrentContext->parent = NULL;
     gCurrentContext->list = NULL;
     gCurrentContext->ref_count = -1;

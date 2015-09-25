@@ -109,13 +109,13 @@ int ReduceStmtA(SYNTAX_TREE* node)
         SYNTAX_TREE* identifier1 = identifier_list1->children[0];
 
         /* import library */
-        // change scope of [namespace] to global
+        // change scope of [NameSpace] to global
         VALUE library = GetRecord(identifier1->string, gCurrentContext);
         
         if (library.type == VAL_REFERENCE)
         {
-            CONTEXT* namespace = library.data.reference;
-            PAIR* iterator = namespace->list;
+            CLOSURE* NameSpace = library.data.reference;
+            PAIR* iterator = NameSpace->list;
             while (iterator)
             {
                 StoreRecord(iterator->identifier, iterator->value, gGlobalContext);
@@ -1882,11 +1882,11 @@ int ReduceReferenceB(SYNTAX_TREE* node)
 
     if (function.type == VAL_FUNCTION)
     {
-        CONTEXT* func_context;
-        CONTEXT* current;
+        CLOSURE* func_context;
+        CLOSURE* current;
     
         // create new context
-        func_context = (CONTEXT*)ALLOC(sizeof(CONTEXT));
+        func_context = (CLOSURE*)ALLOC(sizeof(CLOSURE));
         func_context->list = NULL;
         func_context->parent = function.data.function->closure;
         
@@ -1900,7 +1900,7 @@ int ReduceReferenceB(SYNTAX_TREE* node)
         
         // call function
         if (function.data.function->built_in) {
-            error = function.data.function->functor(0);
+            error = function.data.function->functor(0, 0l);
         } else {
             error = InterpretNode(function.data.function->body);
         }
@@ -1948,8 +1948,8 @@ int ReduceReferenceC(SYNTAX_TREE* node)
         PAIR* arg;
         PAIR* last;
         PAIR* arg_next;
-        CONTEXT* func_context;
-        CONTEXT* current;        
+        CLOSURE* func_context;
+        CLOSURE* current;        
        
         // evaluate arguments
         error = InterpretNode(arguments1);
@@ -1959,7 +1959,7 @@ int ReduceReferenceC(SYNTAX_TREE* node)
         if (error) return error;
 
         // create new context
-        func_context = (CONTEXT*)ALLOC(sizeof(CONTEXT));
+        func_context = (CLOSURE*)ALLOC(sizeof(CLOSURE));
         func_context->list = NULL;
         func_context->parent = function.data.function->closure;
         current = gCurrentContext;
@@ -2000,7 +2000,7 @@ int ReduceReferenceC(SYNTAX_TREE* node)
         
         // call function
         if (function.data.function->built_in) {
-            error = function.data.function->functor(0);
+            error = function.data.function->functor(0, 0l);
         } else {
             error = InterpretNode(function.data.function->body);
         }

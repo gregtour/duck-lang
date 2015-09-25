@@ -10,7 +10,7 @@ char* ToString(VALUE value);
 
 void PrintValue(VALUE);
 void PrintFunction(FUNCTION*);
-void PrintObject(CONTEXT*);
+void PrintObject(CLOSURE*);
 void PrintDictionary(struct HASH_TABLE*);
 
 void BindStandardLibrary();

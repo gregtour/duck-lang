@@ -6,7 +6,7 @@
 
 void BindSDL();
 void SetupGL(int SCR_WIDTH, int SCR_HEIGHT);
-void PrintObject(CONTEXT*);
+void PrintObject(CLOSURE*);
 
 int MakeWindow(int argument_count, void* data);
 int EventLoop(int argument_count, void* data);

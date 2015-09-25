@@ -240,7 +240,7 @@ VALUE Divide(VALUE a, VALUE b)
 VALUE Modulus(VALUE a, VALUE b)
 {
     VALUE result;
-	int base;
+	int64 base;
     result.type = VAL_NIL;
     result.data.primitive = 0;
 

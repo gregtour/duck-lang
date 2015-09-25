@@ -31,9 +31,9 @@ void  FreeEnvironment();
 #define DEALLOC free
 
 /* accessor functions */
-VALUE GetRecord(const char* identifier, CONTEXT* context);
-void  StoreRecord(const char* identifier, VALUE value, CONTEXT* context);
-void RemoveRecord(const char* identifier, CONTEXT* context);
+VALUE GetRecord(const char* identifier, CLOSURE* context);
+void  StoreRecord(const char* identifier, VALUE value, CLOSURE* context);
+void RemoveRecord(const char* identifier, CLOSURE* context);
 
 /* hash table */
 #define HT_MIN_CAPACITY     2048

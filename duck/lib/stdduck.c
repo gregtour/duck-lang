@@ -8,10 +8,9 @@
 #include <string.h>
 
 #ifdef WIN32
-#undef CONTEXT
+#undef CLOSURE
 #define WIN32_LEAN_AND_MEAN
 #include "Windows.h"
-#define CONTEXT        FCONTEXT
 #endif
 
 HASH_TABLE* duck_print_records = NULL;
@@ -22,7 +21,7 @@ unsigned int start_t = 0;
 void PrintString(char** dest, unsigned int* size, const char* text);
 void PrintValueString(char** dest, unsigned int* size, VALUE value);
 void PrintFunctionString(char** dest, unsigned int* size, FUNCTION* function);
-void PrintObjectString(char** dest, unsigned int* size, CONTEXT* context);
+void PrintObjectString(char** dest, unsigned int* size, CLOSURE* context);
 void PrintDictionaryString(char** string, unsigned int* size, HASH_TABLE* dictionary);
 
 
@@ -76,7 +75,7 @@ void PrintFunction(FUNCTION* function)
     }
 }
 
-void PrintObject(CONTEXT* context)
+void PrintObject(CLOSURE* context)
 {
     VALUE key;
 
@@ -214,7 +213,7 @@ void PrintFunctionString(char** dest, unsigned int* size, FUNCTION* function)
     }
 }
 
-void PrintObjectString(char** dest, unsigned int* size, CONTEXT* context)
+void PrintObjectString(char** dest, unsigned int* size, CLOSURE* context)
 {
     VALUE key;
 
@@ -351,7 +350,7 @@ int DuckEval(int argument_count, void* data)
     gLastExpression.type = VAL_NIL;
     gLastExpression.data.primitive = 0;
 
-    CONTEXT* currentContext;
+    CLOSURE* currentContext;
     currentContext = gCurrentContext;
 
     int prev_line_error = line_error;
@@ -545,7 +544,7 @@ int DuckLength(int argument_count, void* data)
     if (argument.type == VAL_REFERENCE)
     {
         long int count = 0;
-        CONTEXT* reference;
+        CLOSURE* reference;
         PAIR* iterator;
 
         reference = argument.data.reference;

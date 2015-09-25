@@ -54,6 +54,10 @@ typedef unsigned long u32;
 #endif
 #endif
 
+// Mem tracking accessors
+unsigned int CheckMemoryUsage();
+void PrintMemoryUsage();
+
 /* ************************************************************************** */
 /*                                GLOBALS                                     */
 /* ************************************************************************** */
