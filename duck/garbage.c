@@ -58,7 +58,7 @@ InitGC(/*GC_DATA_MANAGEMENT gcStore*/)
 
     gcStore.ctx_size = 0;
     gcStore.ctx_capacity = 128;
-    gcStore.contexts = (CONTEXT**)malloc(sizeof(CONTEXT*) * gcStore.ctx_capacity);
+    gcStore.contexts = (CLOSURE**)malloc(sizeof(CLOSURE*) * gcStore.ctx_capacity);
 
     gcStore.func_size = 0;
     gcStore.func_capacity = 128;
@@ -83,7 +83,7 @@ void FreeGCMgmtObject(GC_DATA_MANAGEMENT gcStore)
 }
 
 
-int CallGCRecurseContext(CONTEXT* context, 
+int CallGCRecurseContext(CLOSURE* context, 
                          GC_DATA_MANAGEMENT* managed)
 {
     PAIR* itr;
@@ -169,7 +169,7 @@ int CallGCRecurseFunction(FUNCTION* function,
 }
 
 
-void CallGCTraceRoot(CONTEXT* root,
+void CallGCTraceRoot(CLOSURE* root,
                      VALUE    curExpr)
 {
     //printf("RUNNING GARBAGE COLLECTOR\n");
@@ -201,7 +201,7 @@ void CallGCTraceRoot(CONTEXT* root,
          index < gGCManager.ctx_size;
          index++)
     {
-        CONTEXT* context = gGCManager.contexts[index];
+        CLOSURE* context = gGCManager.contexts[index];
         if (!CONTAINS_POINTER_ARRAY((void**)managed.contexts,
                                     managed.ctx_size,
                                     (void*)context))
@@ -280,7 +280,7 @@ void ClearAllGC()
          index < gGCManager.ctx_size;
          index++)
     {
-        CONTEXT* context = gGCManager.contexts[index];
+        CLOSURE* context = gGCManager.contexts[index];
         ClearContext(context);
     }
 
@@ -372,7 +372,7 @@ int GCAddString(char* string, GC_DATA_MANAGEMENT* gc)
                       (void*)string);
 }
 
-int GCAddContext(CONTEXT* context, GC_DATA_MANAGEMENT* gc)
+int GCAddContext(CLOSURE* context, GC_DATA_MANAGEMENT* gc)
 { 
     return
     ADD_POINTER_ARRAY((void***)&gc->contexts,
@@ -449,6 +449,9 @@ void ClearFunction(FUNCTION* function)
             itr = itr_next;
         }
         //ClearContext(function->closure);
+        if (function->built_in) {
+            free(function->func_data);
+        }
         free(function);
     }
 }
@@ -459,7 +462,7 @@ void ClearString(char* string)
     free(string);
 }
 
-void ClearContext(CONTEXT* context)
+void ClearContext(CLOSURE* context)
 {
     if (context) {
         PAIR *itr, *itr_next;

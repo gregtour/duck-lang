@@ -5,6 +5,7 @@
 */
 #include "main.h"
 #include "interpreter.h"
+#include "tables.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
@@ -27,15 +28,27 @@ const char* ErrorMessage(int error)
         return "No error.";
     else if (error == 1)
         return "Error 1.";
+	else if (error == 22)
+		return "Catch-22.";
     else
         return "Unspecified error.";
 }
 
+// for compressed parse tables
+void FreeParseTable(LR_TABLE* parser)
+{
+	if (parser && parser->gotoTable) {
+		free(parser->gotoTable);
+	}
+	if (parser && parser->actionTable) {
+		free(parser->actionTable);
+	}
+}
 
 /* main(args) accepts program file to run */
 int main(int argc, char* argv[])
 {
-    const char*   program;
+    const char*   program = "";
     L_TOKEN*      lexing;
     SYNTAX_TREE*  ast;
     char*         buffer;
@@ -86,12 +99,29 @@ int main(int argc, char* argv[])
         }
     }
 
+	// load parser
+	DecompressAndPatchParseTable(&PARSE_TABLE, 
+								 COMPRESSED_GOTO_TABLE, 
+								 sizeof(COMPRESSED_GOTO_TABLE)/sizeof(int), 
+								 COMPRESSED_ACTION_TABLE, 
+								 sizeof(COMPRESSED_ACTION_TABLE)/sizeof(int));
+
+	if (PARSE_TABLE.actionTable == NULL || PARSE_TABLE.gotoTable == NULL) 
+	{
+		printf("Failed to load compressed parse tables.\n");
+		FreeLexing(lexing, buffer);
+		FreeParseTable(&PARSE_TABLE);
+		getchar();
+		return 1;
+	}
+		
     // parse source
     ast = ParseSource(lexing, PARSE_TABLE, CONTEXT_FREE_GRAMMAR);
     if (ast == NULL)
     {
         printf("Error parsing source.\n");
         FreeLexing(lexing, buffer);
+		FreeParseTable(&PARSE_TABLE);
         getchar();
         return 1;
     }
@@ -103,14 +133,14 @@ int main(int argc, char* argv[])
 #endif // _PROFILING
 
     // interpret source and run
-    error = Interpret(ast);
+	error = 0;
     if (error)
     {
         printf("%s\n", ErrorMessage(error));
-        //printf("Error %i.\n", ErrorMessage(error));
         PrintStackTrace();
         FreeLexing(lexing, buffer);
         FreeParseTree(ast);
+		FreeParseTable(&PARSE_TABLE);
         getchar();
         return 1;
     }
@@ -128,6 +158,7 @@ int main(int argc, char* argv[])
     FreeEnvironment();
     FreeLexing(lexing, buffer);
     FreeParseTree(ast);
+	FreeParseTable(&PARSE_TABLE);
 
 #ifdef _MEM_TRACKING
     PrintMemoryUsage();

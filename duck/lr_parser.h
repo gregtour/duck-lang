@@ -39,7 +39,11 @@ typedef unsigned long u32;
 #define TOKEN_L_TOKEN       1
 #define TOKEN_SYNTAX_TREE   2
 
-//#define _MEM_TRACKING
+// Clang doesn't seem to support this kind of memory tracking.
+#if defined(__clang__) && defined(_MEM_TRACKING)
+#undef _MEM_TRACKING
+#endif
+
 #ifdef _MEM_TRACKING
 #ifndef malloc
 #define malloc      MallocTrackMemory
@@ -53,6 +57,10 @@ typedef unsigned long u32;
 #define realloc     ReallocTrackMemory
 #endif
 #endif
+
+// Mem tracking accessors
+unsigned int CheckMemoryUsage();
+void PrintMemoryUsage();
 
 /* ************************************************************************** */
 /*                                GLOBALS                                     */

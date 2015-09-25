@@ -96,7 +96,7 @@ void FreeEnvironment()
 }
 
 /* accessor functions */
-VALUE GetRecord(const char* identifier, CONTEXT* context)
+VALUE GetRecord(const char* identifier, CLOSURE* context)
 {
     while (context)
     {
@@ -118,9 +118,9 @@ VALUE GetRecord(const char* identifier, CONTEXT* context)
     return nill;
 }
 
-void StoreRecord(const char* identifier, VALUE value, CONTEXT* context)
+void StoreRecord(const char* identifier, VALUE value, CLOSURE* context)
 {
-    CONTEXT* top = context;
+    CLOSURE* top = context;
     while (context)
     {
         PAIR* iterator = context->list;
@@ -156,7 +156,7 @@ void StoreRecord(const char* identifier, VALUE value, CONTEXT* context)
     }
 }
 
-void RemoveRecord(const char* identifier, CONTEXT* context)
+void RemoveRecord(const char* identifier, CLOSURE* context)
 {
     PAIR* prev = NULL;
     while (context)

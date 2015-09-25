@@ -2,6 +2,7 @@
 
 #include "lr_parser.h"
 
+unsigned int gTokenCount = 0;
 
 // lexer list functions
 void LexAddBlock(L_TOKEN** start,
@@ -35,6 +36,8 @@ void LexAddBlock(L_TOKEN** start,
         else
             *start = next;
         *end = next;
+
+		gTokenCount++;
     }
 }
 
@@ -214,7 +217,7 @@ L_TOKEN* LexSource(const char*    file,
     char* buffer;
     int   size;
     int   read;
-	L_TOKEN* result;
+    L_TOKEN* result;
 
     // read source file
     input = fopen(file, "rb");
@@ -255,6 +258,8 @@ L_TOKEN* LexSourceBuffer(const char*    source_buffer,
     int         size;
     int         i, j;
     int         a, b;
+	
+	gTokenCount = 0;
 
     L_TOKEN* start = NULL;
     L_TOKEN* end = NULL;
@@ -456,8 +461,11 @@ L_TOKEN* LexSourceBuffer(const char*    source_buffer,
         else if (format[i] == '\n')
         {
 #ifdef LEX_NEWLINES
-            // end line
-            LexAddBlock(&start, &end, NEWLINE(line));
+			if (gTokenCount != 0)
+			{
+				// end line
+				LexAddBlock(&start, &end, NEWLINE(line));
+			}
 #endif
         }
         else if (format[i] == ' ')

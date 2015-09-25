@@ -8,6 +8,7 @@
 #include "arithmetic.h"
 #include "memory.h"
 #include "garbage.h"
+#include "lib/stdduck.h"
 
 /* truth */
 int EvaluatesTrue(VALUE value)
@@ -48,6 +49,10 @@ VALUE Concat(VALUE a, VALUE b)
     char* string_b = NULL;
     char buffer1[32];
     char buffer2[32];
+    int length;
+    char* new_string;
+    char* temp1 = NULL;
+    char* temp2 = NULL;
 
     // coerce string for first term
     if (a.type == VAL_STRING) {
@@ -72,8 +77,9 @@ if (_SUPPORTS_80BIT_FLOATING_POINT) {
         // VAL_FUNCTION
         // VAL_DICTIONARY
         else {
-            sprintf(buffer1, "null");
-            string_a = buffer1;
+            //sprintf(buffer1, "null");
+            temp1 = ToString(a);
+            string_a = temp1;
         }
     }
 
@@ -85,7 +91,7 @@ if (_SUPPORTS_80BIT_FLOATING_POINT) {
 //#ifdef WIN32
 //            sprintf(buffer2, "%l64i", b.data.primitive);
 //#else
-			sprintf(buffer2, "%lli", b.data.primitive);
+            sprintf(buffer2, "%lli", b.data.primitive);
 //#endif
             string_b = buffer2;
         } else if (b.type == VAL_FLOATING_POINT) {
@@ -100,14 +106,15 @@ if (_SUPPORTS_80BIT_FLOATING_POINT) {
         // VAL_FUNCTION
         // VAL_DICTIONARY
         else {
-            sprintf(buffer2, "null");
-            string_b = buffer2;
+            //sprintf(buffer2, "null");
+            temp2 = ToString(b);
+            string_b = temp2;
         }
     }
 
     // concat strings
-    int length = strlen(string_a) + strlen(string_b) + 1;
-    char* new_string = (char*)ALLOC(sizeof(char) * length);
+    length = strlen(string_a) + strlen(string_b) + 1;
+    new_string = (char*)ALLOC(sizeof(char) * length);
 
     GCAddString(new_string, &gGCManager);
 
@@ -116,6 +123,9 @@ if (_SUPPORTS_80BIT_FLOATING_POINT) {
     value.type = VAL_STRING;
     value.data.string = new_string;
     value.const_string = 0;
+
+    if (temp1) { free(temp1); }
+    if (temp2) { free(temp2); }
 
     return value;
 }
@@ -230,10 +240,11 @@ VALUE Divide(VALUE a, VALUE b)
 VALUE Modulus(VALUE a, VALUE b)
 {
     VALUE result;
+    int64 base;
     result.type = VAL_NIL;
     result.data.primitive = 0;
 
-    int base = TypeInt(b);
+    base = TypeInt(b);
 
     if (base != 0) {
         result.type = VAL_PRIMITIVE;

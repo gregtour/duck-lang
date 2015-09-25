@@ -11,8 +11,9 @@ add_executable(duck
   ../duck/lexer.c
   ../duck/parser.c
   ../duck/grammar.c
-  ../duck/duck.c
   ../duck/tables.c
+  ../duck/framework.c
+  ../duck/language.c
   ../duck/types.c
   ../duck/memory.c
   ../duck/garbage.c
@@ -30,9 +31,10 @@ add_executable(gduck
   ../duck/lexer.c
   ../duck/parser.c
   ../duck/grammar.c
-  ../duck/duck.c
+  ../duck/language.c
   ../duck/tables.c
   ../duck/types.c
+  ../duck/framework.c
   ../duck/memory.c
   ../duck/garbage.c
   ../duck/lib/library.c

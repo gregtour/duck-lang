@@ -22,7 +22,7 @@ TEST(StdDuck, print_value_string)
 
 namespace TestStdDuck
 {
-    int DummyFunc(int num_args)
+    int DummyFunc(int num_args, void* user_data)
     {
         int error = 0;
         VALUE argument = GetRecord("arg0", gCurrentContext);

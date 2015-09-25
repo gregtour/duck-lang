@@ -8,7 +8,7 @@
 uint64_t XORShiftNext();
 
 void BindRandLibrary();
-int SeedRand(int arg_count);
-int GetRand(int arg_count);
-int GetBoundedRandFloat(int arg_count);
+int SeedRand(int arg_count, void* data);
+int GetRand(int arg_count, void* data);
+int GetBoundedRandFloat(int arg_count, void* data);
 #endif // _LIBRARY_H

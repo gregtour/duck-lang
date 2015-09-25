@@ -27,7 +27,7 @@ void SetupGL(int SCR_WIDTH, int SCR_HEIGHT)
 
 void BindSDL()
 {
-    /* SDL namespace */
+    /* SDL NameSpace */
     VALUE duckSDL = LinkNamespace("SDL");
     VALUE makeWindow = CreateFunction(MakeWindow);
     AddParameter(makeWindow, "width");
@@ -103,7 +103,7 @@ void BindSDL()
 
 /* SDL Functions */
 
-int MakeWindow(int argument_count)
+int MakeWindow(int argument_count, void* data)
 {
     int error = 0;
     //if (argument_count != 3) return 1;
@@ -141,7 +141,7 @@ int MakeWindow(int argument_count)
     return error;
 }
 
-int ClearScreen(int argument_count)
+int ClearScreen(int argument_count, void* data)
 {
     int error = 0;
 
@@ -153,7 +153,7 @@ int ClearScreen(int argument_count)
     return error;
 }
 
-int PageFlip(int argument_count)
+int PageFlip(int argument_count, void* data)
 {
     int error = 0;
 
@@ -165,7 +165,7 @@ int PageFlip(int argument_count)
     return error;
 }
 
-int EventLoop(int argument_count)
+int EventLoop(int argument_count, void* data)
 {
 	SDL_Event event;	
     while (SDL_PollEvent(&event)) 
@@ -185,14 +185,14 @@ int EventLoop(int argument_count)
     return 0;
 }
 
-int StillRunning(int argument_count)
+int StillRunning(int argument_count, void* data)
 {
     gLastExpression.type = VAL_PRIMITIVE;
     gLastExpression.data.primitive = game_is_running;
     return 0;
 }
 
-int WaitKey(int argument_count)
+int WaitKey(int argument_count, void* data)
 {
 	SDL_Event event;
     gLastExpression.type = VAL_NIL;
@@ -216,7 +216,7 @@ int WaitKey(int argument_count)
     return 0;
 }
 
-int Quit(int argument_count)
+int Quit(int argument_count, void* data)
 {
     SDL_Quit();
     gLastExpression.type = VAL_NIL;
@@ -226,7 +226,7 @@ int Quit(int argument_count)
 
 /* OpenGL Functions */
 
-int GlLoadIdentity(int argument_count)
+int GlLoadIdentity(int argument_count, void* data)
 {
     int error = 0;
 
@@ -237,7 +237,7 @@ int GlLoadIdentity(int argument_count)
     return error;
 }
 
-int GlTranslatef(int argument_count)
+int GlTranslatef(int argument_count, void* data)
 {
     int error = 0;
 
@@ -254,7 +254,7 @@ int GlTranslatef(int argument_count)
     return error;
 }
 
-int GlRotatef(int argument_count)
+int GlRotatef(int argument_count, void* data)
 {
     int error = 0;
 
@@ -273,7 +273,7 @@ int GlRotatef(int argument_count)
     return error;
 }
 
-int GlScalef(int argument_count)
+int GlScalef(int argument_count, void* data)
 {
     int error = 0;
 
@@ -291,7 +291,7 @@ int GlScalef(int argument_count)
 }
 
 
-int GlBegin(int argument_count)
+int GlBegin(int argument_count, void* data)
 {
     int error = 0;
 
@@ -307,7 +307,7 @@ int GlBegin(int argument_count)
     return error;
 }
 
-int GlEnd(int argument_count)
+int GlEnd(int argument_count, void* data)
 {
     int error = 0;
     
@@ -318,7 +318,7 @@ int GlEnd(int argument_count)
     return error;
 }
 
-int GlColor3f(int argument_count)
+int GlColor3f(int argument_count, void* data)
 {
     int error = 0;
 
@@ -335,7 +335,7 @@ int GlColor3f(int argument_count)
     return error;
 }
 
-int GlVertex3f(int argument_count)
+int GlVertex3f(int argument_count, void* data)
 {
     int error = 0;
 
@@ -352,7 +352,7 @@ int GlVertex3f(int argument_count)
     return error;
 }
 
-int GlNormal3f(int argument_count)
+int GlNormal3f(int argument_count, void* data)
 {
     int error = 0;
 

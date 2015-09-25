@@ -14,7 +14,7 @@ void  FreeEnvironment();
 
 /* library routines */
 VALUE LinkNamespace(const char* identifier);
-VALUE CreateFunction(int (*function)(int));
+VALUE CreateFunction(int (*function)(int, void*));
 void  AddParameter(VALUE functor,
                    const char* argument_name);
 void  LinkFunction(VALUE ref_namespace,
@@ -31,11 +31,11 @@ void  LinkConstString(VALUE ref_namespace,
                       const char* string);
 
 /* execution context */
-extern CONTEXT* gGlobalContext;
-extern CONTEXT* gCurrentContext;
+extern CLOSURE* gGlobalContext;
+extern CLOSURE* gCurrentContext;
 extern VALUE    gLastExpression;
 extern PAIR*    gParameterListing;
-//extern CONTEXT* gDictionaryInit;
+//extern CLOSURE* gDictionaryInit;
 extern struct HASH_TABLE* gDictionaryInit;
 extern long int  gArrayIndex;
 extern PAIR*     gArgumentEvaluation;
@@ -44,17 +44,18 @@ extern CALLSTACK gStackTrace;
 
 typedef struct 
 CONTEXT_STACK {
-    CONTEXT*    context;
+    CLOSURE*    context;
     struct CONTEXT_STACK* prev;
     struct CONTEXT_STACK* next;
 } CONTEXT_STACK;
 
 extern CONTEXT_STACK*   gExecutionStack;
-void PushExecutionStack(CONTEXT* context);
+void PushExecutionStack(CLOSURE* context);
 int  PopExecutionStack();
 
 extern const char* gLValueIdentifier;
-extern CONTEXT*    gLValueContext;
+extern CLOSURE*    gLValueContext;
+extern VALUE       gLValueStringReference;
 extern VALUE       gLValueIndex;
 extern struct HASH_TABLE* gLValueDictionary;
 
@@ -74,12 +75,14 @@ extern SYNTAX_TREE* failed_production;
 extern int gc_collect_count;
 extern int gc_inst_count;
 
+extern long int test_inst_count;;
+
 //extern int return_value_exists;
 
 /* functions */
-void PrintContext(CONTEXT* context);
-VALUE GetRecord(const char* identifier, CONTEXT* context);
-void  StoreRecord(const char* identifier, VALUE value, CONTEXT* context);
+void PrintContext(CLOSURE* context);
+VALUE GetRecord(const char* identifier, CLOSURE* context);
+void  StoreRecord(const char* identifier, VALUE value, CLOSURE* context);
 
 /* type-casting */
 //long double TypeFloat(VALUE value);
@@ -99,9 +102,12 @@ void PrintStackTrace();
 /* error */
 extern const char* ErrorMessage(int error);
 
-/* extended precision floating-point suppport */
+/* extended precision floating-point support */
 
 #define _SUPPORTS_80BIT_FLOATING_POINT       (sizeof(long double) > sizeof(double))
+
+/* Unit tests */
+#define  TEST_INST_LIMIT            1048576
 
 #endif // _INTERPRETER_H
 

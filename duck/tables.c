@@ -102,5 +102,5 @@ void DecompressActionTable(int* source_data, ACTION* dest_data, unsigned int com
         }
     }
 }
-#endif
+
 

@@ -20,14 +20,13 @@ const char* demo =
 "            duck.println(\"Syntax error.\")\n"
 "            duck.print(duck.newline)\n"
 "            program = \"\"\n"
-"        end\n"
+"        endif\n"
 "    loop\n"
-"    ; duck.print(duck.newline)\n"
 "    expr = eval(program)\n"
 "    if expr or Type(expr) != 'NIL' then\n"
 "        duck.print(\">> \")\n"
 "        duck.println(expr)\n"
-"    end\n"
+"    endif\n"
 "    duck.print(duck.newline)\n"
 "loop\n";
 
