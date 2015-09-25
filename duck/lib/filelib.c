@@ -17,12 +17,12 @@ void BindFileLibrary()
 
 int FileOpen(int argc, void* data)
 {
-	return 0;   
+    return 0;   
 }
 
 int FileClose(int argc, void* data)
 {
-	return 0;    
+    return 0;    
 }
 
 int FileRead(int argc, void* data)

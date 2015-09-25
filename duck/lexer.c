@@ -214,7 +214,7 @@ L_TOKEN* LexSource(const char*    file,
     char* buffer;
     int   size;
     int   read;
-	L_TOKEN* result;
+    L_TOKEN* result;
 
     // read source file
     input = fopen(file, "rb");

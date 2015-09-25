@@ -67,40 +67,47 @@ int gFreeCalls = 0;
 
 void* MallocTrackMemory(size_t size)
 {
-    unsigned int* data;
-    gTotalMemoryUsage += (int)size;
+    char* data;
+    unsigned int* size_record;
+
+    gTotalMemoryUsage = gTotalMemoryUsage +  (unsigned int)size;
+    gMallocCalls++;
 
     if (gTotalMemoryUsage > gPeakMemoryUsage) {
         gPeakMemoryUsage = gTotalMemoryUsage;
     }
 
-    data = (unsigned int*)malloc(size + sizeof(unsigned int));
-    gMallocCalls++;
-    (*data) = (unsigned int)size;
-	data = data + 1;
+    data = (char*)malloc(size + sizeof(unsigned int));
+    size_record = (unsigned int*)data;
+    data = (data + sizeof(unsigned int));
+
+    (*size_record) = (unsigned int)size;
     return (void*)data;
 }
 
 void FreeTrackMemory(void* data)
 {
+    char* pointer = (char*)data;
     if (data) 
     {
-        unsigned int* data_sz = (unsigned int*)data - 1;
-        unsigned int data_size = *data_sz;
+        unsigned int* size_record = (unsigned int*)(pointer - sizeof(unsigned int*));
+        unsigned int data_size = *size_record;
 
-        //printf("Freeing size: %i\n", (int)data_size);
         gTotalMemoryUsage -= data_size;
-        free((void*)data_sz);
+
+        free((void*)size_record);
+
         gFreeCalls++;
-        return;
     }
 }
 
 void* ReallocTrackMemory(void* data, size_t size)
 {
-    if (data) {
-        unsigned int* data_sz = (unsigned int*)data - 1;
-        unsigned int data_size = *data_sz;
+    char* pointer = (char*)data;
+    if (data) 
+    {
+        unsigned int* size_record = (unsigned int*)(pointer - sizeof(unsigned int*));
+        unsigned int data_size = (*size_record);
 
         //printf("Realloc %i for %i\n", data_size, (unsigned int)size);
         gTotalMemoryUsage -= data_size;
@@ -110,16 +117,18 @@ void* ReallocTrackMemory(void* data, size_t size)
             gPeakMemoryUsage = gTotalMemoryUsage;
         }
 
-        unsigned int* new_data = (unsigned int*)malloc(size + sizeof(unsigned int));
-        *(new_data) = (unsigned int)size;
-        new_data = new_data + 1;
-    
+        char* new_data = (char*)malloc(size + sizeof(unsigned int));
+        unsigned int* new_size_record = (unsigned int*)new_data;
+        new_data = (new_data + sizeof(unsigned int));
+
+        (*new_size_record) = (unsigned int)size;
+
         unsigned int i;
-        for (i = 0; i < data_size; i++) {
-            ((char*)new_data)[i] = ((char*)data)[i];
+        for (i = 0; i < data_size && i < (unsigned int)size; i++) {
+            new_data[i] = pointer[i];
         }
 
-        free((void*)data_sz);
+        free((void*)size_record);
         return (void*)new_data;
     } else {
         return MallocTrackMemory(size);
@@ -142,39 +151,39 @@ void* ReallocTrackMemory(void* data, size_t size)
 void PrintMemoryUsage()
 {
 #ifdef _MEM_TRACKING
-	int b = gPeakMemoryUsage % 1000;
-	int kb = (gPeakMemoryUsage / 1000) % 1000;
-	int mb = (gPeakMemoryUsage / 1000000) % 1000;
-	if (mb) {
-		float n = (float)mb + (float)kb/1000.0f;
-		printf("Peak memory usage: %g mb\n", n);
-	} else {
-		float n = (float)kb + (float)b/1000.0f;
-		printf("Peak memory usage: %g kb\n", n);
-	}
+    int b = gPeakMemoryUsage % 1000;
+    int kb = (gPeakMemoryUsage / 1000) % 1000;
+    int mb = (gPeakMemoryUsage / 1000000) % 1000;
+    if (mb) {
+        float n = (float)mb + (float)kb/1000.0f;
+        printf("Peak memory usage: %g mb\n", n);
+    } else {
+        float n = (float)kb + (float)b/1000.0f;
+        printf("Peak memory usage: %g kb\n", n);
+    }
 
-	printf("%i calls to malloc() with %i calls to free()\n",
-		gMallocCalls,
-		gFreeCalls);
+    printf("%i calls to malloc() with %i calls to free()\n",
+        gMallocCalls,
+        gFreeCalls);
 
-	if (gTotalMemoryUsage) {
-		printf("Error: %i bytes still in use at program exit.\n",
-			gTotalMemoryUsage);
-	} else {
-		printf("No unallocated memory.\n");
-	}
+    if (gTotalMemoryUsage) {
+        printf("Error: %i bytes still in use at program exit.\n",
+            gTotalMemoryUsage);
+    } else {
+        printf("No unallocated memory.\n");
+    }
 #else
-	return;
+    return;
 #endif
 }
 
 unsigned int CheckMemoryUsage()
 {
 #ifdef _MEM_TRACKING
-	return gTotalMemoryUsage;
+    return gTotalMemoryUsage;
 #else
-	printf("Warning: Platform not built with memory tracking.\n");
-	return 0;
+    printf("Warning: Platform not built with memory tracking.\n");
+    return 0;
 #endif
 }
 

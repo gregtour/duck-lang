@@ -144,7 +144,7 @@ int RunTest(TEST_PROGRAM* program, char** destbuffer, int* size)
 #else
     saved_stdout = dup(STDOUT_FILENO);
     pipe(out_pipe);
-	dup2(out_pipe[1], STDOUT_FILENO);
+    dup2(out_pipe[1], STDOUT_FILENO);
     close(out_pipe[1]);
 #endif
 
@@ -266,24 +266,24 @@ int main(int argc, char* argv[])
     unsigned int   count;
     unsigned int   parsed;
     unsigned int   testcount;
-	int   result = 1;
+    int   result = 1;
 
     // must include unit test file argument
     if (argc != 2)
     {   
-		printf("Please provide an argument for the unit test file.\n");
+        printf("Please provide an argument for the unit test file.\n");
 #ifdef WIN32
-		getchar();
+        getchar();
 #endif
-		return -1;  
-	}
+        return -1;  
+    }
 
     input = fopen(argv[1], "rb");
     if (input == 0) {
         // file must exit
         printf("Could not open unit tests.\n");
 #ifdef WIN32
-		getchar();
+        getchar();
 #endif
         return 1;
     }
@@ -309,7 +309,7 @@ int main(int argc, char* argv[])
         // file must not be empty
         printf("Unable to read input file.\n");
 #ifdef WIN32
-		getchar();
+        getchar();
 #endif
         return 1;
     }
@@ -348,7 +348,7 @@ int main(int argc, char* argv[])
                 if (index < size) {
                     program->name = buffer + index;
                 } else {
-                    program->name = '\0';
+                    program->name = "";
                     goto end_test;
                 }
 
@@ -429,14 +429,14 @@ end_test:
     free(buffer);
 
 #ifdef _MEM_TRACKING
-	PrintMemoryUsage();
+    PrintMemoryUsage();
 #endif
 
-	if (result == 0 && CheckMemoryUsage() != 0)
-	{
-		printf("\nTest failed due to memory leak!\n");
-		result = 1;
-	}
+    if (result == 0 && CheckMemoryUsage() != 0)
+    {
+        printf("\nTest failed due to memory leak!\n");
+        result = 1;
+    }
 
     fflush(stdout);
 #ifdef WIN32
