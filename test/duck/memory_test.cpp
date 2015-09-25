@@ -10,7 +10,7 @@ TEST(Memory, get_undefined_record)
     CreateEnvironment();
 
     // create context
-    CONTEXT* context = (CONTEXT*)ALLOC(sizeof(CONTEXT));
+    CLOSURE* context = (CLOSURE*)ALLOC(sizeof(CLOSURE));
     context->parent = NULL;
     context->list = NULL;
     context->ref_count = -1;
@@ -33,7 +33,7 @@ TEST(Memory, store_and_get_string_record)
     CreateEnvironment();
 
     // create context
-    CONTEXT* context = (CONTEXT*)ALLOC(sizeof(CONTEXT));
+    CLOSURE* context = (CLOSURE*)ALLOC(sizeof(CLOSURE));
     context->parent = NULL;
     context->list = NULL;
     context->ref_count = -1;
