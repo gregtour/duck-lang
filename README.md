@@ -1,5 +1,5 @@
-# Duck Programming Language
-A simple scripting language based on the idea of duck-typing (or dynamic typing).
+# Duck Programming Language      ![Build Status](https://travis-ci.org/gregtour/duck-lang.svg?branch=master)
+A simple scripting language based on the idea of duck-typing (or dynamic typing). 
 
 >&ldquo;When I see a bird that walks like a duck and swims like a duck and quacks like a duck, I call that bird a duck.&rdquo;
 > &mdash; James Whitcomb Riley
