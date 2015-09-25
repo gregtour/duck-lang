@@ -70,7 +70,7 @@ void* MallocTrackMemory(size_t size)
     char* data;
     unsigned int* size_record;
 
-    gTotalMemoryUsage = gTotalMemoryUsage +  (unsigned int)size;
+    gTotalMemoryUsage = gTotalMemoryUsage + (unsigned int)size;
     gMallocCalls++;
 
     if (gTotalMemoryUsage > gPeakMemoryUsage) {
@@ -78,6 +78,11 @@ void* MallocTrackMemory(size_t size)
     }
 
     data = (char*)malloc(size + sizeof(unsigned int));
+	if (data == NULL) {
+		printf("Error: Could not allocate memory.\n");
+		fflush(stdout);
+		return 0l;
+	}
     size_record = (unsigned int*)data;
     data = (data + sizeof(unsigned int));
 
@@ -91,9 +96,9 @@ void FreeTrackMemory(void* data)
     if (data) 
     {
         unsigned int* size_record = (unsigned int*)(pointer - sizeof(unsigned int));
-        unsigned int data_size = *size_record;
+        unsigned int data_size = (*size_record);
 
-        gTotalMemoryUsage -= data_size;
+        gTotalMemoryUsage = gTotalMemoryUsage - data_size;
 
         free((void*)size_record);
 
@@ -109,15 +114,20 @@ void* ReallocTrackMemory(void* data, size_t size)
         unsigned int* size_record = (unsigned int*)(pointer - sizeof(unsigned int));
         unsigned int data_size = (*size_record);
 
-        //printf("Realloc %i for %i\n", data_size, (unsigned int)size);
-        gTotalMemoryUsage -= data_size;
-        gTotalMemoryUsage += (unsigned int)size;
+        gTotalMemoryUsage = gTotalMemoryUsage - data_size;
+        gTotalMemoryUsage = gTotalMemoryUsage + (unsigned int)size;
 
         if (gTotalMemoryUsage > gPeakMemoryUsage) {
             gPeakMemoryUsage = gTotalMemoryUsage;
         }
 
         char* new_data = (char*)malloc(size + sizeof(unsigned int));
+		if (new_data == NULL) {
+			printf("Error: Could not allocate memory.\n");
+			fflush(stdout);
+			return 0l;
+		}
+
         unsigned int* new_size_record = (unsigned int*)new_data;
         new_data = (new_data + sizeof(unsigned int));
 
