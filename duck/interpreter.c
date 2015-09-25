@@ -90,7 +90,7 @@ void FreeTrackMemory(void* data)
     char* pointer = (char*)data;
     if (data) 
     {
-        unsigned int* size_record = (unsigned int*)(pointer - sizeof(unsigned int*));
+        unsigned int* size_record = (unsigned int*)(pointer - sizeof(unsigned int));
         unsigned int data_size = *size_record;
 
         gTotalMemoryUsage -= data_size;
@@ -106,7 +106,7 @@ void* ReallocTrackMemory(void* data, size_t size)
     char* pointer = (char*)data;
     if (data) 
     {
-        unsigned int* size_record = (unsigned int*)(pointer - sizeof(unsigned int*));
+        unsigned int* size_record = (unsigned int*)(pointer - sizeof(unsigned int));
         unsigned int data_size = (*size_record);
 
         //printf("Realloc %i for %i\n", data_size, (unsigned int)size);
