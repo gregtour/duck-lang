@@ -1,7 +1,7 @@
 /*
     Duck Programming Language - main.c
     Thursday November 20th, 2014 to
-        Sunday December 28th, 2014
+     Monday September 28th, 2015
 */
 #include "main.h"
 #include "interpreter.h"
@@ -43,6 +43,16 @@ void FreeParseTable(LR_TABLE* parser)
 	if (parser && parser->actionTable) {
 		free(parser->actionTable);
 	}
+}
+
+// for compressed parse tables
+void InitializeParseTables()
+{
+	DecompressAndPatchParseTable(&PARSE_TABLE, 
+		COMPRESSED_GOTO_TABLE, 
+		sizeof(COMPRESSED_GOTO_TABLE)/sizeof(int), 
+		COMPRESSED_ACTION_TABLE, 
+		sizeof(COMPRESSED_ACTION_TABLE)/sizeof(int));
 }
 
 /* main(args) accepts program file to run */
@@ -100,11 +110,7 @@ int main(int argc, char* argv[])
     }
 
 	// load parser
-	DecompressAndPatchParseTable(&PARSE_TABLE, 
-								 COMPRESSED_GOTO_TABLE, 
-								 sizeof(COMPRESSED_GOTO_TABLE)/sizeof(int), 
-								 COMPRESSED_ACTION_TABLE, 
-								 sizeof(COMPRESSED_ACTION_TABLE)/sizeof(int));
+	InitializeParseTables();
 
 	if (PARSE_TABLE.actionTable == NULL || PARSE_TABLE.gotoTable == NULL) 
 	{

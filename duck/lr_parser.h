@@ -16,8 +16,8 @@ typedef unsigned long u32;
 /* ************************************************************************** */
 
 // constant constraints for language spec
-//#define _LR1
-#define _SLR
+#define _LR1
+//#define _SLR
 
 #define LEX_NEWLINES
 #define IGNORE_MACROS

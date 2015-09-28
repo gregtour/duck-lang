@@ -8,4 +8,5 @@ add_subdirectory(src)
 install_programs(/bin # dest
   bin/duck
   bin/gduck
+  bin/unittest
 )

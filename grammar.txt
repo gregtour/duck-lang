@@ -1,19 +1,24 @@
 <program> ::= <stmtlist>
 <stmtlist> ::= <stmt> <stmtlist>
 <stmtlist> ::= <epsilon>
-<opt-endl> ::= <endl>
-<opt-endl> ::= <epsilon>
 <identifier-list> ::= <identifier> , <identifier-list>
 <identifier-list> ::= <identifier>
 <stmt> ::= import <identifier-list> <endl>
-<stmt> ::= include <string>
+<stmt> ::= require <identifier-list> <endl>
+<stmt> ::= include <string> <endl>
 <stmt> ::= <expr> <endl>
 <stmt> ::= <endl>
 <stmt> ::= global <identifier-list>
 <stmt> ::= local <identifier-list>
 <stmt> ::= <assignment> <endl>
+<stmt> ::= global <assignment> <endl>
+<stmt> ::= local <assignment> <endl>
+<stmt> ::= static <assignment> <endl>
 <stmt> ::= <self-assignment> <endl>
 <stmt> ::= <function-def> <endl>
+<stmt> ::= global <function-def> <endl>
+<stmt> ::= local <function-def> <endl>
+<stmt> ::= static <function-def> <endl>
 <stmt> ::= <if> <endl>
 <stmt> ::= <for-loop> <endl>
 <stmt> ::= <for-each> <endl>
@@ -27,6 +32,7 @@
 <stmt> ::= break <endl>
 <stmt> ::= continue <endl>
 <stmt> ::= throw <expr> <endl>
+<stmt> ::= call \ cc <reference> <endl>
 <assignment> ::= <l-value> = <condition>
 <self-assignment> ::= <l-value> ++
 <self-assignment> ::= <l-value> --
@@ -57,7 +63,9 @@
 <do-while> ::= do <endl> <stmtlist> loop while <condition> 
 <let-block> ::= let <bindings> begin <endl> <stmtlist> end
 <bindings> ::= <identifier> = <expr> , <bindings>
+<bindings> ::= <identifier> = <expr> , <endl> <bindings>
 <bindings> ::= <identifier> = <expr> 
+<bindings> ::= <identifier> = <expr> <endl>
 <try-block> ::= try <endl> <stmtlist> <catch-block>
 <catch-block> ::= catch <l-value> <endl> <stmtlist> done
 <catch-block> ::= done
@@ -90,6 +98,7 @@
 <factor> ::= - <factor>
 <factor> ::= ! <factor>
 <factor> ::= * <factor>
+<factor> ::= & <factor>
 <factor> ::= <final>
 <final> ::= ( <expr> )
 <final> ::= <boolean>
@@ -106,11 +115,21 @@
 <arguments> ::= <arguments>, <expr>
 <arguments> ::= <expr>
 <object> ::= [ ]
-<object> ::= <opt-endl> [ <opt-endl> <array-init> <opt-endl> ]
-<object> ::= <opt-endl> [ <opt-endl> <dictionary-init> <opt-endl> ]
-<array-init> ::= <array-init> <opt-endl> , <opt-endl> <expr>
-<array-init> ::= <expr>
-<dictionary-init> ::= <dictionary-init> , <identifier> : <expr>
-<dictionary-init> ::= <identifier> : <expr>
+<object> ::= <endl> [ <array-begin>
+<object> ::= [ <array-begin>
+<array-begin> ::= <endl> <expr> <object-array>
+<array-begin> ::= <expr> <object-array>
+<object-array> ::= , <endl> <expr> <object-array>
+<object-array> ::= , <expr> <object-array>
+<object-array> ::= <endl> ]
+<object-array> ::= ]
+<object> ::= <endl> [ <dictionary-begin>
+<object> ::= [ <dictionary-begin>
+<dictionary-begin> ::= <endl> <identifier> : <expr> <object-dictionary>
+<dictionary-begin> ::= <identifier> : <expr> <object-dictionary>
+<object-dictionary> ::= , <endl> <identifier> : <expr> <object-dictionary>
+<object-dictionary> ::= , <identifier> : <expr> <object-dictionary>
+<object-dictionary> ::= <endl> ]
+<object-dictionary> ::= ]
 <boolean> ::= true
 <boolean> ::= false

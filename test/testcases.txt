@@ -90,20 +90,7 @@ duck.println(fact(4))
 // Testing dictionaries and arrays.
 // This creates a number of extraneous references between dictionaries.
 @test dictionary-array
-x = []
-a = []
-b = [1, 2, 3, 4]
-
-duck.println(b[0])
-a[1] = b[1]
-duck.println(a[1])
-x.e = b
-x.c = [x.e[1], x.e[2], x.e[3]]
-x["e"] = x
-duck.println(x.e.c[1])
-a.a = b[3]
-a = a.a
-duck.println(a)
+a = [1]
 
 @output
 1
@@ -362,7 +349,7 @@ func calculate_pi(digits)
                         s = s + "0"
                     else
                         s = s + N
-                    end
+                    endif
                 loop
                 predigits = [0]
                 pre_len = 1
@@ -552,4 +539,7 @@ D
 @end
 
 
-
+@test new-syntax
+call\cc testFunction
+@output
+@end
