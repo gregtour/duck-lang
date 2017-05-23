@@ -1,10 +1,4 @@
-/*var gSymbolEOF = "EOF";
-var gSymbolEndLine = "END LINE";
-var gSymbolInteger = "INT";
-var gSymbolFloat = "FLOAT";
-var gSymbolString = "STRING";
-var gSymbolIdentifier = "IDENTIFIER";
-*/
+/* lexer */
 
 function EOFSYMBOL(line) 
 {
@@ -31,9 +25,9 @@ function STRING(text, line)
     return {"token": gSymbolString, "string": text.substr(1, text.length-2), "length": text.length, "line": line};
 }
 
-function TOKEN(text, line, grammar)
+function TOKEN(text, line)
 {
-    var token = grammar.FindToken(text);
+    var token = FindToken(text);
     if (token) {
         return {"token": token, "string": text, "length": text.length, "line": line};
     } else {
@@ -42,9 +36,9 @@ function TOKEN(text, line, grammar)
     }
 }
 
-function IDENTIFIER(text, line, grammar)
+function IDENTIFIER(text, line)
 {
-    var token = grammar.FindToken(text);
+    var token = FindToken(text);
     if (token) {
         return {"token": token, "string": text, "length": text.length, "line": line};
     } else {
@@ -71,7 +65,7 @@ function isGlyph(c) {
     return (!isAlpha(c) && !isNumeric(c) && !isSpace(c));
 }
 
-function LexSource(text, grammar)
+function LexSource(text)
 {
     var size = text.length;
     var line_number = [];
@@ -177,7 +171,7 @@ function LexSource(text, grammar)
                 i++;
             }
             b = i;
-            tokens.push(IDENTIFIER(format.substr(a, b-a), line, grammar));
+            tokens.push(IDENTIFIER(format.substr(a, b-a), line));
             i--;
         }
         else if (isNumeric(format.charAt(i))) {
@@ -194,12 +188,12 @@ function LexSource(text, grammar)
                     i++;
                 }
                 b = i;
-                tokens.push(FLOAT(format.substr(a, b-a), line, grammar));
+                tokens.push(FLOAT(format.substr(a, b-a), line));
                 i--;
             }
             else {
                 b = i;
-                tokens.push(INTEGER(format.substr(a, b-a), line, grammar));
+                tokens.push(INTEGER(format.substr(a, b-a), line));
                 i--;
             }
         }
@@ -212,7 +206,7 @@ function LexSource(text, grammar)
                 i++;
             }
             b = i++;
-            tokens.push(STRING(format.substr(a, b-a+1), line, grammar));
+            tokens.push(STRING(format.substr(a, b-a+1), line));
             i--;
         }
         else if (isGlyph(format.charAt(i))) {
@@ -220,11 +214,11 @@ function LexSource(text, grammar)
             a = i; b = 0;
             while (i < size && isGlyph(format.charAt(i))) {
                 i++;
-                if (grammar.FindToken(format.substr(a, i-a), grammar))
+                if (FindToken(format.substr(a, i-a)))
                     b = i;
             }
             b = b ? b : i;
-            tokens.push(TOKEN(format.substr(a, b-a), line, grammar));
+            tokens.push(TOKEN(format.substr(a, b-a), line));
             i = b - 1;
         }
         else if (format.charAt(i) == '\n') {

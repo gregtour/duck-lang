@@ -1927,25 +1927,37 @@ function RunAndPrintValue(source)
   }
 }
 
-function Interpret(source_code)
+function lexstring(lexTokens) {
+    //return JSON.stringify(lexTokens);
+    var str = "";
+    for (var i in lexTokens) {
+        var lexeme = lexTokens[i];
+        str += "['" + GRAMMAR.tokens[lexeme.token-1] + "'," + lexeme.token + "," + lexeme.string + "]\n";
+    }    
+    return str;
+}
+
+function TEST(source_code)
 {
-    var grammar = LoadGrammar(DUCK_GRAMMAR);
-    if (grammar) {
-        var lexing = LexSource(source_code, grammar);
-        if (lexing) {
-            var parsing = ParseSource(lexing, PARSE_TABLE, grammar);
+
+        var lexTokens = LexSource(source_code);
+        if (lexTokens) {
+            program.output(lexstring(lexTokens));
+            //program.output(JSON.stringify(lexTokens, null, 4));
+            //return;
+
+            var parsing = ParseSource(lexTokens);
             if (parsing) {
-//                alert(JSON.stringify(parsing));
-                return InterpretProgram(parsing);
+                program.output("Parsing successful.\n");
+                //program.output(JSON.stringify(parsing, null, 4));
+                //alert();
+                //return InterpretProgram(parsing);
             } else {
                 program.output("Error, parsing source.");
             }
         } else {
             program.output("Error, lexing source code.");
         }
-    } else {
-        program.output("Error, loading programming language grammar.");
-    }
 }
 
 
