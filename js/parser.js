@@ -167,15 +167,15 @@ function ParseSource(lexing)
             node = {};
             node.token = lhs;
             //node.token = "SYMBOL";
-            node.production = action.value;
+            node.rule = action.value;
             node.string = "";
             node.len = 0;
             node.line = 0;
-            node.children = [];
+            node.child = [];
             node.numChildren = length;
 
             for (rhs = 0; rhs < length; rhs++) {
-                node.children.push(0);
+                node.child.push(0);
             }
 
             for (rhs = 0; rhs < length; rhs++)
@@ -192,16 +192,16 @@ function ParseSource(lexing)
                 var child = length - rhs - 1;
                 if (symbol.type == TOKEN_L_TOKEN) {
                     var token = symbol.token;
-                    node.children[child] = {};
-                    node.children[child].token = token.token;
-                    node.children[child].production = 0;
-                    node.children[child].string = token.string;
-                    node.children[child].line = token.line;
-                    node.children[child].children = [];
-                    node.children[child].numChildren = 0;
+                    node.child[child] = {};
+                    node.child[child].token = token.token;
+                    node.child[child].rule = 0;
+                    node.child[child].string = token.string;
+                    node.child[child].line = token.line;
+                    node.child[child].child = [];
+                    node.child[child].numChildren = 0;
                 }
                 else if (symbol.type == TOKEN_SYNTAX_TREE) {
-                    node.children[child] = symbol.token;
+                    node.child[child] = symbol.token;
                 }
                 else {
                     program.output("Parse error: expected token object.");
@@ -209,7 +209,7 @@ function ParseSource(lexing)
                 }
             }
             if (length > 0) {
-                node.line = node.children[0].line;
+                node.line = node.child[0].line;
             }
 
             // let s' be the state now on top of the stack;
