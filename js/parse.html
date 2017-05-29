@@ -11,12 +11,8 @@ textarea {
 }
         </style>
     <script src="tables.js"></script>
-    <script src="grammar.js"></script>
-    <script src="lexer.js"></script>
     <script src="parser.js"></script>
-    <script src="duck.js"></script>
-    <script src="arithmetic.js"></script>
-    <script src="stdduck.js"></script>
+    <script src="lexer.js"></script>
     <script>
 var program = {};
 var prog_out = "";
@@ -27,22 +23,31 @@ function output(text)
 }
 program.output = output;
 
-function RunDuck() 
+function TestParse() 
 {
     var program_src = document.getElementById("source").value;
     prog_out = "";
     document.getElementById("output").value = "";
-    var result = TEST(program_src);
-    output("Done.");
-    
-    return 0;
+
+    var lexing = LexSource(program_src);
+    if (lexing) {
+        var tree = ParseSource(lexing);
+        if (tree) { 
+            output(JSON.stringify(tree, null, 1));
+            output("Done.");
+        } else {
+            ouput("Failed to parse.");
+        }
+    } else {
+        output("Failed to lex.");
+    }
 }
     </script>
     </head>
     <body>
         <h3>Duck Language Interactive Interpreter</h3>
         Enter program source code or statements to evaluate:<br>
-        <!--<textarea id="source" rows=20 cols=80>
+        <textarea id="source" rows=20 cols=80>
 ; prime numbers example
 limit = 100
 count = 0
@@ -60,13 +65,12 @@ for i = 2 to limit do
 			numbers[i*j] = 0
 		loop
 		duck.println(count + ". " + i)
-	end
+	endif
 loop
-        </textarea>--><textarea id="source" rows=20 cols=80>
-a = 1
+        </textarea>
         </textarea><br>
         <textarea id="output" rows=8 cols=80></textarea><br>
-        <button onClick="RunDuck();">Evaluate</button>
+        <button onClick="TestParse();">Test Parse</button>
     </body>
 </html>
 

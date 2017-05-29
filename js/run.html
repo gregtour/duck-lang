@@ -1,0 +1,83 @@
+<!-- Duck Programming Language - Interactive Demo -->
+<html>
+    <head>
+        <title>Duck Programming Language Demo</title>
+        <style>
+textarea {
+  font-family: Lucida Console, Terminal, Monospace;
+  color: #000;
+  font-size: 16px;
+    font-weight: normal;
+}
+        </style>
+    <!-- ast -->
+    <script src="tables.js"></script>
+    <script src="parser.js"></script>
+    <script src="lexer.js"></script>
+    <!-- language core -->
+    <script src="runtime.js"></script>
+    <script src="instr/assign.js"></script>
+    <script src="instr/classes.js"></script>
+    <script src="instr/condition.js"></script>
+    <script src="instr/datastruct.js"></script>
+    <script src="instr/exception.js"></script>
+    <script src="instr/function.js"></script>
+    <script src="instr/let.js"></script>
+    <script src="instr/loop.js"></script>
+    <script src="instr/lvalue.js"></script>
+    <script src="instr/ops.js"></script>
+    <script src="instr/stmt.js"></script>
+    <script src="exec.js"></script>
+    <!-- language libraries -->
+    <!-- web page -->
+    <script>
+var program = {};
+var prog_out = "";
+function output(text) 
+{
+    prog_out = prog_out + text + "\n";
+    document.getElementById("output").value = prog_out;
+}
+program.output = output;
+
+function RunDuck() 
+{
+    var program_src = document.getElementById("source").value;
+    prog_out = "";
+    document.getElementById("output").value = "";
+    output("Done.");
+    
+    return 0;
+}
+    </script>
+    </head>
+    <body>
+        <h3>Duck Language Interactive Interpreter</h3>
+        Enter program source code or statements to evaluate:<br>
+        <textarea id="source" rows=20 cols=80>
+; prime numbers example
+limit = 100
+count = 0
+
+duck.println("Primes less than " + limit + ":")
+
+numbers = []
+for i = 2 to limit do
+    numbers[i] = 1
+loop
+for i = 2 to limit do
+    if numbers[i] == 1 then
+        count = count + 1
+        for j = 2 to limit/i do
+            numbers[i*j] = 0
+        loop
+        duck.println(count + ". " + i)
+    endif
+loop
+        </textarea>
+        </textarea><br>
+        <textarea id="output" rows=8 cols=80></textarea><br>
+        <button onClick="RunDuck();">Evaluate</button>
+    </body>
+</html>
+
