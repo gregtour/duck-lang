@@ -32,9 +32,6 @@ var ACTION_ERROR = 0;
 var ACTION_SHIFT = 1;
 var ACTION_REDUCE = 2;
 var ACTION_ACCEPT = 3;
-var TOKEN_L_TOKEN = 1;
-var TOKEN_SYNTAX_TREE = 2;
-
 /* table indexing */
 function ActionTable(state, token) 
 {
@@ -79,28 +76,18 @@ var gParseTop;
 function StackPushState(state) 
 { 
     gParseStack.push({
-        "token": undefined,
-        "type": 0,
         "state": state
     });
 }
 
 function StackPushToken(token) 
 { 
-    gParseStack.push({
-        "token": token,
-        "type": TOKEN_L_TOKEN,
-        "state": -1
-    });
+    gParseStack.push(token);
 }
 
 function StackPushTree(tree) 
 { 
-    gParseStack.push({
-        "token": tree,
-        "type": TOKEN_SYNTAX_TREE,
-        "state": -1
-    });
+    gParseStack.push(tree);
 }
 
 function StackPeek() 
@@ -124,6 +111,7 @@ function StackPop()
         return {"token": undefined, "type": ACTION_ERROR, "state": -1};
     }
 }
+
 
 /* error messages */
 function PrintErrorInput(input)
@@ -158,14 +146,14 @@ function ParseSource(lexing)
         //program.output("S:" + JSON.stringify(s) + ", L: " + JSON.stringify(lexeme));
 
         // get the state off of the top of the stack
-        if (s.token || s.state == -1 || s.state >= PARSER.numStates)
+        if (!s.hasOwnProperty('state') || s.state == -1 || s.state >= PARSER.numStates)
         {
             program.output("Parse error: invalid state on top of the stack.");
-            return 0;
+            return 1;
         }
         if (cur >= lexing.length) {
             program.output("Parse error: unexpected end of input.");
-            return 0;
+            return 2;
         }
         // find the action table entry for the state and input
         var action = ActionTable(s.state, lexeme.token);
@@ -180,75 +168,78 @@ function ParseSource(lexing)
         }
         else if (action.type == ACTION_REDUCE)
         {
-            var rhs, length, node, ruleNum, lhs;
+            var rhs, length, node, subtree, ruleNum, lhs, trivial, recursive, condense;
 
             if (action.value < 0 || action.value >= GRAMMAR.numRules)
             {
                 program.output("Parse error: invalid production for reduce action.");
                 PrintErrorInput(lexeme);
-                return 0;
+                return 3;
             }
 
             ruleNum = action.value;
             length = GRAMMAR.ruleLen[ruleNum];
             lhs = GRAMMAR.ruleSymbol[ruleNum];
+            trivial = (GRAMMAR.trivialRules.indexOf(ruleNum) >= 0);
 
-            // pop 2*|B| symbols off of the stack
-            node = {};
-            node.token = lhs;
-            //node.token = "SYMBOL";
-            node.rule = action.value;
-            node.string = "";
-            node.len = 0;
-            node.line = 0;
-            node.child = [];
-            node.numChildren = length;
-
-            for (rhs = 0; rhs < length; rhs++) {
-                node.child.push(0);
+            node = {
+                "rule": ruleNum,
+                "symbol": lhs,
+                "child": []
+//              "line": lineNum
             }
 
-            for (rhs = 0; rhs < length; rhs++)
-            {
+            // trivial rules are popped then pushed back
+            if (trivial) {
                 var state = StackPop();
-                var symbol = StackPop();
-                if (symbol.token === undefined)
+                subtree = StackPop();
+                node.child = subtree.child;
+            }
+            else {
+                // pop 2*|B| symbols off of the stack
+                for (rhs = 0; rhs < length; rhs++) {
+                    node.child.push(null);
+                }
+                for (rhs = 0; rhs < length; rhs++)
                 {
-                    program.output("Parse error: expected token.");
-                    PrintErrorInput(lexeme);
-                    return 0;
+                    var state = StackPop();
+                    var symbolOrToken = StackPop();
+
+                    // check the reduced child element
+                    if (symbolOrToken.hasOwnProperty('symbol')) 
+                    {
+                        // symbol logic
+                        var symbol = symbolOrToken;
+                    } 
+                    else if (symbolOrToken.hasOwnProperty('token')) 
+                    {
+                        // token logic
+                        var token = symbolOrToken;
+                    }
+                    else
+                    {
+                        // error
+                        program.output("Parse error: expected token.");
+                        PrintErrorInput(lexeme);
+                        return 4;
+                    }
+
+                    var num = length - rhs - 1;
+                    node.child[num] = symbolOrToken;
                 }
 
-                var child = length - rhs - 1;
-                if (symbol.type == TOKEN_L_TOKEN) {
-                    var token = symbol.token;
-                    node.child[child] = {};
-                    node.child[child].token = token.token;
-                    node.child[child].rule = 0;
-                    node.child[child].string = token.string;
-                    node.child[child].line = token.line;
-                    node.child[child].child = [];
-                    node.child[child].numChildren = 0;
-                }
-                else if (symbol.type == TOKEN_SYNTAX_TREE) {
-                    node.child[child] = symbol.token;
-                }
-                else {
-                    program.output("Parse error: expected token object.");
-                    PrintErrorInput(lexeme);
-                }
+                // track parser line error
             }
-            if (length > 0) {
-                node.line = node.child[0].line;
-            }
+
 
             // let s' be the state now on top of the stack;
             s = StackPeek();
-            if (s.token || s.state == -1 || s.state >= PARSER.numStates)
+            //if (s.token || s.state == -1 || s.state >= PARSER.numStates)
+            if (!s.hasOwnProperty('state') || s.state == -1 || s.state >= PARSER.numStates)
             {
                 program.output("Parse error: expected state on top of the stack.");
                 PrintErrorInput(lexeme);
-                return 0;
+                return 6;
             }
 
             // push A then goto[s', A] on top of the stack;
@@ -271,11 +262,12 @@ function ParseSource(lexing)
             if (lexeme.token == gSymbolEOF) {
                 successful = 0;
                 program.output("Unexpected end of input.");
+                return 8;
             } else {
                 program.output("Parse error: illegal action type.");
                 PrintErrorInput(lexeme);
+                return 9;
             }
-            return 0;
         }
     }
    

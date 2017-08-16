@@ -4,7 +4,7 @@ var GRAMMAR = {
   symbols: ["<program>","<top-level-block>","<top-level-stmt>","<identifier-list>","<optendl>","<block>","<stmt>","<expr>","<assignment>","<self-assignment>","<class>","<function>","<if>","<for>","<while>","<let-block>","<try-block>","<parameters>","<class-ext>","<class-body>","<function-def>","<arguments>","<expr-list>","<condition>","<elseif>","<for-start>","<arithmetic>","<loop-end>","<value>","<bindings>","<binding>","<catch-block>","<l-value>","<object>","<logic>","<comparison>","<term>","<factor>","<primitive>","<array-init>","<dictionary-init>","<object-expr>","<dictionary-entry>"],
   ruleSymbol: [0,1,2,2,4,4,5,5,3,3,3,3,6,6,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,11,19,19,20,12,12,21,18,18,18,22,22,23,23,13,25,25,25,14,26,26,26,26,15,15,28,16,30,30,31,17,32,32,9,9,10,10,10,10,10,10,33,33,33,8,24,24,24,35,35,36,36,36,36,36,36,36,36,36,27,27,27,37,37,37,37,38,38,38,29,29,29,29,39,39,39,39,39,34,34,34,42,42,40,40,41,41,43],
   ruleLen: [1,1,2,0,3,1,1,0,3,3,6,1,2,0,2,2,2,2,2,2,2,2,2,2,2,3,2,2,3,1,4,4,2,2,3,3,4,3,2,0,0,1,3,1,6,4,2,1,3,7,9,5,7,5,6,2,7,4,1,3,4,5,1,3,3,3,3,3,3,2,2,1,4,3,1,3,3,1,2,1,3,3,3,3,3,3,3,4,1,3,3,1,3,3,3,1,2,2,1,1,1,4,3,1,1,1,1,1,3,3,3,1,1,4,3,4,2,4],
-  recursiveRules: [2,4,12,42,57,113,115],
+  recursiveSymbols: [2,4,6,23,24,27,30,33,36,37,40,41],
   trivialRules: [1,11,41,43,58,74,77,79,88,91,95,98,99,100,111,112],
   numRules: 118
 };

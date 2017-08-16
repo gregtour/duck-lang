@@ -1,5 +1,9 @@
 /* lexer */
 
+var INCLUDE_NEWLINES = true;
+var INCLUDE_WHITESPACE = false;
+var INCLUDE_COMMENTS = false;
+
 function EOFSYMBOL(line) 
 {
     return {"token": gSymbolEOF, "string": "", "length": 1, "line": line};
@@ -22,7 +26,7 @@ function FLOAT(text, line)
 
 function STRING(text, line)
 {
-    return {"token": gSymbolString, "string": text.substr(1, text.length-2), "length": text.length, "line": line};
+    return {"token": gSymbolString, "string": text.substr(1, text.length-2), "length": text.length, "line": line, "delimiter": text.charAt(0)};
 }
 
 function TOKEN(text, line)
@@ -34,6 +38,15 @@ function TOKEN(text, line)
         program.output("Syntax error on line " + line + ": token '" + text + "'.");
         return 0;
     }
+}
+
+function SPACE(text, line) {
+    return {"token": gSymbolEOF, "space": true, "string": text, "line": line};
+}
+
+function COMMENT(text, line, lineCount) 
+{
+    return {"token": gSymbolEOF, "comment": true, "string": text, "line": line, "lineCount": lineCount};
 }
 
 function IDENTIFIER(text, line)
@@ -65,178 +78,163 @@ function isGlyph(c) {
     return (!isAlpha(c) && !isNumeric(c) && !isSpace(c));
 }
 
-function LexSource(text)
+function LexSource(text, includeWSC)
 {
+    var tokens = [];
     var size = text.length;
-    var line_number = [];
+    var a, b, c, cc, i;
     var line = 0;
-    var i;
 
-    // count lines
-    for (i = 0; i <= size; i++) {
-        line_number.push(line);
-        if (text.charAt(i) == '\n') {
-            line++;
-        }
-    }
+    text = text + "";
 
-    // strip clean
-    var format = "";
-    var j = 0;
-    for (i = 0; i < size; i++) {
-        if (text.charAt(i) == '/' &&
-            text.charAt(i+1) == '/') {
-            while (i < size && text.charAt(i) != '\n')
-                i++;
-            i--;
+    for (i = 0; i < size; i++) 
+    {
+        c = text.charAt(i);
+        cc = (i+1) < size ? c + text.charAt(i+1) : null;
+
+        // whitespace
+        if (isSpace(c)) {
+            // newline
+            if (c == '\n') {
+                if (INCLUDE_NEWLINES) {
+                    // concatenate successive newlines
+                    var prevNewline = (tokens.length > 0 && tokens[tokens.length-1].token === gSymbolEndLine);
+                    if (prevNewline) {
+                        tokens[tokens.length - 1].length++;
+                    } else {
+                        tokens.push(NEWLINE(line));                        
+                    }
+                }
+                line++;
+            } 
+            // space or tab
+            else if (c != '\r') {
+                if (INCLUDE_WHITESPACE) {
+                    // concatenate successive spaces
+                    var prevSpace = (tokens.length > 0 && tokens[tokens.length-1].space);
+                    if (prevSpace) {
+                        tokens[tokens.length - 1]["string"] += c;
+                    } else {
+                        tokens.push(SPACE(c, line));
+                    }
+                }
+            }
         }
-        else if (text.charAt(i) == '/' &&
-                 text.charAt(i+1) == '*') {
-            i++; i++;
-            while (i < size - 1 &&
-                    (text.charAt(i) != '*' ||
-                     text.charAt(i+1) != '/'))
-            {
+        // single-line comment
+        else if (c == '#' || c == ';' || cc == "//") {
+            a = i;
+            // search for trailing newline
+            while (i < size) {
+                if ((i+1) < size && text.charAt(i+1) == "\n")
+                    break;
                 i++;
             }
-            i++;
+            b = i;
+            if (INCLUDE_COMMENTS) {
+                var commentText = text.substr(a, b-a);
+                tokens.push(COMMENT(commentText, line, 0));
+            }
         }
-        else if (text.charAt(i) == '#' ||
-                 text.charAt(i) == ';') {
-            while (i < size && text.charAt(i) != '\n')
-                i++;
-            i--;
-        }
-        else if (isSpace(text.charAt(i))) {
-            var lb = false;
-            line_number[j] = line_number[i];
-            while (i < size && isSpace(text.charAt(i)))
+        // multiline comment
+        else if (cc == "/*") {
+            var lineCount = 0;
+            a = i;
+            i += 2;
+            // search for trailing "*/"
+            while ((i+1) < size) 
             {
-                if (text.charAt(i) == '\n') {
-                    lb = true;
-                    line_number[j] = line_number[i];
+                if (text.charAt(i) == "\n") {
+                    lineCount++;
+                    line++;
+                }
+                if (text.substr(i,2) == "*/") {
+                    break;
                 }
                 i++;
             }
-            if (lb)
-                format += '\n';
-            else
-                format += ' ';
-            i--;
-            j++;
-        }
-        else if (text.charAt(i) == '"' ||
-                 text.charAt(i) == '\'') {
-            var quote = text.charAt(i);
-            format += text.charAt(i++);
-            j++;
-            while (i < size - 1 && text.charAt(i) != quote) {
-                line_number[j] = line_number[i];
-                format += text.charAt(i++);
-                j++;
+            i++;
+            b = i;
+            if (INCLUDE_COMMENTS) {
+                var commentText = text.substr(a, b-a);
+                tokens.push(COMMENT(commentText, line, lineCount));
             }
-            line_number[j] = line_number[i];
-            format += text.charAt(i);
-            j++;
         }
-        else {
-            line_number[j] = line_number[i];
-            format += text.charAt(i);
-            j++;
-        }
-    }
-
-    //program.output(format);
-
-    var sizen = size;
-    size = j;
-
-//    var start = [];
-//    var end = [];
-    var tokens = [];
-                    
-    // lex
-    var a, b;
-    for (i = 0; i < size; i++) {
-        line = line_number[i];
-        // check next character
-        if (isAlpha(format.charAt(i))) {
+        // alphabetical identifier or keyword
+        else if (isAlpha(c)) {
             a = i;
-            // alpha
             while (i < size &&
-                    (isAlpha(format.charAt(i)) ||
-                     isNumeric(format.charAt(i)) ||
-                     format.charAt(i) == '_'))
+                    (isAlpha(text.charAt(i)) ||
+                     isNumeric(text.charAt(i)) ||
+                     text.charAt(i) == '_'))
             {
                 i++;
             }
             b = i;
-            tokens.push(IDENTIFIER(format.substr(a, b-a), line));
+            tokens.push(IDENTIFIER(text.substr(a, b-a), line));
             i--;
         }
-        else if (isNumeric(format.charAt(i))) {
-            // numeric
+        // number - float or int
+        else if (isNumeric(c)) {
             a = i;
-            while (i < size && isNumeric(format.charAt(i)))
+            while (i < size && isNumeric(text.charAt(i)))
             {
                 i++;
             }
-            if (format.charAt(i) == '.') {
+            if (text.charAt(i) == '.') {
                 i++;
-                while (i < size && isNumeric(format.charAt(i)))
+                while (i < size && isNumeric(text.charAt(i)))
                 {
                     i++;
                 }
                 b = i;
-                tokens.push(FLOAT(format.substr(a, b-a), line));
+                tokens.push(FLOAT(text.substr(a, b-a), line));
                 i--;
             }
             else {
                 b = i;
-                tokens.push(INTEGER(format.substr(a, b-a), line));
+                tokens.push(INTEGER(text.substr(a, b-a), line));
                 i--;
             }
         }
-        else if (format.charAt(i) == '"' || format.charAt(i) == '\'') {
-            // string literal
-            var delimiter = format.charAt(i);
+        // string literal
+        else if (c == '"' || c == "'") {
+            var delimiter = text.charAt(i);
             a = i++;
-            while (i < size && format.charAt(i) != delimiter)
+            while (i < size && text.charAt(i) != delimiter)
             {
+                if (text.charAt(i) == '\n') {
+                    program.output("Syntax error on line " + line + ". New line in string.");
+                    return 0;
+                }
                 i++;
             }
             b = i++;
-            tokens.push(STRING(format.substr(a, b-a+1), line));
+            tokens.push(STRING(text.substr(a, b-a+1), line));
             i--;
         }
-        else if (isGlyph(format.charAt(i))) {
-            // token symbol or glyph
+        // token symbol or glyph
+        else if (isGlyph(c)) {
             a = i; b = 0;
-            while (i < size && isGlyph(format.charAt(i))) {
+            while (i < size && isGlyph(text.charAt(i))) {
                 i++;
-                if (FindToken(format.substr(a, i-a)))
+                if (FindToken(text.substr(a, i-a)))
                     b = i;
             }
             b = b ? b : i;
-            tokens.push(TOKEN(format.substr(a, b-a), line));
+            tokens.push(TOKEN(text.substr(a, b-a), line));
             i = b - 1;
         }
-        else if (format.charAt(i) == '\n') {
-            // new line
-            tokens.push(NEWLINE(line));
-        }
-        else if (format.charAt(i) == ' ') {
-            // whitespace
-        }
+        // error
         else {
-            // error
             program.output("Syntax error on line " + line + ".");
             return 0;
         }
     }
 
     // add trailing line feed
-    tokens.push(NEWLINE(line));
+    if (INCLUDE_NEWLINES) {
+        tokens.push(NEWLINE(line));
+    }
     tokens.push(EOFSYMBOL(line));
     
     // output tokenized source
